@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../Color/Colorclass.dart';
 import '../../services/getSupervisors/getSupervisors.dart';
 
 class ReportDetailScreen extends StatelessWidget {
@@ -11,10 +12,12 @@ class ReportDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: C.appBar1,
         title: const Text(
           ''
-          'Scanned Items Report',
+          'Scanned Items Report',style: TextStyle(color: C.bg),
         ),
+        iconTheme: IconThemeData(color: C.bg),
         centerTitle: true,
       ),
       body: FutureBuilder<List<dynamic>>(

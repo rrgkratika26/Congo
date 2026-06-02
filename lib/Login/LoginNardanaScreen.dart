@@ -919,7 +919,7 @@ class _LoginPageState extends State<LoginPage>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             color: isFocused
-                ? C.textHigh
+                ? Colors.blue.withOpacity(0.12)
                 : Colors.white.withOpacity(0.07),
             border: Border.all(
               color: isFocused
@@ -935,8 +935,8 @@ class _LoginPageState extends State<LoginPage>
                 Icons.person_outline_rounded,
                 size: 19,
                 color: isFocused
-                    ? C.primaryLight
-                    : Colors.white.withOpacity(0.35),
+                    ? C.primaryblue
+                    : C.textHigh,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -945,7 +945,7 @@ class _LoginPageState extends State<LoginPage>
                   focusNode: _usernameFocus,
                   style: const TextStyle(
                       fontSize: 15,
-                      color: C.primaryblue,
+                      color: C.primaryLight,
                       fontWeight: FontWeight.w400),
                   decoration: InputDecoration(
                     hintText: 'Enter username',
@@ -953,7 +953,7 @@ class _LoginPageState extends State<LoginPage>
                         color: C.textHigh,
                         fontSize: 15),
                     border: InputBorder.none,
-                    isDense: true,
+                    isDense: false,
                   ),
                 ),
               ),
@@ -994,8 +994,8 @@ class _LoginPageState extends State<LoginPage>
                 Icons.lock_outline_rounded,
                 size: 19,
                 color: isFocused
-                    ? C.textHigh
-                    : Colors.white.withOpacity(0.35),
+                    ? C.primaryblue
+                    : C.textHigh,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1005,12 +1005,12 @@ class _LoginPageState extends State<LoginPage>
                   obscureText: _obscurePassword,
                   style: const TextStyle(
                       fontSize: 15,
-                      color: C.textHigh,
+                      color: C.primaryLight,
                       fontWeight: FontWeight.w400),
                   decoration: InputDecoration(
                     hintText: 'Enter password',
                     hintStyle: TextStyle(
-                        color: C.primaryblue,
+                        color: C.textHigh,
                         fontSize: 15),
                     border: InputBorder.none,
                     isDense: true,
@@ -1069,18 +1069,18 @@ class _LoginPageState extends State<LoginPage>
                   children: [
                     Icon(Icons.business_outlined,
                         size: 19,
-                        color: C.primaryblue),
+                        color: C.textHigh),
                     const SizedBox(width: 10),
                     Text('Select unit',
                         style: TextStyle(
-                            color: C.primaryblue,
+                            color: C.textHigh,
                             fontSize: 15)),
                   ],
                 ),
               ),
-                  // items: ['UNIT-CONGO'].map((String value) {
+                  items: ['UNIT-CONGO'].map((String value) {
 
-              items: ['UNIT-NARDANA'].map((String value) {
+              // items: ['UNIT-NARDANA'].map((String value) {
               // items: ['UNIT-SILVASSA'].map((String value) {
                 // items: ['FIBC'].map((String value) {
               //   items: ['DINESH-POLYFAB', 'JBL'].map((String value) {
@@ -1176,15 +1176,15 @@ class _LoginPageState extends State<LoginPage>
             Text(
               'Sign In',
               style: TextStyle(
-                color: C.actionOrange,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                color: C.primaryDark,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
               ),
             ),
             SizedBox(width: 8),
             Icon(Icons.arrow_forward_rounded,
-                size: 18, color: C.actionOrange),
+                size: 20, color: C.primaryDark),
           ],
         ),
       ),

@@ -34,22 +34,16 @@ class _BagReportScreenState extends State<BagReportScreen> {
     _loadReport();
   }
 
-
   Future<void> _pickDateRange() async {
     final picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
-      initialDateRange: DateTimeRange(
-        start: _fromDate,
-        end: _toDate,
-      ),
+      initialDateRange: DateTimeRange(start: _fromDate, end: _toDate),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF42A5F6),
-            ),
+            colorScheme: const ColorScheme.light(primary: Color(0xFF42A5F6)),
           ),
           child: child!,
         );
@@ -65,7 +59,6 @@ class _BagReportScreenState extends State<BagReportScreen> {
       _loadReport(); // 🔥 API call
     }
   }
-
 
   void _loadReport() {
     setState(() {
@@ -130,19 +123,23 @@ class _BagReportScreenState extends State<BagReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
+      backgroundColor: C.bg,
       appBar: AppBar(
         title: const Text(
           'Bag Reports',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: C.bg,
+          ),
         ),
-        backgroundColor: const Color(0xFF42A5F6).withOpacity(0.2),
-        foregroundColor: Colors.black87,
+        backgroundColor: C.appBar1,
+        iconTheme: IconThemeData(color: C.bg),
         elevation: 0,
         actions: [
           // Filter Button
           IconButton(
-            icon: const Icon(Icons.calendar_month, color: Color(0xFF42A5F6)),
+            icon: const Icon(Icons.calendar_month, color: C.bg),
             onPressed: _pickDateRange,
           ),
         ],
@@ -150,8 +147,6 @@ class _BagReportScreenState extends State<BagReportScreen> {
       body: Column(
         children: [
           // Date Filter Section
-
-
           InlineSearchBar(
             controller: _searchController,
             onChanged: _onSearchChanged,
@@ -200,7 +195,7 @@ class _BagReportScreenState extends State<BagReportScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(color: C.appBar3,),
+                    child: CircularProgressIndicator(color: C.appBar3),
                   );
                 }
 
@@ -256,13 +251,9 @@ class _BagReportScreenState extends State<BagReportScreen> {
                   _visibleData = data.take(_pageSize).toList();
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _visibleData.length,
-                  itemBuilder: (context, index) {
-                    final item = _visibleData[index];
-                    return _buildReportCard(item, index + 1);
-                  },
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: _buildReportTable(),
                 );
               },
             ),
@@ -322,76 +313,69 @@ class _BagReportScreenState extends State<BagReportScreen> {
     );
   }
 
-  Widget _buildReportCard(BagProductionReport item, int number) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columnSpacing: 20,
-        headingRowColor: MaterialStateProperty.all(
-          const Color(0xFF42A5F6).withOpacity(0.2),
-        ),
-        columns: const [
-          DataColumn(label: Text('SrNo')),
-          DataColumn(label: Text('Date')),
-          DataColumn(label: Text('Shift')),
-          DataColumn(label: Text('Party')),
-          DataColumn(label: Text('BOM')),
-          DataColumn(label: Text('Article')),
-          DataColumn(label: Text('PO')),
-          DataColumn(label: Text('Print')),
-          DataColumn(label: Text('Bag Type')),
-          DataColumn(label: Text('Size')),
-          DataColumn(label: Text('Weight')),
-          DataColumn(label: Text('Line')),
-          DataColumn(label: Text('Prod Qty')),
-          DataColumn(label: Text('Bag Out')),
-          DataColumn(label: Text('Req Bag')),
-          DataColumn(label: Text('Contractor')),
-          DataColumn(label: Text('Remark')),
-        ],
-        rows: _visibleData.map((item) {
-          return DataRow(
-            cells: [
-              DataCell(Text(item.srno.toString())),
-              DataCell(Text(DateFormat('dd-MM-yyyy').format(item.date))),
-              DataCell(Text(item.shift)),
-              DataCell(Text(item.partyName)),
-              DataCell(Text(item.bomNo)),
-              DataCell(Text(item.articleNo)),
-              DataCell(Text(item.poNum)),
-              DataCell(Text(item.printStatus)),
-              DataCell(Text(item.bagType)),
-              DataCell(Text(item.bagSize)),
-              DataCell(Text(item.bagGwtGm.toString())),
-              DataCell(Text(item.line)),
-              DataCell(Text(item.productionQty.toString())),
-              DataCell(Text(item.bagOut.toString())),
-              DataCell(
-                Text(
-                  item.requireD_BAG.toString(),
-                  style: TextStyle(
-                    color: item.bagOut < 10 ? Colors.red : Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
+  Widget _buildReportTable() {
+    return DataTable(
+      columnSpacing: 20,
+      headingRowColor: MaterialStateProperty.all(C.primaryLight),
+      columns: const [
+        DataColumn(label: Text('SrNo')),
+        DataColumn(label: Text('Date')),
+        DataColumn(label: Text('Shift')),
+        DataColumn(label: Text('Party')),
+        DataColumn(label: Text('BOM')),
+        DataColumn(label: Text('Article')),
+        DataColumn(label: Text('PO')),
+        DataColumn(label: Text('Print')),
+        DataColumn(label: Text('Bag Type')),
+        DataColumn(label: Text('Size')),
+        DataColumn(label: Text('Weight')),
+        DataColumn(label: Text('Line')),
+        DataColumn(label: Text('Prod Qty')),
+        DataColumn(label: Text('Bag Out')),
+        DataColumn(label: Text('Req Bag')),
+        DataColumn(label: Text('Contractor')),
+        DataColumn(label: Text('Remark')),
+      ],
+      rows: _visibleData.map((item) {
+        return DataRow(
+          cells: [
+            DataCell(Text(item.srno.toString())),
+            DataCell(Text(DateFormat('dd-MM-yyyy').format(item.date))),
+            DataCell(Text(item.shift)),
+            DataCell(Text(item.partyName)),
+            DataCell(Text(item.bomNo)),
+            DataCell(Text(item.articleNo)),
+            DataCell(Text(item.poNum)),
+            DataCell(Text(item.printStatus)),
+            DataCell(Text(item.bagType)),
+            DataCell(Text(item.bagSize)),
+            DataCell(Text(item.bagGwtGm.toString())),
+            DataCell(Text(item.line)),
+            DataCell(Text(item.productionQty.toString())),
+            DataCell(Text(item.bagOut.toString())),
+            DataCell(
+              Text(
+                item.requireD_BAG.toString(),
+                style: TextStyle(
+                  color: item.bagOut < 10 ? Colors.red : Colors.green,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              DataCell(Text(item.contractor ?? "N/A")),
-              DataCell(Text(item.remark ?? "N/A")),
-            ],
-            onSelectChanged: (value) {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) =>
-              //         BagReportDetailScreen(report: item),
-              //   ),
-              // );
-            },
-          );
-        }).toList(),
-      ),
+            ),
+            DataCell(Text(item.contractor ?? "N/A")),
+            DataCell(Text(item.remark ?? "N/A")),
+          ],
+          onSelectChanged: (value) {
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) =>
+            //         BagReportDetailScreen(report: item),
+            //   ),
+            // );
+          },
+        );
+      }).toList(),
     );
   }
-
-
 }

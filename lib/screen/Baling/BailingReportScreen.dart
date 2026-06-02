@@ -193,7 +193,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: C.bg,
       body: Column(
         children: [
           _buildFilterBar(),
@@ -329,14 +329,11 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
             borderRadius: BorderRadius.circular(8),
             child: Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1565C0),
-                borderRadius: BorderRadius.circular(8),
-              ),
+
               child: const Icon(
                 Icons.calendar_month,
-                color: Colors.white,
-                size: 20,
+                color: C.primary,
+                size: 25,
               ),
             ),
           ),
@@ -349,7 +346,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   Widget _buildBody() {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF1565C0)),
+        child: CircularProgressIndicator(color: C.actionOrange),
       );
     }
     if (_error != null) {
@@ -423,7 +420,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   // ── Table Header ─────────────────────────────────────────────────────────────
   Widget _buildTableHeader() {
     return Container(
-      color: const Color(0xFF1565C0),
+      color: C.primary,
       child: Row(
         children: [
           _headerCell('BARCODE', _colBarcode),
@@ -449,15 +446,15 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   Widget _headerCell(String text, double width) {
     return Container(
       width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
       decoration: const BoxDecoration(
-        border: Border(right: BorderSide(color: Colors.white24, width: 0.8)),
+        border: Border(right: BorderSide(color: C.primaryLight, width: 0.8)),
       ),
       child: Text(
         text,
         textAlign: TextAlign.center,
         style: const TextStyle(
-          color: Colors.white,
+          color: C.bg,
           fontWeight: FontWeight.w700,
           fontSize: 12,
           height: 1.3,

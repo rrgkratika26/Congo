@@ -753,11 +753,12 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [C.appBar1, C.appBar4,],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: C.appBar1,
+        // gradient: LinearGradient(
+        //   colors: [C.appBar1, C.appBar4,],
+        //   begin: Alignment.topLeft,
+        //   end: Alignment.bottomRight,
+        // ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
       child: SafeArea(
@@ -819,7 +820,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                   child: _filterCard(
                     title: "Process",
                     icon: Icons.sync,
-                    color: C.warning,
+
                   ),
                 ),
 
@@ -829,7 +830,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                   child: _filterCard(
                     title: "All",
                     icon: Icons.grid_view_rounded,
-                    color: C.brand700,
+
                   ),
                 ),
 
@@ -839,7 +840,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                   child: _filterCard(
                     title: "Finish",
                     icon: Icons.check_circle_rounded,
-                    color: C.success,
+
                   ),
                 ),
               ],
@@ -918,7 +919,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
   Widget _filterCard({
     required String title,
     required IconData icon,
-    required Color color,
+
   }) {
     final isSelected = _selectedFilter == title;
 
@@ -933,7 +934,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
           color: isSelected ? C.border : C.bg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? color : C.borderLight,
+            color: isSelected ? C.actionOrange : C.borderLight,
             width: 1.2,
           ),
         ),

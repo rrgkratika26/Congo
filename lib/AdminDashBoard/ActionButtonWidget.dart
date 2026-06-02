@@ -108,8 +108,8 @@ Bom_Report,
   Bom_List,
   Webbing_Ledger,
   Issue_to_QC,
-  Or_Planning,
-  Or_Composition,
+  Order_Planning,
+  Order_Composition,
   To_Loom
 }
 
@@ -251,7 +251,7 @@ List<MenuAction> getActionsForMenu(String label) {
     case 'INQUIRY':
       return [MenuAction.Inquirey_Report,];
     case 'PLANNING':
-      return [MenuAction.Or_Planning, MenuAction.Or_Composition,MenuAction.To_Loom];
+      return [MenuAction.Order_Planning, MenuAction.Order_Composition,MenuAction.To_Loom];
     case 'LOOM':
       return [
         MenuAction.IN,
@@ -283,13 +283,13 @@ List<MenuAction> getActionsForMenu(String label) {
         MenuAction.stock,
         // MenuAction.transfer,
       ];
-    case 'FOLDING':
-      return [
-        MenuAction.IN,
-
-        // MenuAction.OUT,
-        MenuAction.report,MenuAction.stock
-      ];
+    // case 'FOLDING':
+    //   return [
+    //     MenuAction.IN,
+    //
+    //     // MenuAction.OUT,
+    //     MenuAction.report,MenuAction.stock
+    //   ];
     case 'FOLDING':
       return [MenuAction.IN, MenuAction.report, MenuAction.stock];
     case 'BAG':

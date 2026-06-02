@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system, // ✅ auto system mode
 
       initialRoute: AppRoutes.login,
-      routes: AppRoutes.routes,
+      getPages: AppRoutes.pages,
     );
   }
 }

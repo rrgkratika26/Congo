@@ -180,7 +180,7 @@ class _FormScreenState extends State<FormScreen> {
         "bagQty": item.bagQty,
         "lineNo": _lineNo!,
         "supervisorName": _supervisorName!,
-        "operatorName": "string",
+        "operatorName": _shift!,
         "tableQuantity": int.tryParse(_requiredBagController.text) ?? widget.requiredBag,
       });
     });

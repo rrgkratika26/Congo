@@ -6,8 +6,6 @@ import '../../NARDANA/RmdINReports/StockReportsModel.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
 import '../../util/widget/CountRecords/CountRecords.dart';
 
-const _primary = Color(0xFF1565C0);
-
 class RmdStockReportScreen extends StatefulWidget {
   const RmdStockReportScreen({super.key});
 
@@ -146,7 +144,7 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
       backgroundColor: C.bg,
       // ✅ REAL APP BAR
       appBar: AppBar(
-        backgroundColor: _primary,
+        backgroundColor: C.appBar1,
         elevation: 1,
         title: const Text(
           'Stock Report',
@@ -177,7 +175,6 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
 
       body: Column(
         children: [
-
           _summaryBar(),
           _searchBar(),
           _isLoading
@@ -187,9 +184,7 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
               : _filtered.isEmpty
               ? Expanded(child: _emptyState())
               : Expanded(
-                  child: Column(
-                    children: [Expanded(child: _table(_filtered))],
-                  ),
+                  child: Column(children: [Expanded(child: _table(_filtered))]),
                 ),
         ],
       ),
@@ -205,7 +200,11 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
         children: [
           // _box("Records", "$totalRecords", Colors.blue),
           _box("Roll Weight(Kg)", _totalNet.toStringAsFixed(2), Colors.green),
-          _box("Roll Length(mtr)", _totalLength.toStringAsFixed(2), Colors.orange),
+          _box(
+            "Roll Length(mtr)",
+            _totalLength.toStringAsFixed(2),
+            Colors.orange,
+          ),
         ],
       ),
     );
@@ -244,8 +243,6 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
       ),
     );
   }
-
-
 
   // ── Table ────────────FStock ──────────────────────────────────────────────────────
 
@@ -363,9 +360,9 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
   Widget _head(String text) => Text(
     text,
     style: const TextStyle(
-      fontSize: 11,
+      fontSize: 13,
       fontWeight: FontWeight.w700,
-      color: _primary,
+      color: C.textHigh,
     ),
   );
 
@@ -382,7 +379,7 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
         text.isEmpty ? '-' : text,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
           fontFamily: mono ? 'monospace' : null,
           color: color ?? Colors.black87,
@@ -441,27 +438,20 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
           hintText: "Search Barcode / Party / Fabric / Batch",
-          hintStyle: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 13,
-          ),
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
 
-          prefixIcon: const Icon(
-            Icons.search,
-            size: 20,
-            color: _primary,
-          ),
+          prefixIcon: const Icon(Icons.search, size: 20, color: C.actionOrange),
 
           suffixIcon: _query.isNotEmpty
               ? IconButton(
-            icon: const Icon(Icons.close, size: 18),
-            onPressed: () {
-              _searchCtrl.clear();
-              setState(() {
-                _query = '';
-              });
-            },
-          )
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () {
+                    _searchCtrl.clear();
+                    setState(() {
+                      _query = '';
+                    });
+                  },
+                )
               : null,
 
           filled: true,
@@ -479,17 +469,12 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
 
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
-              color: Colors.grey.shade300,
-            ),
+            borderSide: BorderSide(color: Colors.grey.shade300),
           ),
 
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(
-              color: _primary,
-              width: 1.2,
-            ),
+            borderSide: const BorderSide(color: C.actionOrange, width: 1.2),
           ),
         ),
       ),

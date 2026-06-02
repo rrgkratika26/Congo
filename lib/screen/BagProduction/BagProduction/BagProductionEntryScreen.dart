@@ -150,8 +150,8 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
       backgroundColor: Colors.blue.shade50,
 
       appBar: AppBar(
-        title: const Text("Bag Entries", style: TextStyle(color: C.bg)),
-        backgroundColor: C.primary,
+        title: const Text("Bag Entries", style: TextStyle(color: C.bg,  fontWeight: FontWeight.w600,)),
+        backgroundColor: C.appBar1,
         iconTheme: IconThemeData(
           color: C.bg, // 👈 Back arrow color white
         ),
@@ -299,18 +299,18 @@ class _BagEntryCard extends StatelessWidget {
                         style: const TextStyle(fontSize: 16),
                         children: [
                           TextSpan(
-                            text: item.customerName,
+                            text: (item.customerName ?? '').toUpperCase(),
                             style: const TextStyle(
-                              color: C.primary,
+                              color: C.actionOrange,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           TextSpan(
                             text: "  •  ${item.generatedInquiry}", // BOM No
                             style: TextStyle(
-                              fontSize: 13,
-                              color: C.textHigh,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                              color: C.secondary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],

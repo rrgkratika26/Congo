@@ -99,15 +99,14 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
         title: const Text(
           "Order Composition",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors:  [C.appBar2, C.appBar3],
-            ),
-          ),
-        ),
+        ),backgroundColor: C.appBar1,
+        // flexibleSpace: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors:  [C.appBar2, C.appBar3],
+        //     ),
+        //   ),
+        // ),
       ),
 
       body: Column(
@@ -164,7 +163,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? C.primary
+                                      ? C.actionOrange
                                       : Colors.transparent,
 
                                   borderRadius: BorderRadius.circular(8),

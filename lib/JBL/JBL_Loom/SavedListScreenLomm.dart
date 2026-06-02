@@ -151,12 +151,13 @@ class _SavedListScreenState extends State<SavedListScreen> {
         title: const Text("Loom List", style: TextStyle(color: C.bg)),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                C.appBar1,
-                C.appBar4,
-              ],
-            ),
+            // gradient: LinearGradient(
+            //   colors: [
+            //     C.appBar1,
+            //     C.appBar4,
+            //   ],
+            // ),
+            color: C.appBar1
           ),
         ),
         // C.primary,
@@ -310,246 +311,246 @@ class _SavedListScreenState extends State<SavedListScreen> {
     );
   }
 
-  //   Future<void> _printBarcodeApi(LoomListModel item) async {
-  //     final address = _storage.read<String>('printer_address');
-  //     final name = _storage.read<String>('printer_name') ?? 'Printer';
-  //
-  //     if (address == null) {
-  //       Get.snackbar(
-  //         "Printer Error",
-  //         "❌ Please connect printer first",
-  //         backgroundColor: Colors.red,
-  //         colorText: Colors.white,
-  //       );
-  //       return;
-  //     }
-  //
-  //     /// 🔹 Confirm dialog
-  //     final confirm = await showDialog<bool>(
-  //       context: context,
-  //       builder: (_) => AlertDialog(
-  //         title: const Text("Print Barcode"),
-  //         content: Text("Print barcode?\n\n${item.barcode}"),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.pop(context, false),
-  //             child: const Text("Cancel"),
-  //           ),
-  //           ElevatedButton(
-  //             onPressed: () => Navigator.pop(context, true),
-  //             child: const Text("Yes, Print"),
-  //           ),
-  //         ],
-  //       ),
-  //     );
-  //
-  //     if (confirm != true) return;
-  //
-  //     try {
-  //       /// 🔥 CONNECT PRINTER
-  //       await PrinterManager.instance.disconnect(type: PrinterType.bluetooth);
-  //       await Future.delayed(const Duration(milliseconds: 400));
-  //
-  //       await PrinterManager.instance.connect(
-  //         type: PrinterType.bluetooth,
-  //         model: BluetoothPrinterInput(
-  //           name: name,
-  //           address: address,
-  //           isBle: false,
-  //           autoConnect: false,
-  //         ),
-  //       );
-  //
-  //       await Future.delayed(const Duration(milliseconds: 800));
-  //
-  //       /// 🔥 WAKE PRINTER
-  //       await PrinterManager.instance.send(
-  //         type: PrinterType.bluetooth,
-  //         bytes: [27, 64],
-  //       );
-  //
-  //       await Future.delayed(const Duration(milliseconds: 200));
-  //
-  //       /// 🔥 TSPL LABEL (LIKE YOUR FIRST CODE)
-  //       String tspl =
-  //           '''
-  // SIZE 100 mm,100 mm
-  // GAP 3 mm,0 mm
-  // DIRECTION 1
-  // CLS
-  //
-  // TEXT 30,80,"3",0,1,2,"${item.partyName}"
-  //
-  // TEXT 40,140,"3",0,2,2,"BARCODE:${item.barcode}"
-  // TEXT 40,200,"3",0,2,2,"OP:${item.operator}"
-  //
-  // TEXT 40,260,"3",0,2,2,"SUP:${item.supervisor}"
-  // TEXT 40,320,"3",0,2,2,"QTY:${item.quantity}"
-  //
-  // QRCODE 240,390,L,12,A,0,"${item.barcode}"
-  //
-  // TEXT 180,660,"3",0,2,2,"${item.barcode}"
-  //
-  // PRINT 1
-  // ''';
-  //
-  //       /// 🔥 PRINT
-  //       await PrinterManager.instance.send(
-  //         type: PrinterType.bluetooth,
-  //         bytes: tspl.codeUnits,
-  //       );
-  //
-  //       /// 🔥 OPTIONAL API CALL AFTER PRINT
-  //       final response = await InStockService().printBarcode(
-  //         id: item.id,
-  //         barcode: item.barcode,
-  //       );
-  //
-  //       Get.snackbar(
-  //         "Success",
-  //         response['message'] ?? "Printed Successfully",
-  //         backgroundColor: Colors.green,
-  //         colorText: Colors.white,
-  //       );
-  //     } catch (e) {
-  //       Get.snackbar(
-  //         "Error",
-  //         "❌ Print failed: $e",
-  //         backgroundColor: Colors.red,
-  //         colorText: Colors.white,
-  //       );
-  //     }
-  //   }
+    Future<void> _printBarcodeApi(LoomListModel item) async {
+      final address = _storage.read<String>('printer_address');
+      final name = _storage.read<String>('printer_name') ?? 'Printer';
 
-  Future<void> _printBarcodeApi(LoomListModel item) async {
-    final address = _storage.read<String>('printer_address');
-    final name = _storage.read<String>('printer_name') ?? 'Printer';
-
-    /// Printer selected or not
-    if (address == null || address.isEmpty) {
-      Get.snackbar(
-        "Printer Error",
-        "❌ Please connect printer first",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    /// Confirm dialog
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Print Barcode"),
-        content: Text("Print barcode?\n\n${item.barcode}"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Yes, Print"),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    try {
-      /// Disconnect previous connection
-      await PrinterManager.instance.disconnect(type: PrinterType.bluetooth);
-
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      /// Connect printer
-      await PrinterManager.instance.connect(
-        type: PrinterType.bluetooth,
-        model: BluetoothPrinterInput(
-          name: name,
-          address: address,
-          isBle: false,
-          autoConnect: false,
-        ),
-      );
-
-      await Future.delayed(const Duration(seconds: 1));
-
-      /// Verify connection
-      bool? isConnected = await PrintBluetoothThermal.connectionStatus;
-
-      if (isConnected != true) {
+      if (address == null) {
         Get.snackbar(
           "Printer Error",
-          "❌ Printer not connected",
+          "❌ Please connect printer first",
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
-
-        return; // STOP HERE
+        return;
       }
 
-      /// Wake printer
-      await PrinterManager.instance.send(
-        type: PrinterType.bluetooth,
-        bytes: [27, 64],
+      /// 🔹 Confirm dialog
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Print Barcode"),
+          content: Text("Print barcode?\n\n${item.barcode}"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Yes, Print"),
+            ),
+          ],
+        ),
       );
 
-      await Future.delayed(const Duration(milliseconds: 300));
+      if (confirm != true) return;
 
-      String tspl =
-          '''
-SIZE 100 mm,100 mm
-GAP 3 mm,0 mm
-DIRECTION 1
-CLS
+      try {
+        /// 🔥 CONNECT PRINTER
+        await PrinterManager.instance.disconnect(type: PrinterType.bluetooth);
+        await Future.delayed(const Duration(milliseconds: 400));
 
-TEXT 30,80,"3",0,1,2,"${item.partyName}"
+        await PrinterManager.instance.connect(
+          type: PrinterType.bluetooth,
+          model: BluetoothPrinterInput(
+            name: name,
+            address: address,
+            isBle: false,
+            autoConnect: false,
+          ),
+        );
 
-TEXT 40,140,"3",0,2,2,"BARCODE:${item.barcode}"
-TEXT 40,200,"3",0,2,2,"OP:${item.operator}"
+        await Future.delayed(const Duration(milliseconds: 800));
 
-TEXT 40,260,"3",0,2,2,"SUP:${item.supervisor}"
-TEXT 40,320,"3",0,2,2,"QTY:${item.quantity}"
+        /// 🔥 WAKE PRINTER
+        await PrinterManager.instance.send(
+          type: PrinterType.bluetooth,
+          bytes: [27, 64],
+        );
 
-QRCODE 240,390,L,12,A,0,"${item.barcode}"
+        await Future.delayed(const Duration(milliseconds: 200));
 
-TEXT 180,660,"3",0,2,2,"${item.barcode}"
+        /// 🔥 TSPL LABEL (LIKE YOUR FIRST CODE)
+        String tspl =
+            '''
+  SIZE 100 mm,100 mm
+  GAP 3 mm,0 mm
+  DIRECTION 1
+  CLS
 
-PRINT 1
-''';
+  TEXT 30,80,"3",0,1,2,"${item.partyName}"
 
-      /// Send print data
-      await PrinterManager.instance.send(
-        type: PrinterType.bluetooth,
-        bytes: tspl.codeUnits,
-      );
+  TEXT 40,140,"3",0,2,2,"BARCODE:${item.barcode}"
+  TEXT 40,200,"3",0,2,2,"OP:${item.operator}"
 
-      /// Wait before API call
-      await Future.delayed(const Duration(seconds: 2));
+  TEXT 40,260,"3",0,2,2,"SUP:${item.supervisor}"
+  TEXT 40,320,"3",0,2,2,"QTY:${item.quantity}"
 
-      /// API ONLY AFTER SUCCESSFUL PRINT
-      final response = await InStockService().printBarcode(
-        id: item.id,
-        barcode: item.barcode,
-      );
+  QRCODE 240,390,L,12,A,0,"${item.barcode}"
 
-      Get.snackbar(
-        "Success",
-        response['message'] ?? "Printed Successfully",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-    } catch (e) {
-      Get.snackbar(
-        "Print Failed",
-        "❌ $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+  TEXT 180,660,"3",0,2,2,"${item.barcode}"
+
+  PRINT 1
+  ''';
+
+        /// 🔥 PRINT
+        await PrinterManager.instance.send(
+          type: PrinterType.bluetooth,
+          bytes: tspl.codeUnits,
+        );
+
+        /// 🔥 OPTIONAL API CALL AFTER PRINT
+        final response = await InStockService().printBarcode(
+          id: item.id,
+          barcode: item.barcode,
+        );
+
+        Get.snackbar(
+          "Success",
+          response['message'] ?? "Printed Successfully",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } catch (e) {
+        Get.snackbar(
+          "Error",
+          "❌ Print failed: $e",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     }
-  }
+
+//   Future<void> _printBarcodeApi(LoomListModel item) async {
+//     final address = _storage.read<String>('printer_address');
+//     final name = _storage.read<String>('printer_name') ?? 'Printer';
+//
+//     /// Printer selected or not
+//     if (address == null || address.isEmpty) {
+//       Get.snackbar(
+//         "Printer Error",
+//         "❌ Please connect printer first",
+//         backgroundColor: Colors.red,
+//         colorText: Colors.white,
+//       );
+//       return;
+//     }
+//
+//     /// Confirm dialog
+//     final confirm = await showDialog<bool>(
+//       context: context,
+//       builder: (_) => AlertDialog(
+//         title: const Text("Print Barcode"),
+//         content: Text("Print barcode?\n\n${item.barcode}"),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pop(context, false),
+//             child: const Text("Cancel"),
+//           ),
+//           ElevatedButton(
+//             onPressed: () => Navigator.pop(context, true),
+//             child: const Text("Yes, Print"),
+//           ),
+//         ],
+//       ),
+//     );
+//
+//     if (confirm != true) return;
+//
+//     try {
+//       /// Disconnect previous connection
+//       await PrinterManager.instance.disconnect(type: PrinterType.bluetooth);
+//
+//       await Future.delayed(const Duration(milliseconds: 500));
+//
+//       /// Connect printer
+//       await PrinterManager.instance.connect(
+//         type: PrinterType.bluetooth,
+//         model: BluetoothPrinterInput(
+//           name: name,
+//           address: address,
+//           isBle: false,
+//           autoConnect: false,
+//         ),
+//       );
+//
+//       await Future.delayed(const Duration(seconds: 1));
+//
+//       /// Verify connection
+//       bool? isConnected = await PrintBluetoothThermal.connectionStatus;
+//
+//       if (isConnected != true) {
+//         Get.snackbar(
+//           "Printer Error",
+//           "❌ Printer not connected",
+//           backgroundColor: Colors.red,
+//           colorText: Colors.white,
+//         );
+//
+//         return; // STOP HERE
+//       }
+//
+//       /// Wake printer
+//       await PrinterManager.instance.send(
+//         type: PrinterType.bluetooth,
+//         bytes: [27, 64],
+//       );
+//
+//       await Future.delayed(const Duration(milliseconds: 300));
+//
+//       String tspl =
+//           '''
+// SIZE 100 mm,100 mm
+// GAP 3 mm,0 mm
+// DIRECTION 1
+// CLS
+//
+// TEXT 30,80,"3",0,1,2,"${item.partyName}"
+//
+// TEXT 40,140,"3",0,2,2,"BARCODE:${item.barcode}"
+// TEXT 40,200,"3",0,2,2,"OP:${item.operator}"
+//
+// TEXT 40,260,"3",0,2,2,"SUP:${item.supervisor}"
+// TEXT 40,320,"3",0,2,2,"QTY:${item.quantity}"
+//
+// QRCODE 240,390,L,12,A,0,"${item.barcode}"
+//
+// TEXT 180,660,"3",0,2,2,"${item.barcode}"
+//
+// PRINT 1
+// ''';
+//
+//       /// Send print data
+//       await PrinterManager.instance.send(
+//         type: PrinterType.bluetooth,
+//         bytes: tspl.codeUnits,
+//       );
+//
+//       /// Wait before API call
+//       await Future.delayed(const Duration(seconds: 2));
+//
+//       /// API ONLY AFTER SUCCESSFUL PRINT
+//       final response = await InStockService().printBarcode(
+//         id: item.id,
+//         barcode: item.barcode,
+//       );
+//
+//       Get.snackbar(
+//         "Success",
+//         response['message'] ?? "Printed Successfully",
+//         backgroundColor: Colors.green,
+//         colorText: Colors.white,
+//       );
+//     } catch (e) {
+//       Get.snackbar(
+//         "Print Failed",
+//         "❌ $e",
+//         backgroundColor: Colors.red,
+//         colorText: Colors.white,
+//       );
+//     }
+//   }
 
   Future<void> _showIssueOptions(LoomListModel item) async {
     showModalBottomSheet(

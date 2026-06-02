@@ -66,9 +66,9 @@ class _DispatchScreenState extends State<DispatchScreen> {
         centerTitle: true,
 
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(40),
+          preferredSize: const Size.fromHeight(20),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
               children: [
                 Expanded(
@@ -188,18 +188,18 @@ class _DispatchScreenState extends State<DispatchScreen> {
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: isTablet ? 20 : 14,
+              fontSize: isTablet ? 25 : 14,
               fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
-              color: isActive ? C.bg : C.textMid,
+              color: isActive ? C.actionOrange : C.primaryLight,
             ),
           ),
 
           AnimatedContainer(
             duration: const Duration(milliseconds: 250),
-            height: 5,
-            width: isActive ? 130 : 0,
+            height: 3,
+            width: isActive ? 150 : 0,
             decoration: BoxDecoration(
-              color: C.borderLight,
+              color: C.actionOrange,
               borderRadius: BorderRadius.circular(2),
             ),
           ),

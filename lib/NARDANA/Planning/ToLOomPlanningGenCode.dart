@@ -35,6 +35,8 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
   String? selectedSpecial;
   PartyNameModel? partyData;
 
+  String? apiFabricCode;
+
   List<ForwardListModel> forwardList = [];
   String forwardResponse = "";
   String partyResponse = "";
@@ -54,13 +56,18 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
-    loadDropdownData();
-    actualMtr = double.tryParse(widget.data.mtr.toString()) ?? 0;
 
+    actualMtr = double.tryParse(widget.data.mtr.toString()) ?? 0;
     actualKg = double.tryParse(widget.data.kg.toString()) ?? 0;
 
     extraMtrController.addListener(calculateValues);
+
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await loadDropdownData();
+    await _loadData();
   }
 
   @override
@@ -111,14 +118,26 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
 
   void setFabricValuesFromApi(String fabricCode) {
     try {
-      List<String> parts = fabricCode.split("-");
+      final parts = fabricCode.trim().split('-');
 
-      if (parts.length >= 4) {
-        widthController.text = parts[0]; // 083
-        gsmController.text = parts[3]; // 110+0
-
-        generateFabricCode();
+      if (parts.length != 8) {
+        debugPrint("Invalid Fabric Code => $fabricCode");
+        return;
       }
+
+      widthController.text = parts[0];
+      gsmController.text = parts[3];
+
+      selectedFabricType = parts[1];
+      selectedType = parts[2];
+      selectedLamination = parts[4];
+      selectedColor = parts[5];
+      selectedCut = parts[6];
+      selectedSpecial = parts[7];
+
+      generateFabricCode();
+
+      setState(() {});
     } catch (e) {
       debugPrint("Fabric Parse Error: $e");
     }
@@ -287,23 +306,22 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
     required String? selectedValue,
     required Function(String?) onChanged,
   }) {
+    final validValue = list.any((e) => e.code == selectedValue)
+        ? selectedValue
+        : null;
+
     return buildField(
       title,
-
       DropdownButtonFormField<String>(
-        value: selectedValue,
-
+        value: validValue,
         isExpanded: true,
 
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
-
           contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-
             borderSide: BorderSide.none,
           ),
         ),
@@ -311,10 +329,12 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
         hint: const Text("Select"),
 
         items: list.map((e) {
-          return DropdownMenuItem(
+          return DropdownMenuItem<String>(
             value: e.code,
-
-            child: Text(e.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+            child: Text(
+              e.name,
+              overflow: TextOverflow.ellipsis,
+            ),
           );
         }).toList(),
 
@@ -395,6 +415,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           setState(() {
             selectedFabricType = v;
           });
+          generateFabricCode();
         },
       ),
 
@@ -418,6 +439,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           setState(() {
             selectedLamination = v;
           });
+          generateFabricCode();
         },
       ),
 
@@ -429,6 +451,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           setState(() {
             selectedColor = v;
           });
+          generateFabricCode();
         },
       ),
 
@@ -440,6 +463,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           setState(() {
             selectedCut = v;
           });
+          generateFabricCode();
         },
       ),
 
@@ -451,6 +475,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           setState(() {
             selectedSpecial = v;
           });
+          generateFabricCode();
         },
       ),
     ];
@@ -468,39 +493,25 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           children: [
             /// Party Name
             Text(
-              "Party Name:${partyData?.partyName ?? "Loading..."}",
+              "${partyData?.partyName ?? "Loading..."}",
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 17,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
 
-            /// Article
-            Text(
-              "Article : ${partyData?.articleNum ?? widget.data.articleNum}",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, color: Colors.white70),
-            ),
 
-            /// PO
-            Text(
-              "PO : ${partyData?.poNum ?? widget.data.poNum}",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, color: Colors.white70),
-            ),
           ],
         ),
-
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
-          ),
-        ),
+backgroundColor: C.appBar1,
+        // flexibleSpace: Container(
+        //   decoration: const BoxDecoration(
+        //     gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
+        //   ),
+        // ),
       ),
 
       body: SingleChildScrollView(
@@ -513,9 +524,9 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.teal, C.appBar4],
-                ),
+
+                  color: Colors.teal.shade200,
+
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
@@ -525,22 +536,37 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
                   const Text(
                     "Generated Fabric Code",
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: C.textHigh,
                       fontSize: 13,
                     ),
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 1),
 
                   Text(
                     generatedFabricCode.isEmpty
                         ? "Not Generated"
                         : generatedFabricCode,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: C.textHigh,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  /// Article
+                  Text(
+                    "Article : ${partyData?.articleNum ?? widget.data.articleNum}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: C.textHigh),
+                  ),
+
+                  /// PO
+                  Text(
+                    "PO : ${partyData?.poNum ?? widget.data.poNum}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: C.textHigh),
                   ),
                 ],
               ),
@@ -549,7 +575,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
             const SizedBox(height: 10),
 
             Card(
-              color: C.appBar4,
+              color: C.primaryLight,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),

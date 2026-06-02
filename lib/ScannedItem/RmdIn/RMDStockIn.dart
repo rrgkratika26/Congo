@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import '../../Color/Colorclass.dart';
 import '../../QRScan/QrScanScreen.dart';
 import '../../screen/inStock/ReportScreen.dart';
 import '../../screen/inStock/inStockController.dart';
@@ -91,7 +92,7 @@ class _RMDStockInState extends State<RMDStockIn> {
                   setState(() => controller.selectedOperator = value),
             ),
 
-            SizedBox(height: isTablet ? 16 : 12),
+            SizedBox(height: isTablet ? 10 : 12),
 
             _buildDropdown(
               label: 'Choose a Supervisor',
@@ -122,7 +123,7 @@ class _RMDStockInState extends State<RMDStockIn> {
             SizedBox(height: isTablet ? 16 : 12),
 
             _buildDepartmentField(isTablet, isSmallScreen),
-            SizedBox(height: isTablet ? 32 : 24),
+            SizedBox(height: isTablet ? 28 : 24),
 
             _buildScanningCard(isTablet, isSmallScreen),
             SizedBox(height: isTablet ? 24 : 20),
@@ -150,13 +151,13 @@ class _RMDStockInState extends State<RMDStockIn> {
       decoration: _boxDecoration(),
       child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 12 : 12,
-          vertical: isSmallScreen ? 8 : 8,
+          horizontal: isSmallScreen ? 10 : 12,
+          vertical: isSmallScreen ? 5: 8,
         ),
         child: Row(
           children: [
             _iconBox(icon),
-            SizedBox(width: isSmallScreen ? 12 : 16),
+            SizedBox(width: isSmallScreen ? 10 : 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,19 +198,19 @@ class _RMDStockInState extends State<RMDStockIn> {
     return Container(
       decoration: _boxDecoration(),
       padding: EdgeInsets.symmetric(
-        horizontal: isSmallScreen ? 12 : 16,
-        vertical: isSmallScreen ? 12 : 16,
+        horizontal: isSmallScreen ? 10 : 16,
+        vertical: isSmallScreen ? 10 : 16,
       ),
       child: Row(
         children: [
           _iconBox(Icons.business),
-          SizedBox(width: isSmallScreen ? 12 : 16),
+          SizedBox(width: isSmallScreen ? 5 : 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('DEPARTMENT', style: _labelStyle(isTablet, isSmallScreen)),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 department,
                 style: TextStyle(
@@ -239,7 +240,7 @@ class _RMDStockInState extends State<RMDStockIn> {
       child: Center(
         child: Container(
           decoration: _boxDecoration(borderRadius: 20),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(15),
           child: FutureBuilder<int>(
             future: InStockService().getScannedItemsCount(getApiDate()),
             builder: (context, snapshot) {
@@ -251,7 +252,7 @@ class _RMDStockInState extends State<RMDStockIn> {
                     'Total Items Scanned',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   Text(
                     // snapshot.connectionState == ConnectionState.waiting
                     //     ? '...'
@@ -278,8 +279,6 @@ class _RMDStockInState extends State<RMDStockIn> {
       ),
     );
   }
-
-
 
   Widget _buildActionButtons(bool isTablet, bool isSmallScreen) {
     return Row(
@@ -470,18 +469,18 @@ class _RMDStockInState extends State<RMDStockIn> {
 
   Widget _iconBox(IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
+        color: C.primaryblue,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(icon, color: Colors.blue),
+      child: Icon(icon, color: C.primaryLight),
     );
   }
 
   TextStyle _labelStyle(bool isTablet, bool isSmallScreen) {
     return TextStyle(
-      fontSize: isTablet ? 12 : (isSmallScreen ? 10 : 11),
+      fontSize: isTablet ? 12 : (isSmallScreen ? 8 : 11),
       color: Colors.grey[600],
       fontWeight: FontWeight.w500,
     );

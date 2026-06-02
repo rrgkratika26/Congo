@@ -35,12 +35,12 @@ import '../auth_exception.dart';
 
 class InStockService {
 
-  // static const String baseUrl = 'http://192.168.128.237:7165/api';
+  static const String baseUrl = 'http://192.168.29.125:7165/api';
   // static const String baseUrl = 'http://fibcsoftware.in:4430/api/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String baseUrl = 'http://190.92.175.47:80/Visa/api';
-  static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  // static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
 
   // static const String baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String baseUrl ='http://190.92.175.47:80/API/api';
@@ -1123,7 +1123,7 @@ class InStockService {
     final url = Uri.parse(
       '$baseUrl/BaleDepartment/bailing-report?fromDate=$fromDate&toDate=$toDate',
     );
-    _logApi(method: "GET", url: url);
+    // _logApi(method: "GET", url: url);
     final response = await http.get(url, headers: await authHeaders());
     // _checkUnauthorized(response);
     if (response.statusCode == 200) {

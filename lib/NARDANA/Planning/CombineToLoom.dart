@@ -65,14 +65,14 @@ class _CombineToLoomScreenState extends State<CombineToLoomScreen> {
 
       appBar: AppBar(
         iconTheme: IconThemeData(color: C.bg),
-
+backgroundColor: C.appBar1,
         title: const Text("Combine To Loom", style: TextStyle(color: C.bg)),
 
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
-          ),
-        ),
+        // flexibleSpace: Container(
+        //   decoration: const BoxDecoration(
+        //     gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
+        //   ),
+        // ),
       ),
 
       body: isLoading

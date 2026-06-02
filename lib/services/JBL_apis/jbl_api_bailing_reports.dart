@@ -37,14 +37,14 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../getSupervisors/getSupervisors.dart';
 
 class JblApiService {
-  // static const String baseUrlJBL = 'http://192.168.128.237:7165/api';
+  static const String baseUrlJBL = 'http://192.168.29.125:7165/api';
 
   // static const String baseUrlJBL = 'http://190.92.175.47:80/JblAPI/api';
   // static const String baseUrlJBL = 'http://fibcsoftware.in:4430/api/api';
   // static String baseUrlJBL = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static String baseUrlJBL = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String baseUrlJBL = 'http://190.92.175.47:80/Visa/api';
-  static const String baseUrlJBL = 'http://190.92.175.47:80/Nardana/api';
+  // static const String baseUrlJBL = 'http://190.92.175.47:80/Nardana/api';
   // static const String baseUrlJBL = 'http://190.92.175.47:80/ASIA_API/api';
 
   // static const String baseUrlJBL ='http://190.92.175.47:80/API/api';  // for others database
@@ -1016,9 +1016,9 @@ class JblApiService {
       headers: await InStockService.authHeaders(),
     );
 
-    // debugPrint("RMD IN URL: $url");
-    // debugPrint("STATUS: ${response.statusCode}");
-    // debugPrint("RESPONSE: ${response.body}");
+    debugPrint("RMD IN URL: $url");
+    debugPrint("STATUS: ${response.statusCode}");
+    debugPrint("RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;

@@ -21,7 +21,7 @@ class CountText extends StatelessWidget {
         child: Text(
           " $count Records",
           style: const TextStyle(
-            color: C.primaryDark,
+            color: C.bg,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),

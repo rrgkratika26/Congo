@@ -35,12 +35,12 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class NaradanaApiService {
-  // static const String _baseUrl = 'http://192.168.128.237:7165/api';
+  static const String _baseUrl = 'http://192.168.29.125:7165/api';
   // static const String _baseUrl = 'http://fibcsoftware.in:4430/api/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Visa/api';
-  static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  // static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String _baseUrl ='http://190.92.175.47:80/API/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Nardana';

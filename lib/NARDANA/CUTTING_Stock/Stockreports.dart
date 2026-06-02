@@ -144,6 +144,7 @@ class _CuttingStockScreenState extends State<CuttingStockScreen> {
   Widget _box(String title, String value, Color color) {
     return Expanded(
       child: Container(
+
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(

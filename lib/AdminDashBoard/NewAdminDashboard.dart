@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../Color/Colorclass.dart';
 import '../Login/InquiryReportScreen.dart';
 import '../Login/ProfileSCreen.dart';
+import '../ScannedItem/Cutting/CuttinIN/CuttingScreen.dart';
 import '../routes/app_routes.dart';
 import '../services/JBL_apis/jbl_api_bailing_reports.dart';
 import '../util/sharedpreference/shared_preference.dart';
@@ -97,8 +98,9 @@ class _NewAdminDashboardState extends State<NewAdminDashboard>
       _DashboardItem(title: 'BALING', icon: Icons.waves),
       _DashboardItem(title: 'WEBBING', icon: Icons.web),
       _DashboardItem(title: 'LEDGER', icon: Icons.menu_book),
-      _DashboardItem(title: 'FOLDING', icon: Icons.dashboard_customize),
+      // _DashboardItem(title: 'FOLDING', icon: Icons.dashboard_customize),
       _DashboardItem(title: 'TAPELINE', icon: Icons.dashboard),
+
       _DashboardItem(title: 'MARKETING', icon: Icons.bar_chart),
     ];
 
@@ -179,7 +181,8 @@ class _NewAdminDashboardState extends State<NewAdminDashboard>
         vertical: isMobile ? 14 : 18,
       ),
       decoration: const BoxDecoration(
-        gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
+        color: C.appBar1
+        // gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
       ),
       child: Row(
         children: [
@@ -535,9 +538,9 @@ class _NewAdminDashboardState extends State<NewAdminDashboard>
           }
           break;
         case 'PLANNING':
-          if (action == MenuAction.Or_Planning) {
+          if (action == MenuAction.Order_Planning) {
             Navigator.pushNamed(context, AppRoutes.orderPlanning);
-          } else if (action == MenuAction.Or_Composition) {
+          } else if (action == MenuAction.Order_Composition) {
             Navigator.pushNamed(context, AppRoutes.orderComposition);
           } else if (action == MenuAction.To_Loom) {
             Navigator.pushNamed(context, AppRoutes.toLoom);
@@ -576,14 +579,31 @@ class _NewAdminDashboardState extends State<NewAdminDashboard>
             Navigator.pushNamed(context, AppRoutes.lamNaradanaReports);
           }
           break;
-
         case 'CUTTING':
           if (action == MenuAction.IN) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CuttingScreen()),
+            );
+          }
+          else if (action == MenuAction.In_Report) {
             Navigator.pushNamed(context, AppRoutes.nardanaInReport);
-          } else if (action == MenuAction.OUT) {
-            Navigator.pushNamed(context, AppRoutes.nardanaCutOutList);
-          } else if (action == MenuAction.stock) {
+          }
+          else if (action == MenuAction.OUT) {
+          Navigator.pushNamed(context, AppRoutes.nardanaCutOutList);
+            // Navigator.pushNamed(context, AppRoutes.visaCutOutStock);
+          }
+          // RollWiseReportScreen
+          else if (action == MenuAction.report) {
+            Navigator.pushNamed(context, AppRoutes.rollWisereport);
+          }
+          else if (action == MenuAction.stock) {
             Navigator.pushNamed(context, AppRoutes.cutGroupStock);
+          }
+          else if (action == MenuAction.Approval) {
+            Navigator.pushNamed(context, AppRoutes.cuttingnardana);
+          } else if (action == MenuAction.Pcs_Issue) {
+            Navigator.pushNamed(context, AppRoutes.cuttingIssuenardana);
           }
           break;
 
@@ -602,6 +622,9 @@ class _NewAdminDashboardState extends State<NewAdminDashboard>
             Navigator.pushNamed(context, AppRoutes.baleReport);
           } else if (action == MenuAction.dispatch) {
             Navigator.pushNamed(context, AppRoutes.baleDispatch);
+          }
+          else if(action == MenuAction.stock){
+            Navigator.pushNamed(context, AppRoutes.baleStockgroup);
           }
           break;
 
@@ -669,7 +692,7 @@ class _NewAdminDashboardState extends State<NewAdminDashboard>
       _DashboardItem(title: 'BALING', icon: Icons.waves),
       _DashboardItem(title: 'WEBBING', icon: Icons.web),
       _DashboardItem(title: 'LEDGER', icon: Icons.menu_book),
-      _DashboardItem(title: 'FOLDING', icon: Icons.dashboard_customize),
+      // _DashboardItem(title: 'FOLDING', icon: Icons.dashboard_customize),
       _DashboardItem(title: 'TAPELINE', icon: Icons.dashboard),
       _DashboardItem(title: 'MARKETING', icon: Icons.bar_chart),
     ];

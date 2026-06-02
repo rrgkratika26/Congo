@@ -177,7 +177,7 @@ class _JBLFormScreenState extends State<JBLFormScreen>
         "bagType": _bagTypeCtrl.text,
         "bagWeight": int.tryParse(_bagWtCtrl.text) ?? 0,
         "supervisorName": _supervisorCtrl.text,
-        "operatorName": '',
+        "operatorName": _shiftCtrl,
         "tableQuantity": _rows.length,
 
         "rows": rows,

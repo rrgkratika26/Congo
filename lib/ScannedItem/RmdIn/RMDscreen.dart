@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Color/Colorclass.dart';
 import '../../screen/inStock/inStockScreen.dart';
 import 'RMDStockIn.dart';
 import 'RMDinStock.dart';
@@ -46,15 +47,26 @@ class _RmdScreenState extends State<RmdScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade100,
+        backgroundColor: C.appBar1,
         elevation: 2,
+        iconTheme: IconThemeData(color: C.primaryLight),
+        // flexibleSpace: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors:  [C.appBar2, C.appBar3],
+        //       begin: Alignment.topLeft,
+        //       end: Alignment.bottomRight,
+        //     ),
+        //   ),
+        // ),
+
         shadowColor: Colors.black.withOpacity(0.1),
 
         leadingWidth: 110, // important
         leading: Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+              icon: const Icon(Icons.arrow_back_ios_new, color: C.primaryLight),
               onPressed: () => Navigator.pop(context),
             ),
             // Image.asset(
@@ -70,20 +82,20 @@ class _RmdScreenState extends State<RmdScreen> {
             Text(
               _unitTitle.isNotEmpty ? _unitTitle : 'Unit Name',
               style: TextStyle(
-                color: Colors.black87,
+                color: C.primaryLight,
                 fontSize: isTablet ? 20 : 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(width: 5,),
-            Text(
-              'RMD ${widget.screenType}',
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: isTablet ? 20 : 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            // SizedBox(width: 5,),
+            // Text(
+            //   'RMD ${widget.screenType}',
+            //   style: TextStyle(
+            //     color: C.primaryLight,
+            //     fontSize: isTablet ? 20 : 18,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
           ],
         ),
 
@@ -119,7 +131,7 @@ class _RmdScreenState extends State<RmdScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildTabIndicator('IN Stock', 0, isTablet),
+                _buildTabIndicator('RMD IN', 0, isTablet),
                 // const SizedBox(width: 40),
                 // _buildTabIndicator('IN Report', 1, isTablet),
               ],
@@ -169,7 +181,7 @@ class _RmdScreenState extends State<RmdScreen> {
             style: TextStyle(
               fontSize: isTablet ? 18 : 16,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? const Color(0xFF2196F3) : Colors.grey[600],
+              color: isActive ?C.actionOrange: Colors.grey[600],
             ),
           ),
           const SizedBox(height: 4),
@@ -177,7 +189,7 @@ class _RmdScreenState extends State<RmdScreen> {
             height: 5,
             width: isTablet ? 100 : 80,
             decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF2196F3) : Colors.transparent,
+              color: isActive ? C.actionOrange : Colors.transparent,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
