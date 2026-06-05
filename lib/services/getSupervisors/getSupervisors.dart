@@ -444,7 +444,7 @@ class InStockService {
       final loginResponse = LoginModel.fromJson(decoded);
 
       if (loginResponse.status == 'ok') {
-        await AppSession.saveToken(loginResponse.token);
+        await AppSession.getToken();
         return loginResponse;
       } else {
         throw Exception(loginResponse.message);
@@ -1073,15 +1073,25 @@ class InStockService {
   //     return {"success": false, "message": "Exception: $e"};
   //   }
   // }
-
   Future<Map<String, dynamic>?> saveBaleEntry(
-    Map<String, dynamic> payload,
-  ) async {
+      Map<String, dynamic> payload,
+      ) async {
+
+    final url = "$baseUrl/BaleDepartment/SaveBaleEntry";
+
+    debugPrint("🌐 API URL: $url");
+    debugPrint("📤 REQUEST BODY:");
+    debugPrint(jsonEncode(payload));
+
     final response = await http.post(
-      Uri.parse("$baseUrl/BaleDepartment/SaveBaleEntry"),
+      Uri.parse(url),
       headers: await authHeaders(),
       body: jsonEncode(payload),
     );
+
+    debugPrint("📥 STATUS CODE: ${response.statusCode}");
+    debugPrint("📥 RESPONSE BODY:");
+    debugPrint(response.body);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -2073,7 +2083,7 @@ class InStockService {
     required String dateFrom,
     required String dateTo,
     int pageNumber = 1,
-    int pageSize = 50000000,
+    int pageSize = 50,
   }) async {
     final url = Uri.parse(
       "$baseUrl/Cutting/cuttinginreport"
@@ -2184,7 +2194,7 @@ class InStockService {
     String? fromDate,
     String? toDate,
     int pageNumber = 1,
-    int pageSize = 50000,
+    int pageSize = 50,
   }) async {
     final url =
         "$baseUrl/Cutting/cutting-report?fromDate=$fromDate&toDate=$toDate&pageNumber=$pageNumber&pageSize=$pageSize";

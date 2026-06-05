@@ -1410,6 +1410,7 @@ class BaleEntryForm extends StatefulWidget {
   final String? articleNo;
   final String? poNumber;
   final String? bomNo;
+  final int? remaining;
 
   const BaleEntryForm({
     Key? key,
@@ -1417,6 +1418,7 @@ class BaleEntryForm extends StatefulWidget {
     this.articleNo,
     this.poNumber,
     this.bomNo,
+    this.remaining,
   }) : super(key: key);
 
   @override
@@ -1473,6 +1475,7 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
   // Additional Information
   late TextEditingController _palletSizeController;
 
+
   DateTime _selectedDate = DateTime.now();
   String? _selectedShift;
   bool _withoutM = false;
@@ -1480,6 +1483,8 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
   final List<String> _shifts = ['Select shift', 'A', 'B'];
   String? _selectedSupervisor;
   String? _selectedCheckedBy;
+  String _requiredBag = "0";
+  String _availableBag = "0";
   // List<String> _supervisors = ['Select supervisor'];
 
   List<String> _supervisors = [];
@@ -1527,9 +1532,13 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
         _tareWtController.text.isEmpty ||
         _baleQTyController.text.isEmpty ||
         _baleNoController.text.isEmpty) {
-      _showSnack("Fill all Bale details before adding", isError: true);
+      _showPopup("Fill all Bale details before adding", isError: true);
       return;
     }
+    // final palletSize =
+    // _palletSizeController.text
+    //     .replaceAll(RegExp(r'\s*x\s*', caseSensitive: false), ' X ')
+    //     .trim();
 
     final item = {
       "baleGwt": double.tryParse(_baleGwtController.text) ?? 0,
@@ -1545,13 +1554,15 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
       "baleNo": _baleNoController.text.trim(),
       "palletSize": _palletSizeController.text.trim(),
 
+      // "activeOut": palletSize,
+
     };
 
     setState(() {
-      _baleItems.add(Map<String, dynamic>.from(item)); // ✅ explicit copy
+      _baleItems.add(Map<String, dynamic>.from(item));
     });
 
-    _showSnack("Item Added ✅");
+    _showPopup("Item Added ✅");
   }
 
   void _calculateWeights() {
@@ -1602,15 +1613,19 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
         partyName: widget.partyName!,
         articleNo: widget.articleNo!,
         generatedInquiry: widget.bomNo!,
+
+
       );
       debugPrint("📦 Product API tBAGotal (GWT) → ${res['bagwt']}");
 
       setState(() {
+        _requiredBag = widget.remaining?.toString() ?? "0";
+        _availableBag = res['availableBag']?.toString() ?? "0";
         _bagTypeController.text = res['typee']?.toString() ?? '';
         _printStatusController.text = res['printStatus']?.toString() ?? '';
         _bagSizeController.text = res['bagSize']?.toString() ?? '';
         // _baleGwtController.text = res['bagwt']?.toString() ?? '';
-        _baleQTyController.text = res['printStatus']?.toString() ?? '';
+        // _baleQTyController.text = res['printStatus']?.toString() ?? '';
         _bagWtController.text = res['bagwt']?.toString() ?? '';
 
         // Don't override BOM if it was passed from previous screen
@@ -1741,12 +1756,12 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
 
   Future<void> _saveEntry() async {
     if (!_formKey.currentState!.validate()) {
-      _showSnack('Please fill all required fields', isError: true);
+      _showPopup('Please fill all required fields', isError: true);
       return;
     }
 
     if (_baleItems.isEmpty) {
-      _showSnack("Add at least one item", isError: true);
+      _showPopup("Add at least one item", isError: true);
       return;
     }
 
@@ -1803,36 +1818,63 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
       }).toList(),
     };
 
-    debugPrint("🚀 FINAL PAYLOAD → ${jsonEncode(payload)}");
+    debugPrint("🚀 FINAL PAYLOAD:");
+    debugPrint(jsonEncode(payload));
 
     final response = await _service.saveBaleEntry(payload);
-
+    debugPrint("📥 SAVE RESPONSE:");
+    debugPrint(response.toString());
     if (!mounted) return;
 
     if (response != null && response["success"] == true) {
-      _showSnack(response["message"] ?? "Saved successfully ✅");
+      _showPopup(response["message"] ?? "Saved successfully ✅");
 
       await _fetchNextSerialNumber();
       _clearFormFields();
 
       Navigator.pop(context, true);
     } else {
-      _showSnack(
+      _showPopup(
         response?["message"] ?? "Failed to save bale entry",
         isError: true,
       );
     }
   }
 
-  void _showSnack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: isError ? Colors.red : Colors.green,
+  void _showPopup(String msg, {bool isError = false}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error : Icons.check_circle,
+              color: isError ? Colors.red : Colors.green,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                msg,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
-  }
 
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    });
+  }
   int _getWeekNumber(DateTime date) {
     final firstDay = DateTime(date.year, 1, 1);
     return ((date.difference(firstDay).inDays + firstDay.weekday) / 7).ceil();
@@ -1905,35 +1947,29 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
               // BASIC INFORMATION SECTION
               _buildSectionHeader('BASIC INFORMATION'),
               SizedBox(height: _getResponsiveSpacing(context)),
+              _buildBagSummary(),
 
-              _buildResponsiveRow(
-                context,
+              const SizedBox(height: 24),
+              Row(
                 children: [
-                  _buildTextField(
-                    label: 'SR. NO.',
-                    controller: _srNoController,
-                    required: true,
-                    inputFormatters: [],
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'PARTY NAME',
+                      controller: _partyNameController,
+                      required: true,
+                      inputFormatters: [],
+                    ),
                   ),
-                  _buildTextField(
-                    label: 'PARTY NAME',
-                    controller: _partyNameController,
-                    required: true,
-                    inputFormatters: [],
-                  ),
-                  _buildDropdown(
-                    label: 'SUPERVISOR',
-                    value: _selectedSupervisor,
-                    hint: 'Select Supervisor',
-                    items: _supervisors,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedSupervisor = value;
-                      });
-                    },
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'BOM NO.',
+                      controller: _bomNoController,
+                      required: true,
+                      inputFormatters: [],
+                    ),
                   ),
                 ],
-                columns: 3,
               ),
 
               SizedBox(height: _getResponsiveSpacing(context)),
@@ -1958,32 +1994,30 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
                     },
                   ),
 
-                  _buildTextField(
-                    label: 'SUBMITTED BY',
-                    controller: _submittedByController,
-                    inputFormatters: [],
-                    // required: true,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'SUBMITTED BY',
+                          controller: _submittedByController,
+                          inputFormatters: [],
+                          // required: true,
+                        ),
+                      ),const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'PO NUMBER',
+                          controller: _poNumberController,
+                          inputFormatters: [],
+                          // required: true,
+                        ),
+                      ),
+                    ],
                   ),
-                  _buildTextField(
-                    label: 'BOM NO.',
-                    controller: _bomNoController,
-                    required: true,
-                    inputFormatters: [],
-                  ),
+
                 ],
-                columns: 3,
+                // columns: 3,
               ),
-
-              SizedBox(height: _getResponsiveSpacing(context)),
-
-              _buildTextField(
-                label: 'PO NUMBER',
-                controller: _poNumberController,
-                inputFormatters: [],
-                // required: true,
-              ),
-
-              SizedBox(height: _getResponsiveSpacing(context) * 2),
 
               // PRODUCT DETAILS SECTION
               _buildSectionHeader('PRODUCT DETAILS'),
@@ -1992,42 +2026,62 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
               _buildResponsiveRow(
                 context,
                 children: [
-                  _buildTextField(
-                    label: 'ARTICLE NO',
-                    controller: _articleNoController,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                    focusNode: _articleFocusNode,
-                    inputFormatters: [],
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'ARTICLE NO',
+                          controller: _articleNoController,
+                          required: true,
+                          keyboardType: TextInputType.number,
+                          focusNode: _articleFocusNode,
+                          inputFormatters: [],
+                        ),
+                      ),
+      const SizedBox(width: 12),
+
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'BAG TYPE',
+                          controller: _bagTypeController,
+                          inputFormatters: [],
+                          // required: true,
+                        ),
+                      ),
+                    ],
                   ),
 
-                  _buildTextField(
-                    label: 'BAG TYPE',
-                    controller: _bagTypeController,
-                    inputFormatters: [],
-                    // required: true,
-                  ),
-                  _buildTextField(
-                    label: 'PRINT STATUS',
-                    controller: _printStatusController,
-                    required: true,
-                    inputFormatters: [],
-                  ),
                 ],
-                columns: 3,
+                // columns: 3,
               ),
 
-              SizedBox(height: _getResponsiveSpacing(context)),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'PRINT STATUS',
+                      controller: _printStatusController,
+                      required: true,
+                      inputFormatters: [],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'BAG SIZE (LXWXH)',
+                      controller: _bagSizeController,
+                      required: true,
+                      inputFormatters: [],
+                    ),
+                  ),
+                ],
+              ),
 
               _buildResponsiveRow(
                 context,
                 children: [
-                  _buildTextField(
-                    label: 'BAG SIZE (LXWXH)',
-                    controller: _bagSizeController,
-                    required: true,
-                    inputFormatters: [],
-                  ),
+
                   _buildTextField(
                     label: 'BALE (GWT)',
                     controller: _baleGwtController,
@@ -2037,7 +2091,7 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
                   ),
                   _buildDateField(),
                 ],
-                columns: 3,
+                // columns: 3,
               ),
 
               SizedBox(height: _getResponsiveSpacing(context) * 2),
@@ -2049,41 +2103,60 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
               _buildResponsiveRow(
                 context,
                 children: [
-                  _buildTextField(
-                    label: 'TARE (WT)',
-                    controller: _tareWtController,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [],
-                  ),
-                  _buildTextField(
-                    label: 'BAG WT (GM)',
-                    // controller: _baleNwtController,
-                    controller: _bagWtController,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [],
-                  ),
-                  _buildTextField(
-                    label: 'BALE QTY (PCS)',
-                    controller: _baleQTyController,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [],
-                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'TARE (WT)',
+                          controller: _tareWtController,
+                          required: true,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
 
-                  _buildTextField(
-                    label: 'BALE NWT (GM)',
-                    // controller: _bagWtController,
-                    controller: _baleNwtController,
-                    required: true,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [],
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'BAG WT (GM)',
+                          // controller: _baleNwtController,
+                          controller: _bagWtController,
+                          required: true,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'BALE QTY (PCS)',
+                          controller: _baleQTyController,
+                          required: true,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      Expanded(
+                        child: _buildTextField(
+                          label: 'BALE NWT (GM)',
+                          // controller: _bagWtController,
+                          controller: _baleNwtController,
+                          required: true,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [],
+                        ),
+                      ),
+                    ],
                   ),
 
                   _buildWithoutMCheckbox(),
                 ],
-                columns: 3,
+                // columns: 3,
               ),
 
               SizedBox(height: _getResponsiveSpacing(context)),
@@ -2127,7 +2200,7 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
                     placeholder: 'SELECT SHIFT',
                   ),
                 ],
-                columns: 2,
+                // columns: 2,
               ),
 
               SizedBox(height: _getResponsiveSpacing(context) * 2),
@@ -2177,7 +2250,7 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
   Widget _buildResponsiveRow(
     BuildContext context, {
     required List<Widget> children,
-    required int columns,
+
   }) {
     final width = MediaQuery.of(context).size.width;
     final gap = _getResponsiveGap(context);
@@ -2196,44 +2269,7 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
       );
     }
 
-    // Tablet: 2 columns for 3-column layouts, keep 2 columns for 2-column layouts
-    if (width < 900) {
-      if (columns == 3) {
-        // Split into rows of 2, with last one potentially alone
-        List<Widget> rows = [];
-        for (int i = 0; i < children.length; i += 2) {
-          final rowChildren = children.skip(i).take(2).toList();
-          rows.add(
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: i + 2 < children.length ? gap : 0,
-              ),
-              child: Row(
-                children: [
-                  for (int j = 0; j < rowChildren.length; j++) ...[
-                    Expanded(child: rowChildren[j]),
-                    if (j < rowChildren.length - 1) SizedBox(width: gap),
-                  ],
-                  // Add empty space if odd number of items
-                  if (rowChildren.length == 1) Expanded(child: Container()),
-                ],
-              ),
-            ),
-          );
-        }
-        return Column(children: rows);
-      } else {
-        // 2 columns layout
-        return Row(
-          children: [
-            for (int i = 0; i < children.length; i++) ...[
-              Expanded(child: children[i]),
-              if (i < children.length - 1) SizedBox(width: gap),
-            ],
-          ],
-        );
-      }
-    }
+
 
     // Desktop and large tablets: Full columns as specified
     return Row(
@@ -2757,5 +2793,103 @@ class _BaleEntryFormState extends State<BaleEntryForm> {
       'Dec',
     ];
     return months[month - 1];
+  }
+
+  Widget _buildBagSummary() {
+    final width = MediaQuery.of(context).size.width;
+
+    Widget card({
+      required String title,
+      required String value,
+      required Color color,
+    }) {
+      return Container(
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: 120,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(color: color),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (width < 600) {
+      return Row(
+        children: [
+          card(
+            title: "REQUIRED BAG",
+            value: _requiredBag,
+            color: Colors.red,
+          ),
+          // const SizedBox(width: 12),
+          // card(
+          //   title: "AVAILABLE BAG",
+          //   value: _availableBag,
+          //   color: Colors.green,
+          // ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: card(
+            title: "REQUIRED BAG",
+            value: _requiredBag,
+            color: Colors.red,
+          ),
+        ),
+        // const SizedBox(width: 20),
+        // Expanded(
+        //   child: card(
+        //     title: "AVAILABLE BAG",
+        //     value: _availableBag,
+        //     color: Colors.green,
+        //   ),
+        // ),
+      ],
+    );
   }
 }

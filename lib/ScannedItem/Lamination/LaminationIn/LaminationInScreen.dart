@@ -75,9 +75,13 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
     _loadData();
     _loadPlant();
   }
-
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    refreshCount();
+  }
   Future<void> _loadPlant() async {
-    plant = await AppSession.getPlant();
+    plant = await AppSession.getUnit();
 
     if (plant == null) {
       debugPrint("Plant not found in session");
@@ -346,7 +350,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
           child: _buildActionButton(
             icon: Icons.qr_code_scanner,
             label: 'Scan QR',
-            color: Colors.blue,
+            color: C.purple,
             onTap: _openScanner,
           ),
         ),

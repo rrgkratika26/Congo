@@ -17,7 +17,7 @@ class CutOutSavedListNardana extends StatefulWidget {
 
   const CutOutSavedListNardana({
     super.key,
-    this.title = "Out List- Nardana",
+    this.title = "Out List-",
     this.initialItems = const [],
   });
 

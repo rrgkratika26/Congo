@@ -169,7 +169,7 @@ class _SavedListScreenState extends State<SavedListScreen> {
           //   onPressed: _checkPrinterConnection,
           // ),
           IconButton(
-            icon: const Icon(Icons.bluetooth_searching),
+            icon: const Icon(Icons.bluetooth_searching,color: C.textHead,),
             onPressed: showPrinterList,
           ),
         ],
@@ -217,7 +217,7 @@ class _SavedListScreenState extends State<SavedListScreen> {
                       headingRowHeight: 50,
                       dataRowHeight: 52,
 
-                      headingRowColor: MaterialStateProperty.all(C.brand50),
+                      headingRowColor: MaterialStateProperty.all(C.border),
 
                       columns: const [
                         DataColumn(label: Text("ID")),

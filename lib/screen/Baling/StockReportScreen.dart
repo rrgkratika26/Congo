@@ -19,7 +19,7 @@ class StockReportScreen extends StatefulWidget {
 class _StockReportScreenState extends State<StockReportScreen> {
   final _service = InStockService();
 
-  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 7));
+  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 31));
   DateTime _toDate = DateTime.now();
 
   bool _isLoading = true;
@@ -331,14 +331,11 @@ class _StockReportScreenState extends State<StockReportScreen> {
             borderRadius: BorderRadius.circular(8),
             child: Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: C.primary,
-                borderRadius: BorderRadius.circular(8),
-              ),
+
               child: const Icon(
                 Icons.calendar_month,
-                color: Colors.white,
-                size: 20,
+                color: C.primary,
+                size: 25,
               ),
             ),
           ),

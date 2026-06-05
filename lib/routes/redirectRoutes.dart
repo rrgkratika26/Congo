@@ -3,6 +3,7 @@ import 'package:IMS/ScannedItem/Lamination/LaminationScreen.dart';
 import 'package:flutter/material.dart';
 import '../AdminDashBoard/DashBoard.dart';
 import '../AdminDashBoard/AsiaDashBoard/dashBoard_screen.dart';
+import '../AdminDashBoard/DepartmentDashboard.dart';
 import '../AdminDashBoard/ListMenuItems/dashBoardNewUi.dart';
 import '../AdminDashBoard/NewAdminDashboard.dart';
 import '../util/sharedpreference/shared_preference.dart';

@@ -164,7 +164,9 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
             Navigator.pop(context);
 
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Data Saved Successfully")),
+              const SnackBar(
+                  backgroundColor: C.success,
+                  content: Text("Data Saved Successfully")),
             );
           } catch (e) {
             Navigator.pop(context);
@@ -179,14 +181,14 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
 
       appBar: AppBar(
         elevation: 0,
-
+backgroundColor: C.appBar1,
         iconTheme: const IconThemeData(color: Colors.white),
 
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
-          ),
-        ),
+        // flexibleSpace: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
+        //   ),
+        // ),
 
         title: const Text(
           "WO Inquiry",
@@ -312,22 +314,22 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
         scrollDirection: Axis.horizontal,
         child: SizedBox(
           width: totalWidth,
-          child: Column(
-            children: [
-              _header(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              children: [
+                _header(),
 
-              // remove Expanded
-              SizedBox(
-                height: MediaQuery.of(context).size.height * .45,
-                child: ListView.builder(
-                  controller: listCtrl,
-                  itemCount: planningList.length,
-                  itemBuilder: (_, index) {
-                    return _row(planningList[index], index);
-                  },
+                Expanded(
+                  child: ListView.builder(
+                    controller: listCtrl,
+                    itemCount: planningList.length,
+                    itemBuilder: (_, index) =>
+                        _row(planningList[index], index),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

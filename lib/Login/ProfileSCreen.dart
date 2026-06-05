@@ -75,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: horizontalPadding,
-              vertical: 24,
+              vertical: 54,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +84,7 @@ class ProfileScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color:C.brand500,
+                    color:C.primaryblue,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -115,28 +115,28 @@ class ProfileScreen extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: C.textHigh,
                               ),
                             ),
                             const SizedBox(height: 6),
         
                             Text(
                               "Unit: ${unit ?? "N/A"}",
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: C.textHigh,),
                             ),
         
                             const SizedBox(height: 4),
         
                             Text(
                               "Department: ${department ?? "N/A"}",
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: C.textHigh,),
                             ),
         
                             const SizedBox(height: 4),
         
                             Text(
                               "User Type: ${userType ?? "N/A"}",
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: C.textHigh,),
                             ),
                           ],
                         ),
@@ -152,7 +152,7 @@ class ProfileScreen extends StatelessWidget {
                 // _buildTile(Icons.description, "Terms & Conditions"),
                 // _buildTile(Icons.security, "Privacy Policies"),
                 // _buildTile(Icons.info_outline, "About Us"),
-                const SizedBox(height: 40),
+                const SizedBox(height: 80),
         
                 /// 🔹 Logout Button
                 Center(
@@ -162,7 +162,7 @@ class ProfileScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => _showLogoutDialog(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1E5AA8),
+                        backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -182,132 +182,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLogoutButton(
-    BuildContext context,
-    bool isTablet,
-    bool isDesktop,
-  ) {
-    return SizedBox(
-      width: double.infinity,
-      height: isDesktop ? 54 : (isTablet ? 50 : 48),
-      child: ElevatedButton.icon(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              title: Row(
-                children: [
-                  Icon(Icons.logout, color: Colors.red[700]),
-                  const SizedBox(width: 12),
-                  const Text('Logout'),
-                ],
-              ),
-              content: const Text('Are you sure you want to logout?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.grey[700],
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                  ),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pop(context); // close dialog
-
-                    final success = await LogoutService.logout();
-
-                    if (context.mounted) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
-                        (route) => false,
-                      );
-
-                      if (!success) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Logged out locally")),
-                        );
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[700],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Logout',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-        icon: Icon(
-          Icons.logout_rounded,
-          size: isDesktop ? 22 : (isTablet ? 20 : 18),
-        ),
-        label: Text(
-          'Logout',
-          style: TextStyle(
-            fontSize: isDesktop ? 17 : (isTablet ? 16 : 15),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red[50],
-          foregroundColor: Colors.red[700],
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: Colors.red[200]!),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTile(IconData icon, String title) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue.shade500),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () {},
       ),
     );
   }

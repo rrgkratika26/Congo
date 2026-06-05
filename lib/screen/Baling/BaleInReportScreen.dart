@@ -202,6 +202,8 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
                 articleNo: entry.articleNo,
                 bomNo: entry.worK_ORDER_NO,
                 poNumber: entry.poNumber,
+                  remaining: entry.remaining,
+
               ),
             ),
           );

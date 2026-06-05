@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../Color/Colorclass.dart';
 import 'BailingReportScreen.dart';
 
 import 'StockReportScreen.dart';
@@ -35,14 +36,14 @@ class _BailingSliderScreenState extends State<BailingSliderScreen>
           children: [
             /// ✅ Tab Bar at the top
             Container(
-              color: Colors.blue.shade50,
+              color: C.primary,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 children: [
                   /// 🔙 Back Button
                   IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-                    color: Colors.black87,
+                    color: C.bg,
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -53,10 +54,12 @@ class _BailingSliderScreenState extends State<BailingSliderScreen>
                     child: TabBar(
                       controller: _tabController,
                       splashFactory: NoSplash.splashFactory,
-                      labelColor: Colors.blue,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: Colors.blue,
-                      indicatorWeight: 3,
+                      labelColor: C.cardOrange,
+                      unselectedLabelColor: C.border,
+                      indicatorColor: C.actionOrange,
+                      indicatorWeight: 5,
+                      indicatorSize: TabBarIndicatorSize.tab,
+
                       labelStyle: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -65,11 +68,9 @@ class _BailingSliderScreenState extends State<BailingSliderScreen>
                         fontWeight: FontWeight.w500,
                       ),
                       tabs: const [
-
                         Tab(
                           // icon: Icon(Icons.factory_outlined),
                           text: 'Stock Report',
-
                         ),
                         Tab(
                           // icon: Icon(Icons.inventory_2_outlined),

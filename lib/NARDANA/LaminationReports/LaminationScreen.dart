@@ -78,7 +78,7 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
   @override
   void initState() {
     super.initState();
-    _from = DateTime.now();
+    _from = _to?.subtract(const Duration(days: 30));
     _to = DateTime.now();
     _fetchData();
   }

@@ -3,26 +3,24 @@ import 'package:flutter/material.dart';
 import '../../Color/Colorclass.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
 
-class InquiryReportScreen extends StatefulWidget {
+class InquiryMarketingReportScreen extends StatefulWidget {
   final DateTime? startDate;
   final DateTime? endDate;
 
-  const InquiryReportScreen({Key? key, this.startDate, this.endDate})
+  const InquiryMarketingReportScreen({Key? key, this.startDate, this.endDate})
     : super(key: key);
 
   @override
-  State<InquiryReportScreen> createState() => _InquiryReportScreenState();
+  State<InquiryMarketingReportScreen> createState() => _InquiryMarketingReportScreenState();
 }
 
-class _InquiryReportScreenState extends State<InquiryReportScreen> {
+class _InquiryMarketingReportScreenState extends State<InquiryMarketingReportScreen> {
   // ───────────────── DATE ─────────────────
   final ScrollController _listController = ScrollController();
 
   bool isLoadingMore = false;
   bool hasMoreData = true;
-  DateTime _fromDate = DateTime.now().subtract(
-    const Duration(days: 30),
-  );
+  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 30));
 
   DateTime _toDate = DateTime.now();
 
@@ -31,7 +29,6 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   // ───────────────── STATIC DATA ─────────────────
-
 
   String? selectedParty;
 
@@ -81,37 +78,34 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
   static const double _colStatusReason = 180;
   static const double _colStatus = 150;
 
-
   double get _totalWidth =>
       _colSrNo +
-          _colDate +
-          _colParty +
-          _colInquiry +
-          _colEmployee +
-          _colBagType +
-          _colArticle +
-          _colFg +
-          _colWo +
-          _colWoDate +
-          _colWoEmployee +
-          _colPo +
-          _colSrWo +
-          _colSrWoDate +
-          _colSrWoUser +
-          _colIssueQc +
-          _colIssuePerson +
-          _colBomDate +
-          _colBomProd +
-          _colIssueSample +
-          _colSamplePerson +
-          _colSampleDate +
-          _colComplaint +
-          _colStatusReason +
-          _colStatus;
+      _colDate +
+      _colParty +
+      _colInquiry +
+      _colEmployee +
+      _colBagType +
+      _colArticle +
+      _colFg +
+      _colWo +
+      _colWoDate +
+      _colWoEmployee +
+      _colPo +
+      _colSrWo +
+      _colSrWoDate +
+      _colSrWoUser +
+      _colIssueQc +
+      _colIssuePerson +
+      _colBomDate +
+      _colBomProd +
+      _colIssueSample +
+      _colSamplePerson +
+      _colSampleDate +
+      _colComplaint +
+      _colStatusReason +
+      _colStatus;
 
   // ───────────────── INIT ─────────────────
-
-
 
   @override
   void initState() {
@@ -129,9 +123,10 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
     loadParties(); // add this
     loadInquiryReport();
   }
+
   void _scrollListener() {
     if (_listController.position.pixels >=
-        _listController.position.maxScrollExtent - 200 &&
+            _listController.position.maxScrollExtent - 200 &&
         !isLoadingMore &&
         hasMoreData) {
       loadMoreData();
@@ -143,21 +138,19 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
         "${date.month.toString().padLeft(2, '0')}-"
         "${date.day.toString().padLeft(2, '0')}";
   }
+
   Future<void> loadParties() async {
     try {
       setState(() {
         isPartyLoading = true;
       });
 
-      final result =
-      await NaradanaApiService()
-          .fetchCustomerNames();
+      final result = await NaradanaApiService().fetchCustomerNames();
 
       setState(() {
         partyList = result;
         isPartyLoading = false;
       });
-
     } catch (e) {
       setState(() {
         isPartyLoading = false;
@@ -166,6 +159,7 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
       print(e);
     }
   }
+
   Future<void> loadMoreData() async {
     try {
       setState(() {
@@ -174,8 +168,7 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
 
       pageNumber++;
 
-      final result =
-      await NaradanaApiService().fetchInquiryReport(
+      final result = await NaradanaApiService().fetchInquiryReport(
         fromDate: _apiDate(_fromDate),
         toDate: _apiDate(_toDate),
         pageNumber: pageNumber,
@@ -200,42 +193,25 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
     }
   }
 
-
   void _filterData() {
     final query = _searchController.text.toLowerCase().trim();
 
     setState(() {
       filteredReports = reports.where((item) {
-
         final matchesSearch =
-            item["customeR_NAME"]
-                .toString()
-                .toLowerCase()
-                .contains(query) ||
-
-                item["articlE_NO"]
-                    .toString()
-                    .toLowerCase()
-                    .contains(query) ||
-
-                item["inquirY_NO_main"]
-                    .toString()
-                    .toLowerCase()
-                    .contains(query) ||
-
-                item["baG_TYPE"]
-                    .toString()
-                    .toLowerCase()
-                    .contains(query);
+            item["customeR_NAME"].toString().toLowerCase().contains(query) ||
+            item["articlE_NO"].toString().toLowerCase().contains(query) ||
+            item["inquirY_NO_main"].toString().toLowerCase().contains(query) ||
+            item["baG_TYPE"].toString().toLowerCase().contains(query);
 
         final matchesParty =
-            selectedParty == null ||
-                item["customeR_NAME"] == selectedParty;
+            selectedParty == null || item["customeR_NAME"] == selectedParty;
 
         return matchesSearch && matchesParty;
       }).toList();
     });
   }
+
   Future<void> loadInquiryReport() async {
     try {
       pageNumber = 1;
@@ -245,8 +221,7 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
         isLoading = true;
       });
 
-      final result =
-      await NaradanaApiService().fetchInquiryReport(
+      final result = await NaradanaApiService().fetchInquiryReport(
         fromDate: _apiDate(_fromDate),
         toDate: _apiDate(_toDate),
         pageNumber: pageNumber,
@@ -269,6 +244,7 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
       });
     }
   }
+
   void _onSearch(String value) {
     _filterData();
   }
@@ -444,9 +420,7 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
                 isExpanded: true,
 
                 hint: Text(
-                  isPartyLoading
-                      ? "Loading parties..."
-                      : "Select Party Name",
+                  isPartyLoading ? "Loading parties..." : "Select Party Name",
                 ),
 
                 items: [
@@ -456,14 +430,11 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
                   ),
 
                   ...partyList.map(
-                        (party) => DropdownMenuItem<String>(
+                    (party) => DropdownMenuItem<String>(
                       value: party,
-                      child: Text(
-                        party,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: Text(party, overflow: TextOverflow.ellipsis),
                     ),
-                  )
+                  ),
                 ],
 
                 onChanged: (value) {
@@ -605,27 +576,20 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
               Expanded(
                 child: ListView.builder(
                   controller: _listController,
-                  itemCount: filteredReports.length +
-                      (isLoadingMore ? 1 : 0),
+                  itemCount: filteredReports.length + (isLoadingMore ? 1 : 0),
 
                   itemBuilder: (_, index) {
-
                     if (index == filteredReports.length) {
                       return const Padding(
                         padding: EdgeInsets.all(15),
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        child: Center(child: CircularProgressIndicator()),
                       );
                     }
 
-                    return _buildTableRow(
-                      filteredReports[index],
-                      index,
-                    );
+                    return _buildTableRow(filteredReports[index], index);
                   },
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -701,36 +665,21 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
 
   // ───────────────── ROW ─────────────────
 
-  Widget _buildTableRow(
-      Map<String, dynamic> item,
-      int index,
-      ) {
-    final bool isFood =
-    item["fG_NON_FG"]
-        .toString()
-        .toUpperCase()
-        .contains("FOOD");
+  Widget _buildTableRow(Map<String, dynamic> item, int index) {
+    final bool isFood = item["fG_NON_FG"].toString().toUpperCase().contains(
+      "FOOD",
+    );
 
     return Container(
-      color: index.isEven
-          ? Colors.white
-          : const Color(0xFFF7F9FC),
+      color: index.isEven ? Colors.white : const Color(0xFFF7F9FC),
 
       child: Row(
         children: [
-
           _dataCell("${index + 1}", _colSrNo),
 
-          _dataCell(
-            item["date"] ?? "",
-            _colDate,
-          ),
+          _dataCell(item["date"] ?? "", _colDate),
 
-          _dataCell(
-            item["customeR_NAME"] ?? "",
-            _colParty,
-            bold: true,
-          ),
+          _dataCell(item["customeR_NAME"] ?? "", _colParty, bold: true),
 
           _dataCell(
             item["inquirY_NO_main"] ?? "",
@@ -739,20 +688,11 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
             bold: true,
           ),
 
-          _dataCell(
-            item["employee"] ?? "",
-            _colEmployee,
-          ),
+          _dataCell(item["employee"] ?? "", _colEmployee),
 
-          _dataCell(
-            item["baG_TYPE"] ?? "",
-            _colBagType,
-          ),
+          _dataCell(item["baG_TYPE"] ?? "", _colBagType),
 
-          _dataCell(
-            item["articlE_NO"] ?? "",
-            _colArticle,
-          ),
+          _dataCell(item["articlE_NO"] ?? "", _colArticle),
 
           // Hygiene badge
           Container(
@@ -761,25 +701,15 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(
-                  color: Colors.grey.shade200,
-                ),
-                bottom: BorderSide(
-                  color: Colors.grey.shade200,
-                ),
+                right: BorderSide(color: Colors.grey.shade200),
+                bottom: BorderSide(color: Colors.grey.shade200),
               ),
             ),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: isFood
-                    ? Colors.green.shade100
-                    : Colors.orange.shade100,
-                borderRadius:
-                BorderRadius.circular(20),
+                color: isFood ? Colors.green.shade100 : Colors.orange.shade100,
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 item["fG_NON_FG"] ?? "",
@@ -794,90 +724,39 @@ class _InquiryReportScreenState extends State<InquiryReportScreen> {
             ),
           ),
 
-          _dataCell(
-            item["wo"] ?? "",
-            _colWo,
-          ),
+          _dataCell(item["wo"] ?? "", _colWo),
 
-          _dataCell(
-            item["wO_DATE"] ?? "",
-            _colWoDate,
-          ),
+          _dataCell(item["wO_DATE"] ?? "", _colWoDate),
 
-          _dataCell(
-            item["wO_EMPLOYEE"] ?? "",
-            _colWoEmployee,
-          ),
+          _dataCell(item["wO_EMPLOYEE"] ?? "", _colWoEmployee),
 
-          _dataCell(
-            item["po_num"] ?? "",
-            _colPo,
-          ),
+          _dataCell(item["po_num"] ?? "", _colPo),
 
-          _dataCell(
-            item["sR_WO_NUM"] ?? "",
-            _colSrWo,
-          ),
+          _dataCell(item["sR_WO_NUM"] ?? "", _colSrWo),
 
-          _dataCell(
-            item["sR_WO_DATE"] ?? "",
-            _colSrWoDate,
-          ),
+          _dataCell(item["sR_WO_DATE"] ?? "", _colSrWoDate),
 
-          _dataCell(
-            item["sR_WO_USER_NAME"] ?? "",
-            _colSrWoUser,
-          ),
+          _dataCell(item["sR_WO_USER_NAME"] ?? "", _colSrWoUser),
 
-          _dataCell(
-            item["issuE_TO_QC"] ?? "",
-            _colIssueQc,
-          ),
+          _dataCell(item["issuE_TO_QC"] ?? "", _colIssueQc),
 
-          _dataCell(
-            item["issuE_PERSON"] ?? "",
-            _colIssuePerson,
-          ),
+          _dataCell(item["issuE_PERSON"] ?? "", _colIssuePerson),
 
-          _dataCell(
-            item["boM_DATE"] ?? "",
-            _colBomDate,
-          ),
+          _dataCell(item["boM_DATE"] ?? "", _colBomDate),
 
-          _dataCell(
-            item["boM_TO_PRODUCTION"] ?? "",
-            _colBomProd,
-          ),
+          _dataCell(item["boM_TO_PRODUCTION"] ?? "", _colBomProd),
 
-          _dataCell(
-            item["issuE_TO_SAMPLE"] ?? "",
-            _colIssueSample,
-          ),
+          _dataCell(item["issuE_TO_SAMPLE"] ?? "", _colIssueSample),
 
-          _dataCell(
-            item["samplE_PERSON"] ?? "",
-            _colSamplePerson,
-          ),
+          _dataCell(item["samplE_PERSON"] ?? "", _colSamplePerson),
 
-          _dataCell(
-            item["samplE_PROCESSING_DATE"] ?? "",
-            _colSampleDate,
-          ),
+          _dataCell(item["samplE_PROCESSING_DATE"] ?? "", _colSampleDate),
 
-          _dataCell(
-            item["complain"] ?? "",
-            _colComplaint,
-          ),
+          _dataCell(item["complain"] ?? "", _colComplaint),
 
-          _dataCell(
-            item["statuS_REASON"] ?? "",
-            _colStatusReason,
-          ),
+          _dataCell(item["statuS_REASON"] ?? "", _colStatusReason),
 
-          _dataCell(
-            item["status"] ?? "",
-            _colStatus,
-          ),
+          _dataCell(item["status"] ?? "", _colStatus),
         ],
       ),
     );

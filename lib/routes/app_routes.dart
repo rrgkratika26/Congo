@@ -1,3 +1,4 @@
+import 'package:IMS/AdminDashBoard/DepartmentDashboard.dart';
 import 'package:IMS/JBL/JBLDispatch/DispatchDetailScreen.dart';
 import 'package:IMS/JBL/JBL_BailingReport/JBLBailingReportScreen.dart';
 import 'package:IMS/NARDANA/WebbingsReports/WebInReportScreen.dart';
@@ -32,6 +33,7 @@ import '../JBL/Lamination/LaminationReportscreen.dart';
 import '../JBL/Lamination/lamination_Instock_screen.dart';
 import '../JBL/PrintSample.dart';
 
+import '../Login/InquiryReportScreen.dart';
 import '../Login/LoginNardanaScreen.dart';
 import '../Login/LoginScreen.dart';
 import '../NARDANA/BaleNardana/BaleStockGroup.dart';
@@ -276,6 +278,7 @@ import '../ScannedItem/Cutting/OutStock/OutSavedList.dart';
 
 class AppRoutes {
   AppRoutes._();
+  static const String dashboard = '/dashboard';
 
   static const String login = '/login';
   static const String inStock = '/instock';
@@ -412,6 +415,8 @@ class AppRoutes {
     GetPage(name: baleDispatch, page: () => DispatchScreen()),
 
     GetPage(name: login, page: () => LoginPage()),
+    GetPage(name: dashboard, page: () => NewAdminDashboard()),
+
 
     GetPage(name: inStock, page: () => RMDStockIn()),
 
@@ -452,7 +457,7 @@ class AppRoutes {
 
     GetPage(name: stockLedger, page: () => const StockLedgerScreen()),
 
-    GetPage(name: InquiryPannel, page: () => const InquiryReportScreen()),
+    GetPage(name: InquiryPannel, page: () => const InquiryMarketingReportScreen()),
 
     GetPage(name: bomReport, page: () => const BomReportScreen()),
 

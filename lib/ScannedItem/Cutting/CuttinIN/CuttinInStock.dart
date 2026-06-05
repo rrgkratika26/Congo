@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../Color/Colorclass.dart';
 import '../../../QRScan/QrScanScreen.dart';
 import '../../../screen/inStock/ReportScreen.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
@@ -117,7 +118,7 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
           value: controller.selectedOperator,
           items: controller.operators,
           icon: Icons.person_rounded,
-          color: const Color(0xFF42A5F5),
+          color: C.primaryblue,
           isTablet: isTablet,
           isDesktop: isDesktop,
           isSmallScreen: isSmallScreen,
@@ -130,7 +131,7 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
           value: controller.selectedSupervisor,
           items: controller.supervisors,
           icon: Icons.supervisor_account_rounded,
-          color: const Color(0xFF42A5F5),
+          color: C.primaryblue,
           isTablet: isTablet,
           isDesktop: isDesktop,
           isSmallScreen: isSmallScreen,
@@ -143,7 +144,7 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
           value: controller.selectedLocation,
           items: controller.locations,
           icon: Icons.location_on_rounded,
-          color: const Color(0xFF42A5F5),
+          color: C.primaryblue,
           isTablet: isTablet,
           isDesktop: isDesktop,
           isSmallScreen: isSmallScreen,
@@ -169,7 +170,7 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(
-          isDesktop ? 16 : (isTablet ? 14 : 12),
+          isDesktop ? 16 : (isTablet ? 14 : 10),
         ),
         boxShadow: [
           BoxShadow(
@@ -573,7 +574,7 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
           child: _buildActionButton(
             icon: Icons.qr_code_scanner,
             label: 'Scan QR',
-            color: Colors.blue,
+            color: C.purple,
             onTap: _openScanner,
           ),
         ),

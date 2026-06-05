@@ -800,7 +800,7 @@ class _CuttingOutStockFormNardanaState
     final d =
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     return AppBar(
-      backgroundColor: _primary,
+      backgroundColor: C.appBar1,
       foregroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(

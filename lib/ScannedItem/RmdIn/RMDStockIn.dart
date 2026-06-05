@@ -287,7 +287,7 @@ class _RMDStockInState extends State<RMDStockIn> {
           child: _buildActionButton(
             icon: Icons.qr_code_scanner,
             label: 'Scan QR',
-            color: Colors.blue,
+            color: C.purple,
             onTap: _openScanner,
           ),
         ),

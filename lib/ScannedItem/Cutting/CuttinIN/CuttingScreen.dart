@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../Color/Colorclass.dart';
 import '../CuttingController/CuttingController.dart';
 import 'CuttinInStock.dart';
 import 'CuttingOut.dart';
@@ -46,19 +47,19 @@ class _CuttingScreenState extends State<CuttingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: Colors.green.shade100,
+        backgroundColor: C.primary,
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
 
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back_ios_new, color: C.textHigh),
           onPressed: () => Navigator.pop(context),
         ),
 
         title: Text(
           unitTitle.isNotEmpty ? unitTitle : 'Unit Name',
           style: TextStyle(
-            color: Colors.black87,
+            color: C.bg,
             fontSize: isTablet ? 20 : 18,
             fontWeight: FontWeight.bold,
           ),

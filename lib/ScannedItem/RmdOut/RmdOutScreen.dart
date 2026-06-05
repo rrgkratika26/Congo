@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'RMDoutReport.dart';
+import '../../Color/Colorclass.dart';
+
 import 'RMDoutStock.dart';
 
 class RmdOutScreen extends StatefulWidget {
@@ -45,7 +46,7 @@ class _RmdOutScreenState extends State<RmdOutScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade100,
+        backgroundColor: C.appBar1,
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
         // leading: Padding(
@@ -57,7 +58,7 @@ class _RmdOutScreenState extends State<RmdOutScreen> {
             Text(
               _unitTitle.isNotEmpty ? _unitTitle : 'Unit Name',
               style: TextStyle(
-                color: Colors.black87,
+                color: C.primaryDark,
                 fontSize: isTablet ? 20 : 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -66,13 +67,14 @@ class _RmdOutScreenState extends State<RmdOutScreen> {
             Text(
               'RMD ${widget.screenType}',
               style: TextStyle(
-                color: Colors.black87,
+                color: C.bg,
                 fontSize: isTablet ? 20 : 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
+        iconTheme: IconThemeData(color: C.bg),
 
       ),
       body: Column(

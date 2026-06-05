@@ -5,6 +5,7 @@ import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import '../../InquiryScreen/Marketing/MarketingModel.dart';
 import '../../NARDANA/BaleNardana/BaleModel.dart';
 import '../../NARDANA/CUTTING_Stock/StockModel.dart';
 import '../../NARDANA/LaminationReports/LamOutModelClass.dart';
@@ -98,9 +99,7 @@ class NaradanaApiService {
     };
   }
 
-  // =========
-  //
-  //
+
   // ======== DROPDOWN DATA =================
 
   Future<List<LoomReport>> fetchLoomData({
@@ -160,7 +159,7 @@ class NaradanaApiService {
           'fromDate': fromDate,
           'toDate': toDate,
           'pageNumber': '1',
-          'pageSize': '50000',
+          'pageSize': '50',
         },
       );
 
@@ -1489,5 +1488,48 @@ class NaradanaApiService {
       debugPrint("Forward Error => $e");
       return false;
     }
+  }
+
+  static Future<MarketingCountModel?> getMarketingCount({
+    required String unit,
+    required String type,
+    required DateTime fromDate,
+    required DateTime toDate,
+  }) async {
+    final url =
+        "$_baseUrl/Dashboard/MarketingCount"
+        "?unit=$unit"
+        "&type=$type"
+        "&fromDate=${DateFormat('yyyy-MM-dd').format(fromDate)}"
+        "&toDate=${DateFormat('yyyy-MM-dd').format(toDate)}";
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await authHeaders(),
+      );
+
+      debugPrint("=================================");
+      debugPrint("URL => $url");
+      debugPrint("STATUS => ${response.statusCode}");
+      debugPrint("BODY => ${response.body}");
+      debugPrint("=================================");
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+
+        debugPrint("Total Inquiry => ${json['totalInquiryCount']}");
+        debugPrint("Net Weight => ${json['netWeight']}");
+        debugPrint("Roll Length => ${json['rollLength']}");
+        debugPrint("No Of Roll => ${json['noOfRoll']}");
+
+        return MarketingCountModel.fromJson(json);
+      }
+    } catch (e, s) {
+      debugPrint("MarketingCount Error => $e");
+      debugPrint("$s");
+    }
+
+    return null;
   }
 }

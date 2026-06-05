@@ -17,7 +17,7 @@ class CuttingOutStockForm extends StatefulWidget {
 
 class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   // ─────────────── Theme ───────────────
-  static const _primary = Color(0xFF1A56DB);
+
   static const _surface = Color(0xFFF8FAFF);
   static const _border = Color(0xFFDDE3F0);
   static const _labelColor = Colors.black;
@@ -727,7 +727,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     final d =
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     return AppBar(
-      backgroundColor: _primary,
+      backgroundColor: C.appBar1,
       foregroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
@@ -981,8 +981,8 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
                   : const Icon(Icons.qr_code_2_rounded, size: 16),
               label: const Text("Generate Fabric Code & Batch No"),
               style: OutlinedButton.styleFrom(
-                foregroundColor: _primary,
-                side: const BorderSide(color: _primary),
+                foregroundColor: C.primary,
+                side: const BorderSide(color: C.secondaryDark),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -1119,7 +1119,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     int maxLines = 1,
   }) {
     final borderColor = highlight
-        ? _primary
+        ? C.brand700
         : readOnly
         ? _border
         : const Color(0xFFBCC8E8);
@@ -1168,7 +1168,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(
-                color: readOnly ? _border : _primary,
+                color: readOnly ? _border : C.secondaryDark,
                 width: 1.5,
               ),
             ),
@@ -1375,7 +1375,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
       _actionBtn(
         "Save",
         Icons.check_rounded,
-        _primary,
+        C.primary,
         _saveForm,
         loading: _isLoading,
       ),

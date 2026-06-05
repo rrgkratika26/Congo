@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../Color/Colorclass.dart';
 import '../../services/getSupervisors/getSupervisors.dart';
 
 class OutReportDetailsScreen extends StatelessWidget {
@@ -11,9 +12,10 @@ class OutReportDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Out Stock Report'),
+        iconTheme: IconThemeData(color: C.bg),
+        title: const Text('RMD OUT Report',style: TextStyle(color: C.bg),),
         centerTitle: true,
-        backgroundColor: Colors.orange,
+        backgroundColor: C.appBar1,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _service.getOutScannedItems(date),

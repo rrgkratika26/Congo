@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Color/Colorclass.dart';
 import 'LaminationIn/LaminationInScreen.dart';
 import 'LaminationOutScreen.dart';
 
@@ -43,16 +44,30 @@ class _LaminationScreenState extends State<LaminationScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: Colors.orange.shade100,
+        backgroundColor: C.appBar1,
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
-        title: Text(
-          unitTitle.isNotEmpty ? unitTitle : 'Unit Name',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: isTablet ? 20 : 18,
-            fontWeight: FontWeight.bold,
-          ),
+        iconTheme: IconThemeData(color: C.bg),
+        title: Row(
+          children: [
+            Text(
+              unitTitle.isNotEmpty ? unitTitle : 'Unit Name',
+              style: TextStyle(
+                color: C.primaryDark,
+                fontSize: isTablet ? 20 : 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(width: 5),
+            Text(
+              'Lamination IN',
+              style: TextStyle(
+                color: C.bg,
+                fontSize: isTablet ? 20 : 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
 
 

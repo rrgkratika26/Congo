@@ -138,7 +138,7 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
         "${_monthName(now.month)}-"
         "${now.year}";
     return AppBar(
-      backgroundColor: _primary,
+      backgroundColor: C.appBar1,
       foregroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
@@ -150,37 +150,37 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
         children: [
           Text(
             widget.title,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           Text(
             formattedDate,
-            style: const TextStyle(fontSize: 11, color: Colors.white70),
+            style: const TextStyle(fontSize: 15, color: C.textHigh),
           ),
         ],
       ),
       actions: [
         // Bluetooth settings
         IconButton(
-          icon: const Icon(Icons.bluetooth_rounded, size: 20),
+          icon: const Icon(Icons.bluetooth_rounded, size: 28,color: C.secondaryDark,),
           tooltip: "Printer",
           onPressed: () => Get.to(() => const BluetoothDeviceListScreen()),
         ),
         // Roll count badge
         Container(
-          margin: const EdgeInsets.only(right: 12),
+          // margin: const EdgeInsets.only(right: 12),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.18),
+            color: C.bg.withOpacity(0.18),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.layers_rounded, color: Colors.white70, size: 13),
+              const Icon(Icons.layers_rounded, color: C.textHigh, size: 13),
               const SizedBox(width: 4),
               Text(
                 "${_rolls.length} Rolls",
-                style: const TextStyle(color: Colors.white, fontSize: 11),
+                style: const TextStyle(color: C.textHigh, fontSize: 11),
               ),
             ],
           ),
@@ -256,7 +256,7 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
           dataRowColor: MaterialStateProperty.resolveWith<Color?>(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return Colors.blue.withOpacity(0.2);
+                return Colors.green.withOpacity(0.2);
               }
               return null;
             },

@@ -929,13 +929,13 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? C.border : C.bg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? C.actionOrange : C.borderLight,
-            width: 1.2,
+            width: 1,
           ),
         ),
         child: Row(

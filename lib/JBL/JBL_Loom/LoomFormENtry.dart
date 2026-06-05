@@ -396,12 +396,28 @@ class _LoomFormState extends State<LoomForm> {
       // print("========== API DEBUG END ==========");
 
       if (res.statusCode == 200) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Saved Successfully")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: C.success,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(20),
+            content: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Text("Saved Successfully"),
+            ),
+          ),
+        );
+
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error ${res.statusCode}: ${res.body}")),
+
+          SnackBar(
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(20),
+              content: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("Error ${res.statusCode}: ${res.body}"),
+              )),
         );
       }
     } catch (e, stack) {
@@ -872,11 +888,7 @@ class _LoomFormState extends State<LoomForm> {
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [C.appBar1, C.appBar4],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: C.appBar1
       ),
       child: SafeArea(
         bottom: false,
@@ -918,8 +930,8 @@ class _LoomFormState extends State<LoomForm> {
                         Text(
                           dateStr,
                           style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
+                            color: C.textHigh,
+                            fontSize: 15,
                           ),
                         ),
                       ],

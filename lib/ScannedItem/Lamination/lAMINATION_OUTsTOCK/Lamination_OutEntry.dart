@@ -482,12 +482,12 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
   // ── AppBar ─────────────────────────────────────────────────────
   PreferredSizeWidget _appBar() => AppBar(
-    backgroundColor: C.primary,
+    backgroundColor: C.appBar1,
     foregroundColor: Colors.white,
     elevation: 0,
     centerTitle: false,
     leading: IconButton(
-      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
       onPressed: () => Navigator.maybePop(context),
     ),
     title: Column(
@@ -503,7 +503,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
               : "Sr. No: ${widget.roll.srNo} ",
           // " •  ${_partyCtrl.text.isNotEmpty ? _partyCtrl.text : '—'}",
           style: const TextStyle(
-            fontSize: 15,
+            fontSize: 18,
             color: Colors.white,
             fontWeight: FontWeight.w700,
           ),
@@ -526,7 +526,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
           context,
           MaterialPageRoute(
             // For Naradana
-            builder: (_) => const LamRollPrintScreennaradan(title: "Lamination Rolls Naradana"),
+            builder: (_) => const LamRollPrintScreennaradan(title: "Lamination Rolls"),
 
             // For VISA
             // builder: (_) => const LamRollPrintScreen(title: "Lamination Rolls"),//visa
@@ -866,11 +866,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
   Widget _infoHeader() => Container(
     width: double.infinity,
     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [C.primary, C.warning],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
+    color: C.primary,
       borderRadius: BorderRadius.circular(14),
     ),
     padding: const EdgeInsets.all(14),
@@ -944,7 +940,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 10, color: Colors.white60),
+                style: const TextStyle(fontSize: 10, color: C.textHigh,fontWeight: FontWeight.bold),
               ),
               Text(
                 value,
@@ -991,7 +987,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
                       color: C.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(icon, color: C.primary, size: 14),
+                    child: Icon(icon, color: C.textHigh, size: 14),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -999,7 +995,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: C.textBody,
+                      color: C.primaryDark,
                       letterSpacing: 0.2,
                     ),
                   ),
@@ -1086,7 +1082,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: readOnly ? C.borderLight : C.border,
+          color: readOnly ? C.brand900 : C.brand800,
         ),
       ),
       const SizedBox(height: 4),
@@ -1097,7 +1093,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
         keyboardType: type,
         style: TextStyle(
           fontSize: 13,
-          color: readOnly ? const Color(0xFF94A3B8) : C.textBody,
+          color: readOnly ? C.textHigh : C.textBody,
           fontWeight: FontWeight.w500,
         ),
         decoration: InputDecoration(
@@ -1144,7 +1140,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
         style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: C.border,
+          color: C.brand700,
         ),
       ),
       const SizedBox(height: 4),
@@ -1163,7 +1159,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
             isDense: true,
             hint: Text(
               "Select $label",
-              style: TextStyle(fontSize: 12, color: C.border),
+              style: TextStyle(fontSize: 12, color: C.textMid),
             ),
             style: const TextStyle(
               fontSize: 13,

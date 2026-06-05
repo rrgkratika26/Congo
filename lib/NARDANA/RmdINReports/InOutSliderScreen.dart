@@ -55,17 +55,18 @@ class _RmdSliderScreenState extends State<RmdSliderScreen>
                   Expanded(
                     child: TabBar(
                       controller: _tabController,
-                      splashFactory: NoSplash.splashFactory,
+                      // splashFactory: NoSplash.splashFactory,
 
-                      labelColor: C.primary,
+                      labelColor: C.textHead,
                       unselectedLabelColor: Colors.grey,
 
                       indicatorColor: C.warning,
                       indicatorWeight: 5,
 
+
                       labelStyle: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 18,
                       ),
 
                       tabs: const [

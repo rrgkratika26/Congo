@@ -145,16 +145,7 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                C.appBar1,
-                C.appBar4,
-              ],
-            ),
-          ),
-        ),
+       backgroundColor: C.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(

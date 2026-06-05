@@ -172,7 +172,8 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
   Widget _topBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-      color: C.primary,
+      color: C.appBar1,
+
       child: Column(
         children: [
           Row(
@@ -181,17 +182,18 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
                 child: TextField(
                   controller: _searchCtrl,
                   onChanged: (v) => setState(() => _query = v),
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                  style: const TextStyle(fontSize: 14, color: C.bg),
                   decoration: InputDecoration(
+                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: C.brand700,),borderRadius: BorderRadius.all(Radius.circular(10))),
                     hintText: 'Search barcode, party, supervisor…',
                     hintStyle: const TextStyle(
-                        color: Colors.white38, fontSize: 13),
+                        color: C.brand700, fontSize: 13),
                     prefixIcon: const Icon(Icons.search,
-                        color: Colors.white54, size: 20),
+                        color: C.brand700, size: 20),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
                       icon: const Icon(Icons.close,
-                          color: Colors.white54, size: 18),
+                          color: C.textHigh, size: 18),
                       onPressed: () {
                         setState(() {
                           _query = '';
@@ -246,10 +248,10 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
   Widget _box(String title, String value, Color color) {
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 2),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(.08),
+          color: C.primaryDark,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

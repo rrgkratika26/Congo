@@ -4,6 +4,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:intl/intl.dart';
 
+import '../../Color/Colorclass.dart';
 import '../../QRScan/QrScanScreen.dart';
 import '../../screen/inStock/inStockController.dart';
 import '../../services/GlobalLoader/GLobalLoader.dart';
@@ -269,9 +270,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    // snapshot.connectionState == ConnectionState.waiting
-                    //     ? '...'
-                    //     :
+
                     '$count',
                     style: const TextStyle(
                       fontSize: 48,
@@ -302,7 +301,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
           child: _buildActionButton(
             icon: Icons.qr_code_scanner,
             label: 'Scan QR',
-            color: Colors.blue,
+            color: C.purple,
             onTap: _openRMDOutScanner,
           ),
         ),
@@ -333,7 +332,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 32),
+            Icon(icon, color: color, size: 38),
             const SizedBox(height: 8),
             Text(
               label,
@@ -640,10 +639,10 @@ class _OutReportScreenState extends State<OutReportScreen> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
+        color: C.bg,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(icon, color: Colors.blue),
+      child: Icon(icon, color: C.appBar1),
     );
   }
 

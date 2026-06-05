@@ -3,6 +3,7 @@ import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/material.dart';
 
 import '../../AdminDashBoard/DashBoard.dart';
+import '../../AdminDashBoard/DepartmentDashboard.dart';
 import '../../AdminDashBoard/ListMenuItems/dashBoardNewUi.dart';
 import '../../Color/Colorclass.dart';
 import 'RecentEntryScreen.dart';

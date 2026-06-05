@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Color/Colorclass.dart';
 import '../../screen/inStock/inStockScreen.dart';
 import 'RMDStockIn.dart';
-import 'RMDinStock.dart';
+
 
 class RmdScreen extends StatefulWidget {
   final String screenType; // "IN" or "OUT"
@@ -62,7 +62,7 @@ class _RmdScreenState extends State<RmdScreen> {
 
         shadowColor: Colors.black.withOpacity(0.1),
 
-        leadingWidth: 110, // important
+        // important
         leading: Row(
           children: [
             IconButton(
@@ -87,15 +87,15 @@ class _RmdScreenState extends State<RmdScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // SizedBox(width: 5,),
-            // Text(
-            //   'RMD ${widget.screenType}',
-            //   style: TextStyle(
-            //     color: C.primaryLight,
-            //     fontSize: isTablet ? 20 : 18,
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            // ),
+            SizedBox(width: 5,),
+            Text(
+              'RMD ${widget.screenType}',
+              style: TextStyle(
+                color: C.primaryLight,
+                fontSize: isTablet ? 20 : 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
 

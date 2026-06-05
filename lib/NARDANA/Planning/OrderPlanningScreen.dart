@@ -136,15 +136,7 @@ class _OrderPlanningScreenState extends State<OrderPlanningScreen> {
       appBar: AppBar(
         elevation: 0,
 
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors:  [C.appBar2, C.appBar3],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+       backgroundColor: C.primary,
 
         iconTheme: const IconThemeData(color: Colors.white),
 
@@ -154,17 +146,17 @@ class _OrderPlanningScreenState extends State<OrderPlanningScreen> {
             const Text(
               "Order Planning",
               style: TextStyle(
-                color: Colors.white,
+                color: C.bg,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
             ),
 
             Text(
-              "Total Records : ${filtered.length}",
+              "Records : ${filtered.length}",
               style: TextStyle(
-                color: Colors.white.withOpacity(.9),
-                fontSize: 12,
+                color: C.textHead,
+                fontSize: 15,
               ),
             ),
           ],

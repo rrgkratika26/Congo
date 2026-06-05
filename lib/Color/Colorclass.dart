@@ -180,11 +180,11 @@ class C {
   // BRAND COLORS (FROM MULTI PACKAGING CONGO LOGO)
   // ==========================================================
 
-  static const Color primary = Color(0xFF287DB3); // Logo Blue
+  static const Color primary = Color(0xFF7EBADE); // Logo Blue
   static const Color primaryDark = Color(0xFF1E628D);
   static const Color primaryLight = Color(0xFFEAF5FC);
 
-  static const Color secondary = Color(0xFFEE7D00); // Logo Orange
+  static const Color secondary = Color(0xFF1F2937); // Logo Orange
   static const Color secondaryDark = Color(0xFFD86D00);
   static const Color secondaryLight = Color(0xFFFFF2E4);
 
@@ -192,7 +192,7 @@ class C {
   // APPBAR GRADIENT
   // ==========================================================
 
-  static const Color appBar1 = Color(0xFF1E628D);
+  static const Color appBar1 = Color(0xFF7EBADE);
   static const Color appBar2 = Color(0xFF287DB3);
   static const Color appBar3 = Color(0xFFEE7D00);
   static const Color appBar4 = Color(0xFFFFD2A3);

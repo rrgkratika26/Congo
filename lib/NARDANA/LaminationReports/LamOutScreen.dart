@@ -61,6 +61,9 @@ class _LamOutScreenState extends State<LamOutScreen> {
   @override
   void initState() {
     super.initState();
+    _to = DateTime.now();
+    _from = _to.subtract(const Duration(days: 30));
+
     _load();
   }
 
@@ -90,8 +93,11 @@ class _LamOutScreenState extends State<LamOutScreen> {
     );
 
     if (picked != null) {
-      _from = picked.start;
-      _to = picked.end;
+      setState(() {
+        _from = picked.start;
+        _to = picked.end;
+      });
+
       _load();
     }
   }
@@ -122,10 +128,13 @@ class _LamOutScreenState extends State<LamOutScreen> {
                       const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: _pickDateRange,
-                        child: const Text("Select Date Range",style: TextStyle(color: C.textHigh),),
+                        child: const Text(
+                          "Select Date Range",
+                          style: TextStyle(color: C.textHigh),
+                        ),
                       ),
                     ],
-                  )
+                  ),
                 )
               : Expanded(child: _table(_filtered)),
 
