@@ -864,14 +864,14 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
           Text(
             "${_filteredOrders.length}",
             style: const TextStyle(
-              color: Colors.white,
+              color: C.textHigh,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
           ),
           const Text(
             "Records",
-            style: TextStyle(color: Colors.white70, fontSize: 10),
+            style: TextStyle(color: C.textHigh, fontSize: 10),
           ),
         ],
       ),
@@ -1003,7 +1003,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                     vertical: 12,
                   ),
                   decoration: const BoxDecoration(
-                    color: C.appBar4,
+                    color: Colors.indigo,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(16),
                     ),
@@ -1012,28 +1012,26 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                     children: [
 
                       Expanded(
-                        child: Row(
-                          // crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
 
-                            Text(
-                              order.loomOrderNo,
+                            Text("Order NO -${order.loomOrderNo}",
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
-                                color: C.textHigh,
+                                color: C.bg,
                               ),
                             ),
 
-                            const SizedBox(width: 5),
+                            const SizedBox(height: 2),
 
-                            Text(
-                              order.customerName,
+                            Text("Party Name -${order.customerName}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 15,
-                                color: C.textBody,
+                                color: C.bg,
                               ),
                             ),
                           ],
@@ -1047,8 +1045,8 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: order.status
-                              ? C.success.withOpacity(.10)
-                              : C.danger.withOpacity(.10),
+                              ? C.bg
+                              : C.bg,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -1080,7 +1078,18 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                       ),
                     ),
                     children: [
-
+                      _tableRow(
+                        "Bom No",
+                        order.bom.isEmpty
+                            ? "-"
+                            : order.bom,
+                      ),
+                      _tableRow(
+                        "Article No",
+                        order.articleNo.isEmpty
+                            ? "-"
+                            : order.articleNo,
+                      ),
                       _tableRow(
                         "PO No",
                         order.poNumber.isEmpty
@@ -1146,7 +1155,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        backgroundColor: C.appBar1,
+                        backgroundColor: Colors.indigo,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1177,7 +1186,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
       children: [
 
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 5),
           child: Text(
             title,
             style: const TextStyle(
@@ -1189,7 +1198,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
         ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
           child: Text(
             value,
             style: TextStyle(

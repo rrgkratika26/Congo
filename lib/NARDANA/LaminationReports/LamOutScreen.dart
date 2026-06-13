@@ -220,24 +220,63 @@ class _LamOutScreenState extends State<LamOutScreen> {
                   controller: _searchCtrl,
                   onChanged: (v) => setState(() => _query = v),
                   style: const TextStyle(color: Colors.white),
+                  // decoration: InputDecoration(
+                  //   hintText: 'Search...',
+                  //   hintStyle: const TextStyle(color: Colors.white38),
+                  //   prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                  //   suffixIcon: _query.isNotEmpty
+                  //       ? IconButton(
+                  //           icon: const Icon(
+                  //             Icons.close,
+                  //             color: Colors.white54,
+                  //           ),
+                  //           onPressed: () => setState(() {
+                  //             _query = '';
+                  //             _searchCtrl.clear();
+                  //           }),
+                  //         )
+                  //       : null,
+                  //   filled: true,
+                  //   fillColor: Colors.white12,
+                  //   border: OutlineInputBorder(
+                  //     borderRadius: BorderRadius.circular(10),
+                  //     borderSide: BorderSide.none,
+                  //   ),
+                  // ),
                   decoration: InputDecoration(
-                    hintText: 'Search...',
-                    hintStyle: const TextStyle(color: Colors.white38),
-                    prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: C.primaryDark,
+                        strokeAlign: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    hintText: 'Search barcode, batch, party, supervisor…',
+                    hintStyle: const TextStyle(
+                      color: C.primaryDark,
+                      fontSize: 13,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: C.primaryDark,
+                      size: 20,
+                    ),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              color: Colors.white54,
-                            ),
-                            onPressed: () => setState(() {
-                              _query = '';
-                              _searchCtrl.clear();
-                            }),
-                          )
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white54,
+                        size: 18,
+                      ),
+                      onPressed: () => setState(() {
+                        _query = '';
+                        _searchCtrl.clear();
+                      }),
+                    )
                         : null,
                     filled: true,
                     fillColor: Colors.white12,
+                    contentPadding: EdgeInsets.zero,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
@@ -288,7 +327,7 @@ class _LamOutScreenState extends State<LamOutScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(.08),
+          color: C.primaryDark,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

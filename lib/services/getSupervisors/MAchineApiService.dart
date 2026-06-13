@@ -14,11 +14,11 @@ class MachineApiService {
       final uri = Uri.parse(baseUrl);
       final response = await http.get(uri);
 
-      debugPrint("Status Code: ${response.statusCode}");
+      // debugPrint("Status Code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        debugPrint("Status Response: ${response.body}");
+        // debugPrint("Status Response: ${response.body}");
 
         final List dataList = decoded["data"];
 

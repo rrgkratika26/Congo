@@ -104,13 +104,13 @@ enum MenuAction {
   OUT__,
   transfer,
   Inquirey_Report,
-Bom_Report,
-  Bom_List,
+  Bom_Report,
+  Bom_List_remain,
   Webbing_Ledger,
   Issue_to_QC,
   Order_Planning,
   Order_Composition,
-  To_Loom
+  To_Loom,
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -249,21 +249,17 @@ Widget buildActionButtons(
 List<MenuAction> getActionsForMenu(String label) {
   switch (label) {
     case 'INQUIRY':
-      return [MenuAction.Inquirey_Report,];
+      return [MenuAction.Inquirey_Report];
     case 'PLANNING':
-      return [MenuAction.Order_Planning, MenuAction.Order_Composition,MenuAction.To_Loom];
-    case 'LOOM':
       return [
-        MenuAction.IN,
-        MenuAction.In_Report,
-      MenuAction.report];
-    case 'LAMINATION':
-      return [
-        MenuAction.IN,
-        MenuAction.report,
-
-        MenuAction.OUT
+        MenuAction.Order_Planning,
+        MenuAction.Order_Composition,
+        MenuAction.To_Loom,
       ];
+    case 'LOOM':
+      return [MenuAction.IN, MenuAction.Out_Report, MenuAction.report];
+    case 'LAMINATION':
+      return [MenuAction.IN, MenuAction.OUT, MenuAction.report];
     case 'CUTTING':
       return [
         MenuAction.IN,
@@ -311,13 +307,15 @@ List<MenuAction> getActionsForMenu(String label) {
     case 'LEDGER':
       return [MenuAction.Webbing_Ledger];
     case 'MARKETING':
-      return [MenuAction.Inquirey_Report,
+      return [
+        MenuAction.Inquirey_Report,
         MenuAction.Bom_Report,
-      MenuAction.Bom_List,
-  MenuAction.Issue_to_QC];
+        MenuAction.Bom_List_remain,
+        MenuAction.Issue_to_QC,
+      ];
 
     case 'TAPELINE':
-      return [MenuAction.IN,MenuAction.OUT,];
+      return [MenuAction.IN, MenuAction.OUT];
     case 'MACHINE':
       return [MenuAction.scan];
 

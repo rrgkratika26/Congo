@@ -2,6 +2,7 @@ import '../../../ScannedItem/Loom/LoomModelClass.dart';
 
 class ProductionModel {
   final int orderNo;
+  final String bomNo;
   final String partyName;
   final String fabricCode;
 
@@ -54,12 +55,13 @@ class ProductionModel {
     required this.balanceKgInt,
     required this.balanceMtrInt,
     required this.woNo,
-    required this.status,
+    required this.status, required this.bomNo,
   });
 
   factory ProductionModel.fromJson(Map<String, dynamic> json) {
     return ProductionModel(
       orderNo: json['orderNo'] ?? 0,
+      bomNo: json['boM_NO'] ?? 0,
       partyName: json['partyName'] ?? '',
       fabricCode: json['fabricCode'] ?? '',
 
@@ -87,7 +89,7 @@ class ProductionModel {
       balanceMtrInt: json['balanceMtr'] ?? 0,
 
       woNo: json['woNo'] ?? "",
-      status: json['status'] ?? false,
+      status: json['status'] ?? '',
     );
   }
 }
@@ -99,6 +101,7 @@ ProductionModel convertToProduction(LoomOrder order) {
   return ProductionModel(
     orderNo: int.tryParse(order.loomOrderNo) ?? 0,
     partyName: order.customerName,
+    bomNo: order.bom,
     // fabricCode: order.requiredFabricCode,
     fabricCode: order.fabricCode.isNotEmpty
         ? order.fabricCode
@@ -130,5 +133,6 @@ ProductionModel convertToProduction(LoomOrder order) {
 
     woNo: order.woNo,
     status: order.status,
+
   );
 }

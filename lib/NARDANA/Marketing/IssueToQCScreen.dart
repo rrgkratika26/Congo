@@ -150,20 +150,20 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
       backgroundColor: C.bg,
 
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: C.appBar1,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                C.appBar2,
-                C.appBar3, // lighter shade
-              ],
-            ),
-          ),
-        ),
+        // flexibleSpace: Container(
+        //   decoration: const BoxDecoration(
+        //     gradient: LinearGradient(
+        //       begin: Alignment.topLeft,
+        //       end: Alignment.bottomRight,
+        //       colors: [
+        //         C.appBar2,
+        //         C.appBar3, // lighter shade
+        //       ],
+        //     ),
+        //   ),
+        // ),
 
         iconTheme: const IconThemeData(color: Colors.white),
 

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import '../../Color/Colorclass.dart';
+import '../../services/GlobalLoader/GloabalUnit.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
 import 'ModelClass/CombineToLoomModel.dart';
 import 'ToLOomPlanningGenCode.dart';
@@ -13,7 +16,9 @@ class CombineToLoomScreen extends StatefulWidget {
 
 class _CombineToLoomScreenState extends State<CombineToLoomScreen> {
   bool isLoading = true;
+  final appCtrl = Get.find<AppController>();
 
+  late String unit = appCtrl.unit.value;
   List<CombineToLoomModel> loomList = [];
   List<CombineToLoomModel> filteredList = [];
 
@@ -27,7 +32,7 @@ class _CombineToLoomScreenState extends State<CombineToLoomScreen> {
 
   Future<void> getLoomData() async {
     try {
-      final data = await NaradanaApiService().getCombineToLoomList();
+      final data = await NaradanaApiService().getCombineToLoomList(unit);
 
       setState(() {
         loomList = data;
@@ -65,7 +70,7 @@ class _CombineToLoomScreenState extends State<CombineToLoomScreen> {
 
       appBar: AppBar(
         iconTheme: IconThemeData(color: C.bg),
-backgroundColor: C.appBar1,
+        backgroundColor: C.appBar1,
         title: const Text("Combine To Loom", style: TextStyle(color: C.bg)),
 
         // flexibleSpace: Container(
@@ -144,6 +149,8 @@ backgroundColor: C.appBar1,
 
                                   DataColumn(label: Text("Order No.")),
 
+                                  DataColumn(label: Text("Bom No.")),
+
                                   DataColumn(label: Text("Req Mtr")),
 
                                   DataColumn(label: Text("Req Kg")),
@@ -165,16 +172,15 @@ backgroundColor: C.appBar1,
                                       DataCell(
                                         InkWell(
                                           onTap: () {
-
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (_) => GenerateCodeScreen(
-                                                  data: item,
-                                                ),
+                                                builder: (_) =>
+                                                    GenerateCodeScreen(
+                                                      data: item,
+                                                    ),
                                               ),
                                             );
-
                                           },
 
                                           child: Text(
@@ -182,11 +188,13 @@ backgroundColor: C.appBar1,
                                             style: const TextStyle(
                                               color: Colors.blue,
                                               fontWeight: FontWeight.bold,
-                                              decoration: TextDecoration.underline,
+                                              decoration:
+                                                  TextDecoration.underline,
                                             ),
                                           ),
                                         ),
                                       ),
+                                      DataCell(Text(item.BomNo.toString())),
 
                                       DataCell(Text(item.mtr.toString())),
 

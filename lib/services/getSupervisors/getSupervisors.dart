@@ -34,7 +34,6 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class InStockService {
-
   static const String baseUrl = 'http://192.168.29.125:7165/api';
   // static const String baseUrl = 'http://fibcsoftware.in:4430/api/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JblAPI/api';
@@ -116,13 +115,13 @@ class InStockService {
       final response = await http.get(url, headers: await authHeaders());
 
       InStockService._checkUnauthorized(response);
-      debugPrint("GET SUPERVISORS STATUS: ${response.statusCode}");
+      // debugPrint("GET SUPERVISORS STATUS: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         print('data:::::$jsonData');
-        debugPrint("API URL: $url");
-        debugPrint("GET SUPERVISORS STATUS: ${response.statusCode}");
+        // debugPrint("API URL: $url");
+        // debugPrint("GET SUPERVISORS STATUS: ${response.statusCode}");
         // debugPrint("GET SUPERVISORS RESPONSE: ${response.body}");
 
         if (jsonData['success'] == true) {
@@ -172,8 +171,8 @@ class InStockService {
     final url = Uri.parse('$baseUrl/Rmd/GetScannedItems?date=$date');
     final response = await http.get(url, headers: await authHeaders());
     debugPrint("API URL: $url");
-    debugPrint("GET SCANNED ITEMS STATUS: ${response.statusCode}");
-    debugPrint("GET SCANNED ITEMS RESPONSE: ${response.body}");
+    // debugPrint("GET SCANNED ITEMS STATUS: ${response.statusCode}");
+    // debugPrint("GET SCANNED ITEMS RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
@@ -229,8 +228,8 @@ class InStockService {
         },
       );
 
-      debugPrint("FOLDING CHECK OUT STATUS: ${response.statusCode}");
-      debugPrint("FOLDING CHECK OUT BODY: ${response.body}");
+      // debugPrint("FOLDING CHECK OUT STATUS: ${response.statusCode}");
+      // debugPrint("FOLDING CHECK OUT BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -319,14 +318,12 @@ class InStockService {
   }
 
   Future<Map<String, dynamic>?> checkBarcodeOut({
-
     required String barcode,
     required String roll_entry,
     required String storage,
     required String operatorName,
     required String supervisor,
     required String department,
-
   }) async {
     final url = Uri.parse('$baseUrl/Rmd/checkBarcodeOut');
 
@@ -341,8 +338,6 @@ class InStockService {
           "operatorName": operatorName,
           "supervisor": supervisor,
           "department": department,
-
-
         },
       );
       debugPrint("Barcode : $barcode");
@@ -362,7 +357,6 @@ class InStockService {
     }
     return null;
   }
-
 
   //
   // Future<dynamic> checkBarcodeOut({
@@ -412,7 +406,6 @@ class InStockService {
   //     return null;
   //   }
   // }
-
 
   Future<LoginModel> adminLogin({
     required String username,
@@ -1074,9 +1067,8 @@ class InStockService {
   //   }
   // }
   Future<Map<String, dynamic>?> saveBaleEntry(
-      Map<String, dynamic> payload,
-      ) async {
-
+    Map<String, dynamic> payload,
+  ) async {
     final url = "$baseUrl/BaleDepartment/SaveBaleEntry";
 
     debugPrint("🌐 API URL: $url");
@@ -2211,6 +2203,7 @@ class InStockService {
     print("👉 Response Body Cutting Report: ${response.body}");
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);
+      print(json);
 
       /// 🔥 PRINT PARSED LENGTH
       print("👉 Total Records: ${data.length}");
@@ -2222,10 +2215,11 @@ class InStockService {
 
   static Future<LoomSupervisorData> fetchSuperDropdownData({
     String? machine,
+    String? unit,
   }) async {
     final url = Uri.parse(
       // "$baseUrl/LoomForward/supervisor?unit=UNIT-NARDANA&machine=${machine ?? "All"}",
-      "$baseUrl/LoomForward/supervisor?unit=UNIT-SILAVASSA&machine=${machine ?? "All"}",
+      "$baseUrl/LoomForward/supervisor?unit=$unit&machine=${machine ?? "All"}",
     );
 
     print("👉 API URL: $url"); // ✅ PRINT URL

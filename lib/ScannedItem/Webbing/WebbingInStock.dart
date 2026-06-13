@@ -1,3 +1,4 @@
+import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../QRScan/QrScanScreen.dart';
@@ -67,7 +68,7 @@ class _WebbingInStockState extends State<WebbingInStock> {
 
 
         barcode: barcode,
-        plant: controller.selectedLocation ?? "UNIT-NARDANA",
+        plant: controller.selectedLocation ?? AppGlobals.unit,
         department: department,
         supervisor: controller.selectedSupervisor!,
         operator: controller.selectedOperator!,

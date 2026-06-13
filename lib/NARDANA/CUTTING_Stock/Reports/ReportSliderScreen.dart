@@ -88,7 +88,7 @@ class _CommonReportAppBarState extends State<CommonReportAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: C.primary,
-      title: const Text("Reports Dashboard",style: TextStyle(color: C.bg),),
+      title: const Text("Report Wise- Cutting",style: TextStyle(color: C.bg),),
       centerTitle: true,
 
 iconTheme: IconThemeData(color: C.bg),
@@ -128,10 +128,9 @@ iconTheme: IconThemeData(color: C.bg),
               unselectedLabelColor: Colors.white70,
               indicatorColor: Colors.white,
               tabs: [
-                Tab(text: "Roll Wise",
-                ),
-                Tab(text: "Component"),
-                Tab(text: "Cut Report"),
+                Tab(text: "Roll Wise"),
+                Tab(text: "Component R"),
+                Tab(text: "Cutting R"),
               ],
             ),
           ],

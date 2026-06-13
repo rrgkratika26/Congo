@@ -506,8 +506,8 @@ class _RollTable extends StatelessWidget {
       color: C.primary,
       child: Row(
         children: [
-          _cell("", 40),
-          _cell("Sr", 60),
+          _cell("Select", 40),
+          _cell("RollCode", 60),
           _cell("Barcode", 100),
           _cell("Fabric Code", 160),
           _cell("Gross Wt", 80),
@@ -527,6 +527,7 @@ class _RollTable extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
 
+
         splashColor: C.primary.withOpacity(0.2),
         highlightColor: C.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
@@ -534,7 +535,7 @@ class _RollTable extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RollEntryForm(roll: r),
+              builder: (context) => RollEntryForm(roll: r,),
             ),
           );
         },
@@ -568,11 +569,23 @@ class _RollTable extends StatelessWidget {
                 ),
               ),
 
-              if (selected)
 
 
-              _cell(r.srNo.toString(), 60),
-              _cell(r.barcode, 100,),
+
+              _cell(r.rollCode, 60),
+              SizedBox(
+                width: 100,
+                child: Tooltip(
+                  message: selected ? "Tap to open barcode" : "",
+                  child: _cell(
+                    r.barcode,
+                    100,
+                    color: selected ? Colors.green : C.textHigh,
+                    fontWeight:
+                    selected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ),
               _cell(r.fabricCode, 180),
               _cell("${r.grossWeight}", 80),
               _cell("${r.tareWeight}", 80),
@@ -585,6 +598,8 @@ class _RollTable extends StatelessWidget {
       ),
     );
   }
+
+
   // Widget _row(Roll r, int index, bool selected, BuildContext context) {
   //   return InkWell(
   //     onTap: () {
@@ -625,15 +640,23 @@ class _RollTable extends StatelessWidget {
   // }
 
   // ── CELL ──
-  Widget _cell(String text, double width) {
+  Widget _cell(
+      String text,
+      double width, {
+        Color color = C.textHigh,
+        FontWeight fontWeight = FontWeight.normal,
+      }) {
     return SizedBox(
       width: width,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 15, color: C.textHigh),
-          overflow: TextOverflow.visible, // ✅ NO CUT TEXT
+          style: TextStyle(
+            fontSize: 15,
+            color: color,
+            fontWeight: fontWeight,
+          ),
         ),
       ),
     );

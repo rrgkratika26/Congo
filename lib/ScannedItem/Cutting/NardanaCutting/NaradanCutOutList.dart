@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -17,7 +18,7 @@ class CutOutSavedListNardana extends StatefulWidget {
 
   const CutOutSavedListNardana({
     super.key,
-    this.title = "Out List-",
+    this.title = "Cutting OUT Stock-",
     this.initialItems = const [],
   });
 
@@ -93,7 +94,7 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
 
     try {
       final data = await NaradanaApiService.fetchOutStockListNaradana(
-        plant: 'UNIT-NARDANA',
+        plant: AppGlobals.unit,
         // plant: 'UNIT-SILVASSA',
 
         page: 1,
@@ -125,7 +126,7 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
       final nextPage = _page + 1;
 
       final data = await NaradanaApiService.fetchOutStockListNaradana(
-        plant: 'UNIT-NARDANA',
+        plant: AppGlobals.unit,
         // plant: 'UNIT-SILVASSA',
 
         page: nextPage,
@@ -151,7 +152,7 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
 
     try {
       final data = await NaradanaApiService.fetchOutStockListNaradana(
-        plant: 'UNIT-NARDANA',
+        plant: AppGlobals.unit,
         // plant: 'UNIT-SILVASSA',
 
         page: page,
@@ -338,17 +339,17 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
                 _row("ID", r.id.toString()),
                 _row("Roll Code", r.rollCode.toString()),
                 _row("Barcode", r.barcode),
-                _row("Party", r.partyname),
+                _row("WO", r.partyname),
                 _row("Supervisor", r.supervisorName),
                 _row("Operator", r.operatorName),
-                _row("Loom No", r.loomNo),
-                _row("Fabric", r.fabricType),
-                _row("Component", r.component),
+                _row("Loom Type", r.loomNo),
+                _row("Fabric Type/use", r.fabricType),
+                _row("Party Name", r.component),
                 _row("Fabric Code", r.fabricCode),
                 _row("Week No", r.weekNo),
                 _row("Req Qty(KG)", r.requiredQtyKg.toString()),
                 _row("Req Qty(Mtr)", r.requiredQtyMtr.toString()),
-                _row("Loom Type", r.loomType),
+                _row("Loom No", r.loomType),
                 _row("Color", r.color),
                 _row("GSM", r.fabricGsm),
                 _row("Status", r.status),

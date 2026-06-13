@@ -37,7 +37,7 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../getSupervisors/getSupervisors.dart';
 
 class JblApiService {
-  static const String baseUrlJBL = 'http://192.168.29.125:7165/api';
+  static const String baseUrlJBL = 'http://1192.168.29.125/api';
 
   // static const String baseUrlJBL = 'http://190.92.175.47:80/JblAPI/api';
   // static const String baseUrlJBL = 'http://fibcsoftware.in:4430/api/api';

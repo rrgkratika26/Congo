@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 
+import 'package:IMS/ScannedItem/Cutting/NardanaCutting/CutOutStockFormNardana.dart';
 import 'package:IMS/services/visa_apis/visa_api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -536,7 +537,9 @@ class _CuttingOutStockSavedListState extends State<CuttingOutStockSavedList> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => CuttingOutStockForm(
+                          builder: (_) =>
+                          // CuttingOutStockFormNardana()
+                              CuttingOutStockForm(
                             production: r,
                           ), // ensure 'r' is your row data
                         ),

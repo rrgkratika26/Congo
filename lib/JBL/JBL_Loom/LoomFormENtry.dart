@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-
 import '../../Color/Colorclass.dart';
 import 'SavedListScreenLomm.dart';
 
@@ -27,6 +26,7 @@ class _LoomFormState extends State<LoomForm> {
 
   String? selectedSupervisor;
   String? selectedMachine;
+  String? selectedBom;
   String? selectedOperator1;
   String? selectedShift;
   String? selectedOperator2;
@@ -45,6 +45,8 @@ class _LoomFormState extends State<LoomForm> {
   late TextEditingController articleNoCtrl;
   late TextEditingController partyController;
   late TextEditingController loomOrderController;
+  late TextEditingController bomNoController;
+
   late TextEditingController reqQntyKgController;
   late TextEditingController reqQntyMtrController;
 
@@ -85,6 +87,7 @@ class _LoomFormState extends State<LoomForm> {
     _generatedCodeController = TextEditingController();
     partyController = TextEditingController(text: data.partyName);
     loomOrderController = TextEditingController(text: data.orderNo.toString());
+    bomNoController = TextEditingController(text: data.bomNo);
     reqQntyKgController = TextEditingController(
       text: data.balanceKgInt.toString(),
     );
@@ -235,7 +238,7 @@ class _LoomFormState extends State<LoomForm> {
       cutTypeCtrl.text = parts[1];
       fabricTypeCtrl.text = parts[2];
       gsmCtrl.text = parts[3];
-      laminationCtrl.text = parts[4];
+      laminationCtrl.text = 'UL';
       colorCtrl.text = parts[5];
       sidCtrl.text = parts[6];
       baffleCtrl.text = parts[7];
@@ -318,6 +321,7 @@ class _LoomFormState extends State<LoomForm> {
     final body = {
       "date": DateTime.now().toIso8601String(),
       "machine": selectedMachine,
+      "boM_NO": bomNoController.text,
       // "operator": selectedOperator1,
       "operator": selectedOperator2,
       "fabricCode": fabricController.text,
@@ -348,42 +352,33 @@ class _LoomFormState extends State<LoomForm> {
 
       // "requiredQtyMtr": reqQntyKgController.text,
       "requiredQtyMtr": qtyMtrController.text,
-
       "fromRoll": "LOOM",
       "modelNo": selectedMachineType,
-
       "rmdSupervisor": meshCtrl.text,
-
       "loomOperator1": selectedOperator1,
       // "loomOperator2": selectedOperator2 ?? selectedOperator1,
       "loomOperator2": avgWeightMtrCtrl.text,
-
       "laminationRemark": "0",
       "uscRemark": "FIBC",
       "cuttingRemark": "0",
       "multiple": "0",
-
       "machineNo": partyController.text,
       "planningWeek": tareWeightCtrl.text,
-
       "plant1": unit,
       "plant2": unit,
-
       "stateName": avgWeightMtrGmCtrl.text,
       "cDept": "LO",
-
       "cId": cId ?? 0,
       "purchaseOrder": articleNoCtrl.text,
-
       "batchNo": _batchController.text,
       "shift": selectedShift ?? "A",
     };
 
     try {
-      // print("========== API DEBUG START ==========");
-      // print("👉 URL: $url");
-      // print("👉 HEADERS: ${await InStockService.authHeaders()}");
-      // print("👉 BODY: ${jsonEncode(body)}");
+      print("========== API DEBUG START ==========");
+      print("👉 URL: $url");
+      print("👉 HEADERS: ${await InStockService.authHeaders()}");
+      print("👉 BODY: ${jsonEncode(body)}");
 
       final res = await http.post(
         url,
@@ -391,9 +386,9 @@ class _LoomFormState extends State<LoomForm> {
         body: jsonEncode(body),
       );
 
-      // print("👉 STATUS CODE: ${res.statusCode}");
-      // print("👉 RESPONSE BODY: ${res.body}");
-      // print("========== API DEBUG END ==========");
+      print("👉 STATUS CODE: ${res.statusCode}");
+      print("👉 RESPONSE BODY: ${res.body}");
+      print("========== API DEBUG END ==========");
 
       if (res.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -407,17 +402,17 @@ class _LoomFormState extends State<LoomForm> {
             ),
           ),
         );
-
+        Navigator.pop(context); // Go back to previous screen
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-
           SnackBar(
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(20),
-              content: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text("Error ${res.statusCode}: ${res.body}"),
-              )),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(20),
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Error ${res.statusCode}: ${res.body}"),
+            ),
+          ),
         );
       }
     } catch (e, stack) {
@@ -492,13 +487,30 @@ class _LoomFormState extends State<LoomForm> {
                           },
                         ),
                       ]),
-                      _buildField("Party Name", controller: partyController),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildField(
+                              "Party Name",
+                              controller: partyController,
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildField(
+                              "BOM No",
+                              controller: bomNoController,
+                            ),
+                          ),
+                        ],
+                      ),
                       SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: _buildField(
-                              "BOM No",
+                              "Order No",
                               controller: loomOrderController,
                             ),
                           ),
@@ -624,18 +636,40 @@ class _LoomFormState extends State<LoomForm> {
                           },
                         ),
 
+                        // DropdownButtonFormField<String>(
+                        //   isExpanded: true,
+                        //   value: selectedMachineType,
+                        //   hint: const Text("Select Loom No"),
+                        //   items: machineTypes.map((e) {
+                        //     return DropdownMenuItem(value: e, child: Text(e));
+                        //   }).toList(),
+                        //   onChanged: (val) async {
+                        //     setState(() {
+                        //       selectedMachineType = val;
+                        //     });
+                        //
+                        //     await _fetchLoomReading();
+                        //   },
+                        // ),
                         DropdownButtonFormField<String>(
-                          isExpanded: true,
-                          value: selectedMachineType,
+                          initialValue:
+                              machineTypes.contains(selectedMachineType)
+                              ? selectedMachineType
+                              : null,
+
                           hint: const Text("Select Loom No"),
-                          items: machineTypes.map((e) {
-                            return DropdownMenuItem(value: e, child: Text(e));
-                          }).toList(),
+                          items: machineTypes
+                              .map(
+                                (e) => DropdownMenuItem<String>(
+                                  value: e,
+                                  child: Text(e),
+                                ),
+                              )
+                              .toList(),
                           onChanged: (val) async {
                             setState(() {
                               selectedMachineType = val;
                             });
-
                             await _fetchLoomReading();
                           },
                         ),
@@ -699,7 +733,7 @@ class _LoomFormState extends State<LoomForm> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: _buildField("GSM", controller: gsmCtrl),
+                            child: _buildField("GM", controller: gsmCtrl),
                           ),
                         ],
                       ),
@@ -887,9 +921,7 @@ class _LoomFormState extends State<LoomForm> {
         "${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}";
 
     return Container(
-      decoration: const BoxDecoration(
-        color: C.appBar1
-      ),
+      decoration: const BoxDecoration(color: C.appBar1),
       child: SafeArea(
         bottom: false,
         child: Padding(

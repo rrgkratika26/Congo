@@ -3,10 +3,14 @@ import 'dart:convert';
 
 import 'package:IMS/ScannedItem/Cutting/NardanaCutting/modelclass/CuttingOutStockNardana.dart';
 import 'package:IMS/services/getSupervisors/getSupervisors.dart';
+import 'package:IMS/util/sharedpreference/shared_preference.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../Color/Colorclass.dart';
+import '../../../services/GlobalLoader/GloabalUnit.dart';
 import '../../../services/NardanaApis/NardanaApi.dart';
 import '../../../services/visa_apis/visa_api.dart';
 import '../cutOutModelClass/ModelClassOutstock.dart';
@@ -34,12 +38,15 @@ class _CuttingOutStockFormNardanaState
   final _apiService = VisaApiService();
   final _inStockService = InStockService();
   final _formKey = GlobalKey<FormState>();
-  List<String> _laminationList = [];
+  List<String> _laminationList = ['SL'];
   List<String> _baffleList = [];
   String _woType = "WITH_WO"; // default
   String _rollFinish = "NO";
   String? _selectedLamination;
   String? _selectedBaffle;
+  final appCtrl = Get.find<AppController>();
+
+  late String unit = appCtrl.unit.value;
 
   bool _isLoadingLamination = false;
   // ── Dropdown state ─────────────────────────────────────────────
@@ -91,6 +98,8 @@ class _CuttingOutStockFormNardanaState
   final TextEditingController _operatorCtrl = TextEditingController();
   // late TextEditingController _grossWeightCtrl;
   final TextEditingController _fabricTypeCtrl = TextEditingController();
+
+  final TextEditingController _fabricConstCtrl = TextEditingController(text: 'SL');
   final TextEditingController _colorCtrl = TextEditingController();
   final TextEditingController _specialIdCtrl = TextEditingController();
   final TextEditingController _fabricGsmCtrl = TextEditingController();
@@ -133,9 +142,8 @@ class _CuttingOutStockFormNardanaState
   @override
   void initState() {
     super.initState();
-
+    // _loadUnit();
     final p = widget.production;
-
 
     _rollWeightCtrl.addListener(_onRollWeightChanged);
     // ─── BASIC INFO ───
@@ -164,6 +172,7 @@ class _CuttingOutStockFormNardanaState
 
     // ─── FABRIC ───
     _fabricTypeCtrl.text = p.fabricType ?? "";
+    _fabricConstCtrl.text = 'SL';
 
     _colorCtrl.text = p.color ?? "";
 
@@ -215,7 +224,7 @@ class _CuttingOutStockFormNardanaState
 
     // ─── LISTENERS ───
     _machineEndCtrl.addListener(_calculateCutLength);
-    // _netWtCtrl.addListener(_calculateUseAndFinalRem);
+    _netWtCtrl.addListener(_calculateUseAndFinalRem);
     // _netWtCtrl.addListener(_calculateUseAndFinalRem);
     _wastageCtrl.addListener(_calculateUseAndFinalRem);
     _grossWeightCtrl.addListener(_calculateRollWeight);
@@ -305,6 +314,7 @@ class _CuttingOutStockFormNardanaState
         .clamp(0, double.infinity)
         .toStringAsFixed(2);
   }
+
   Future<void> _initialLoad() async {
     setState(() => _isLoading = true);
 
@@ -345,8 +355,8 @@ class _CuttingOutStockFormNardanaState
     setState(() => _isLoadingFabricWidth = true);
     final data = await VisaApiService.getGsmOrFabricWidth(type: "FW");
 
-    debugPrint("FabricWidth API response: $data"); // ← Ye add karo
-    debugPrint("FabricWidth list length: ${data.length}");
+    // debugPrint("FabricWidth API response: $data"); // ← Ye add karo
+    // debugPrint("FabricWidth list length: ${data.length}");
 
     setState(() {
       _fabricWidthList = data;
@@ -401,6 +411,7 @@ class _CuttingOutStockFormNardanaState
       _fabricGsmCtrl.text = _selectedGsm ?? '';
       _isLoadingGsm = false;
     });
+    _calculateNetWeight();
   }
 
   Future<void> _loadOperators() async {
@@ -489,14 +500,31 @@ class _CuttingOutStockFormNardanaState
   }
 
   void _calculateNetWeight() {
+    print("🔥 _calculateNetWeight called");
+    print("width=${_cutWidthCtrl.text}");
+    print("length=${_cutLengthCmCtrl.text}");
+    print("gsm=${_fabricGsmCtrl.text}");
+    print("qty=${_cutSizeQtyCtrl.text}");
+    print("NetWt=${_netWtCtrl.text}");
     final width = double.tryParse(_cutLengthCmCtrl.text) ?? 0;
     final length = double.tryParse(_cutWidthCtrl.text) ?? 0;
-    final gsm = double.tryParse(_fabricGsmCtrl.text) ?? 0;
+    // final gsm = double.tryParse(_fabricGsmCtrl.text) ?? 0;
+    double parseGsm(String value) {
+      if (value.contains('+')) {
+        return value
+            .split('+')
+            .map((e) => double.tryParse(e.trim()) ?? 0)
+            .reduce((a, b) => a + b);
+      }
+
+      return double.tryParse(value) ?? 0;
+    }
+    final gsm = parseGsm(_fabricGsmCtrl.text);
     final qty = double.tryParse(_cutSizeQtyCtrl.text) ?? 0;
 
-    // ✅ Check Baffle Type
     final isDouble =
-        _fabricBaffleCtrl.text == "CRF" || _fabricBaffleCtrl.text == "C00";
+        _fabricBaffleCtrl.text == "CRF" ||
+            _fabricBaffleCtrl.text == "C00";
 
     double netWt;
 
@@ -507,6 +535,9 @@ class _CuttingOutStockFormNardanaState
     }
 
     _netWtCtrl.text = netWt.toStringAsFixed(2);
+
+    // ✅ ADD THIS
+    _calculateUseAndFinalRem();
   }
   // Future<void> _fetchArticleAndThenBom() async {
   //   final sidInt = int.tryParse(widget.production.id);
@@ -578,6 +609,7 @@ class _CuttingOutStockFormNardanaState
           _cutWidthCtrl.text = "${data['cutWidth'] ?? ''}";
           _cutLengthCmCtrl.text = "${data['cutLength'] ?? ''}";
         });
+        _calculateNetWeight();
       }
     } catch (e) {
       _showSnack("Failed to fetch cut size: $e", Colors.red);
@@ -759,9 +791,9 @@ class _CuttingOutStockFormNardanaState
       "cutType": _fabricBaffleCtrl.text,
       "loomwastage": _loomWastageCtrl.text,
       "lamiwastage": _laminationWastageCtrl.text,
-      // "unit": "UNIT-SILVASSA", // or KG depending on your system
 
-      "unit": "UNIT-NARDANA", // or KG depending on your system
+      // "unit": "UNIT-SILVASSA", // or KG depending on your system
+      "unit": unit, // or KG depending on your system
     };
   }
 
@@ -912,20 +944,22 @@ class _CuttingOutStockFormNardanaState
         _card([
           _row([
             _field("Fabric Type / Use", _fabricTypeCtrl, readOnly: true),
-            _isLoadingLamination
-                ? _loadingLabelBox("Fabric Construction")
-                : _genericDropdown(
-                    label: "Fabric Construction",
-                    items: _baffleList,
-                    value: _selectedBaffle,
-                    isLoading: false,
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedBaffle = val;
-                        _baffleCtrl.text = val ?? "";
-                      });
-                    },
-                  ),
+            _field("Fabric Construction", _fabricBaffleCtrl, readOnly: true),
+            //
+            // _isLoadingLamination
+            //     ? _loadingLabelBox("Fabric Construction")
+            //     : _genericDropdown(
+            //         label: "Fabric Construction",
+            //         items: _baffleList,
+            //         value: _selectedBaffle,
+            //         isLoading: false,
+            //         onChanged: (val) {
+            //           setState(() {
+            //             _selectedBaffle = val;
+            //             _baffleCtrl.text = val ?? "";
+            //           });
+            //         },
+            //       ),
           ]),
           _row([
             _field("Color", _colorCtrl, readOnly: true),
@@ -986,24 +1020,26 @@ class _CuttingOutStockFormNardanaState
           ]),
           _row([
             _field("Baffle / Type", _fabricBaffleCtrl, readOnly: true),
-            _isLoadingLamination
-                ? _loadingLabelBox("Lamination Type")
-                : _genericDropdown(
-                    label: "Lamination Type",
-                    items: _laminationList,
-                    value: _selectedLamination,
-                    isLoading: false,
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedLamination = val;
-                        _laminationCtrl.text = val ?? "";
-                      });
-                    },
-                  ),
+
+            _field("Lamination Type", _fabricConstCtrl, readOnly: true),
+            // _isLoadingLamination
+            //     ? _loadingLabelBox("Lamination Type")
+            //     : _genericDropdown(
+            //         label: "Lamination Type",
+            //         items: _laminationList,
+            //         value: _selectedLamination,
+            //         isLoading: false,
+            //         onChanged: (val) {
+            //           setState(() {
+            //             _selectedLamination = val;
+            //             _laminationCtrl.text = val ?? "";
+            //           });
+            //         },
+            //       ),
           ]),
           _row([
             _field("Cut Type", _cutTypeCtrl, readOnly: true),
-            _field("OP Name", _operatorCtrl,),
+            _field("OP Name", _operatorCtrl),
           ]),
         ]),
         _gap,
@@ -1031,13 +1067,14 @@ class _CuttingOutStockFormNardanaState
               inputType: TextInputType.number,
             ),
           ]),
-          _row([_field("Avg Weight /gm", _avgWeightMtrCtrl, readOnly: true),
+          _row([
+            _field("Avg Weight /gm", _avgWeightMtrCtrl, readOnly: true),
             _field("Batch No", _batchNoCtrl, readOnly: true),
           ]),
           const Divider(height: 20, thickness: 0.5),
           _row([
-            _field("Cut Length(cm)", _cutWidthCtrl),//318
-            _field("Cut Width(cm)", _cutLengthCmCtrl),//98
+            _field("Cut Length(cm)", _cutWidthCtrl), //318
+            _field("Cut Width(cm)", _cutLengthCmCtrl), //98
           ]),
           _row([
             _field(
@@ -1045,14 +1082,14 @@ class _CuttingOutStockFormNardanaState
               _cutSizeQtyCtrl,
               inputType: TextInputType.number,
             ),
-            _field("Net Wt", _netWtCtrl, inputType: TextInputType.number),
+            _field("Net Wt", _netWtCtrl, readOnly: true),
             _field("Wastage", _wastageCtrl, inputType: TextInputType.number),
           ]),
           _row([
             // _field("Till Rem.", _tillRemCtrl, readOnly: true),
             // _field("USE", _useCtrl, readOnly: true),
             // _field("Final Rem.", _finalRemCtrl, readOnly: true),
-            _field("Till Rem.", _tillRemCtrl, ),
+            _field("Till Rem.", _tillRemCtrl),
             _field("USE", _useCtrl, readOnly: true),
             _field("Final Rem.", _finalRemCtrl, readOnly: true),
           ]),
@@ -1078,7 +1115,10 @@ class _CuttingOutStockFormNardanaState
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(color: C.appBar3,strokeWidth: 1.5),
+                      child: CircularProgressIndicator(
+                        color: C.appBar3,
+                        strokeWidth: 1.5,
+                      ),
                     )
                   : const Icon(Icons.qr_code_2_rounded, size: 16),
               label: const Text("Generate Fabric Code & Batch No"),
@@ -1538,7 +1578,10 @@ class _CuttingOutStockFormNardanaState
                       SizedBox(
                         width: 14,
                         height: 14,
-                        child: CircularProgressIndicator(color: C.appBar3,strokeWidth: 1.5),
+                        child: CircularProgressIndicator(
+                          color: C.appBar3,
+                          strokeWidth: 1.5,
+                        ),
                       ),
                       SizedBox(width: 8),
                       Text("Loading...", style: TextStyle(fontSize: 12)),
@@ -1675,7 +1718,7 @@ class _CuttingOutStockFormNardanaState
         SizedBox(
           width: 13,
           height: 13,
-          child: CircularProgressIndicator(color: C.appBar3,strokeWidth: 1.5),
+          child: CircularProgressIndicator(color: C.appBar3, strokeWidth: 1.5),
         ),
         SizedBox(width: 8),
         Text("Loading...", style: TextStyle(fontSize: 12, color: _labelColor)),
@@ -1764,6 +1807,8 @@ class _CuttingOutStockFormNardanaState
       ),
     ),
   );
+
+
 }
 
 class _NameValue {

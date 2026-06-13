@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:IMS/services/GlobalLoader/GLobalLoader.dart';
+import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
 import 'package:IMS/util/widget/AppTheme.dart';
 import 'package:IMS/util/widget/ThemeController.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   // final isLoggedIn = prefs.getString('unit') != null;
-
+  final appController = Get.put(AppController());
+  await appController.loadUnit();
   runApp(const MyApp());
 }
 

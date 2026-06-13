@@ -1,5 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_navigation/src/routes/transitions_type.dart';
+import '../../AdminDashBoard/DepartmentDashboard.dart';
 import '../../Color/Colorclass.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
 import 'ModelClass/OrderCompositionModel.dart';
@@ -222,29 +226,15 @@ class _SelectedOrderScreenState extends State<SelectedOrderScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         backgroundColor: Colors.green,
-
-                        behavior: SnackBarBehavior.floating,
-
-                        content: Row(
-                          children: [
-                            const Icon(Icons.check_circle, color: Colors.white),
-
-                            const SizedBox(width: 10),
-
-                            Expanded(
-                              child: Text(
-                                responseData["message"],
-
-                                style: const TextStyle(
-                                  color: Colors.white,
-
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        content: Text(responseData["message"]),
                       ),
+                    );
+
+                    await Future.delayed(const Duration(seconds: 1));
+
+                    Get.offAll(
+                          () => NewAdminDashboard(),
+                      transition: Transition.cupertino,
                     );
                   } catch (e) {
                     Navigator.pop(context);

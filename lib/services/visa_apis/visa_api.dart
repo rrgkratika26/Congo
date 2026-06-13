@@ -456,8 +456,8 @@ class VisaApiService {
         headers: await InStockService.authHeaders(),
       );
 
-      print("Status Code 👉 ${response.statusCode}");
-      print("Response Body 👉 ${response.body}");
+      debugPrint("✅ CutSize Status: ${response.statusCode}");
+      debugPrint("✅ CutSize Body: ${response.body}"); // ← YE DEKHO
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -483,8 +483,8 @@ class VisaApiService {
         headers: await InStockService.authHeaders(),
       );
 
-      print("Status Code 👉 ${response.statusCode}");
-      print("Response Body 👉 ${response.body}"); // ✅ print response
+      // print("Status Code 👉 ${response.statusCode}");
+      // print("Response Body 👉 ${response.body}"); // ✅ print response
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);

@@ -43,8 +43,7 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
   double get _totalLength =>
       ReportTotalHelper.totalRollLength(_filtered, (e) => e.rollLength);
 
-  int get _totalRecords =>
-      ReportTotalHelper.totalRecords(_filtered);
+  int get _totalRecords => ReportTotalHelper.totalRecords(_filtered);
 
   List<LaminationReportModel> get _filtered {
     return _allData.where((r) {
@@ -78,7 +77,7 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
   @override
   void initState() {
     super.initState();
-    _from = _to?.subtract(const Duration(days: 30));
+    _from = DateTime.now().subtract(const Duration(days: 6));
     _to = DateTime.now();
     _fetchData();
   }
@@ -88,9 +87,10 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
-      initialDateRange: (_from != null && _to != null)
-          ? DateTimeRange(start: _from!, end: _to!)
-          : null,
+      initialDateRange: DateTimeRange(
+        start: _from ?? DateTime.now().subtract(const Duration(days: 6)),
+        end: _to ?? DateTime.now(),
+      ),
     );
 
     if (picked != null) {
@@ -138,7 +138,13 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
             _topBar(),
             _isLoading
                 ? const Expanded(
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.transparent,
+                        color: C.actionOrange,
+                        strokeWidth: 5,
+                      ),
+                    ),
                   )
                 : _filtered.isEmpty
                 ? Expanded(child: _emptyState())
@@ -167,14 +173,21 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
                   onChanged: (v) => setState(() => _query = v),
                   style: const TextStyle(fontSize: 14, color: Colors.white),
                   decoration: InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: C.primaryDark,
+                        strokeAlign: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     hintText: 'Search barcode, batch, party, supervisor…',
                     hintStyle: const TextStyle(
-                      color: Colors.white38,
+                      color: C.primaryDark,
                       fontSize: 13,
                     ),
                     prefixIcon: const Icon(
                       Icons.search,
-                      color: Colors.white54,
+                      color: C.primaryDark,
                       size: 20,
                     ),
                     suffixIcon: _query.isNotEmpty
@@ -236,10 +249,12 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
   Widget _box(String title, String value, Color color) {
     return Expanded(
       child: Container(
+        // color: C.primaryDark,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(.08),
+          color: C.primaryDark,
+          // color: color.withOpacity(.08),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

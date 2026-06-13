@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Color/Colorclass.dart';
+import '../../ScannedItem/Cutting/CuttinIN/CuttingScreen.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
 import '../../util/sharedpreference/shared_preference.dart';
 import 'ModelClass/PlanningModel.dart';
@@ -26,6 +29,7 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
   String endDate = "";
   String selectedDepartment = "LOOM";
   bool isLoading = true;
+  bool _isSaving = false;
 
   static const w1 = 100.0;
   static const w2 = 200.0;
@@ -144,38 +148,93 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
           "Save",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        onPressed: () async {
-          try {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (_) => const Center(child: CircularProgressIndicator()),
-            );
+        // onPressed: () async {
+        //   if (_isSaving) return; // Prevent multiple taps
+        //
+        //   _isSaving = true;
+        //   try {
+        //     showDialog(
+        //       context: context,
+        //       barrierDismissible: false,
+        //       builder: (_) => const Center(child: CircularProgressIndicator()),
+        //     );
+        //     if (!mounted) return;
+        //
+        //
+        //     await NaradanaApiService().savePlanning(
+        //       woNumber: widget.orderData.generatedInquiry,
+        //       quantity: widget.orderData.quantity,
+        //       poNum: widget.orderData.poNum,
+        //       articleNum: widget.orderData.articleNo,
+        //       items: planningList,
+        //       unit: unit ?? "",
+        //     );
+        //
+        //
+        //
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(
+        //           backgroundColor: C.success,
+        //           content: Text("Data Saved Successfully")),
+        //     );
+        //     Navigator.pop(context);
+        //   } catch (e) {
+        //     if (mounted) {
+        //       Navigator.pop(context); // Close loader
+        //     }
+        //
+        //
+        //     ScaffoldMessenger.of(
+        //       context,
+        //     ).showSnackBar(SnackBar(content: Text(e.toString())));
+        //   }
+        // },
+          onPressed: () async {
+            if (_isSaving) return;
 
-            await NaradanaApiService().savePlanning(
-              woNumber: widget.orderData.generatedInquiry,
-              quantity: widget.orderData.quantity,
-              poNum: widget.orderData.poNum,
-              articleNum: widget.orderData.articleNo,
-              items: planningList,
-              unit: unit ?? "",
-            );
+            _isSaving = true;
 
-            Navigator.pop(context);
+            try {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              await NaradanaApiService().savePlanning(
+                woNumber: widget.orderData.generatedInquiry,
+                quantity: widget.orderData.quantity,
+                poNum: widget.orderData.poNum,
+                articleNum: widget.orderData.articleNo,
+                items: planningList,
+                unit: unit ?? "",
+              );
+
+              if (!mounted) return;
+
+              Navigator.pop(context); // Close loader
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
                   backgroundColor: C.success,
-                  content: Text("Data Saved Successfully")),
-            );
-          } catch (e) {
-            Navigator.pop(context);
+                  content: Text("Data Saved Successfully"),
+                ),
+              );
 
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(e.toString())));
+              Navigator.pop(context);
+            } catch (e) {
+              if (mounted) {
+                Navigator.pop(context); // Close loader
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.toString())),
+                );
+              }
+            } finally {
+              _isSaving = false;
+            }
           }
-        },
       ),
       backgroundColor: C.bg,
 

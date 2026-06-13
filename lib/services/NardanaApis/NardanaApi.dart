@@ -61,9 +61,9 @@ class NaradanaApiService {
   }) {
     debugPrint("==========================================");
     debugPrint("🌐 $method => $url");
-    debugPrint("📡 Status Code => ${response.statusCode}");
-    debugPrint("📦 Response => ${response.body}");
-    debugPrint("==========================================");
+    // debugPrint("📡 Status Code => ${response.statusCode}");
+    // debugPrint("📦 Response => ${response.body}");
+    // debugPrint("==========================================");
   }
 
   // COMMON HEADERS
@@ -646,7 +646,10 @@ class NaradanaApiService {
     );
 
     final res = await http.get(url, headers: await authHeaders());
-
+    print("🌐 GET => $url");
+    // print("📡 Status => ${res.statusCode}");
+    debugPrint("📦 Response => ${res.body}");
+    print("======================================");
     if (res.statusCode == 200) {
       final jsonData = jsonDecode(res.body);
 
@@ -701,7 +704,8 @@ class NaradanaApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
+        debugPrint("Status Code: ${response.statusCode}");
+        debugPrint("Response Body: ${response.body}");
         return {
           "laminations": List<String>.from(data["laminations"] ?? []),
           "buffles": List<String>.from(data["buffles"] ?? []),
@@ -721,11 +725,11 @@ class NaradanaApiService {
       final headers = await authHeaders();
       final encodedBody = jsonEncode(body);
 
-      // // 🔥 PRINT EVERYTHING
-      // debugPrint("📡 API CALL → POST");
-      // debugPrint("🔗 URL → $url");
-      // debugPrint("📨 Headers → $headers");
-      // debugPrint("📦 Body → $encodedBody");
+      // 🔥 PRINT EVERYTHING
+      debugPrint("📡 API CALL → POST");
+      debugPrint("🔗 URL → $url");
+      debugPrint("📨 Headers → $headers");
+      debugPrint("📦 Body → $encodedBody");
 
       final response = await http.post(
         Uri.parse(url),
@@ -734,8 +738,8 @@ class NaradanaApiService {
       );
 
       // 🔥 PRINT RESPONSE
-      // debugPrint("📥 Status Code → ${response.statusCode}");
-      // debugPrint("📥 Response Body → ${response.body}");
+      debugPrint("📥 Status Code → ${response.statusCode}");
+      debugPrint("📥 Response Body → ${response.body}");
 
       if (response.statusCode == 200) {
         final res = jsonDecode(response.body);
@@ -796,8 +800,8 @@ class NaradanaApiService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
 
-        // print("📡 Status Code 👉 ${response.statusCode}");
-        // print("📦 Response Body 👉 ${response.body}");
+        print("📡 Status Code 👉 ${response.statusCode}");
+        print("📦 Response Body 👉 ${response.body}");
         return LaminationOutModel.fromJson(
           jsonData['data'], // ✅ FULL DATA
         );
@@ -1312,13 +1316,15 @@ class NaradanaApiService {
     return response;
   }
 
-  Future<List<CombineToLoomModel>> getCombineToLoomList() async {
+  Future<List<CombineToLoomModel>> getCombineToLoomList(String? unit) async {
     try {
       final response = await http.get(
-        Uri.parse("$_baseUrl/Planning/CombineToLoomList?unit=UNIT-NARDANA"),
+        Uri.parse("$_baseUrl/Planning/CombineToLoomList?unit=$unit"),
         headers: await authHeaders(),
       );
+      debugPrint("Response Body => ${response.body}");
 
+      debugPrint("==================================");
       if (response.statusCode == 200) {
         List data = jsonDecode(response.body);
 
@@ -1331,17 +1337,17 @@ class NaradanaApiService {
     }
   }
 
-  Future<List<FabricCategoryModel>> getFabricDropdowns() async {
+  Future<List<FabricCategoryModel>> getFabricDropdowns(String? unit) async {
     try {
       final response = await http.get(
-        Uri.parse("$_baseUrl/Planning/AllFabricDropdowns?unit=UNIT-NARDANA"),
+        Uri.parse("$_baseUrl/Planning/AllFabricDropdowns?unit=$unit"),
         headers: await authHeaders(),
       );
 
       if (response.statusCode == 200) {
         List data = jsonDecode(response.body);
         debugPrint(
-          "Status Code /Planning/AllFabricDropdowns?unit=UNIT-NARDANA => ${response.statusCode}",
+          "Status Code /Planning/AllFabricDropdowns?unit=$unit => ${response.statusCode}",
         );
 
         debugPrint("Headers => ${response.headers}");
@@ -1362,7 +1368,10 @@ class NaradanaApiService {
     }
   }
 
-  Future<dynamic> forwardToLoom({
+  Future<dynamic> forwardToLoom(
+      {
+        required  String? unit,
+
     required int orderNo,
     required String fabricCode,
     required String requiredMtr,
@@ -1377,7 +1386,7 @@ class NaradanaApiService {
   }) async {
     try {
       final url = Uri.parse(
-        '$_baseUrl/Planning/ForwardToLoom?unit=UNIT-NARDANA',
+        '$_baseUrl/Planning/ForwardToLoom?unit=$unit',
       );
 
       final body = {

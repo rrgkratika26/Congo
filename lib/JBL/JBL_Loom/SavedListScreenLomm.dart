@@ -633,6 +633,9 @@ class _SavedListScreenState extends State<SavedListScreen> {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+      // Previous screen par wapas
+      Get.back();
+
     } catch (e) {
       Get.snackbar(
         "Error",

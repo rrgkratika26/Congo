@@ -17,7 +17,10 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
   final ScrollController horizontalCtrl = ScrollController();
 
   String orderComponent = "SINGLE";
+  TextEditingController searchController = TextEditingController();
 
+
+  List<OrderCompositionModel> filteredData = [];
   List<String> componentTypes = ["SINGLE", "CLUB"];
 
   List<OrderCompositionModel> data = [];
@@ -60,9 +63,25 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
   @override
   void initState() {
     super.initState();
+
     loadData();
   }
-
+  void filterData(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        filteredData = data;
+      } else {
+        filteredData = data.where((item) {
+          return item.woNumber
+              .toLowerCase()
+              .contains(value.toLowerCase()) ||
+              item.component
+                  .toLowerCase()
+                  .contains(value.toLowerCase());
+        }).toList();
+      }
+    });
+  }
   Future loadData() async {
     try {
       setState(() {
@@ -73,10 +92,12 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
       setState(() {
         data = result;
+        filteredData = result;
         isLoading = false;
       });
     } catch (e) {
       setState(() {
+
         isLoading = false;
       });
 
@@ -107,10 +128,36 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
         //     ),
         //   ),
         // ),
+        actions: [IconButton(onPressed: () {  }, icon: Icon(Icons.filter_alt_outlined),)],
       ),
 
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 10),
+            child: TextField(
+              controller: searchController,
+              onChanged: filterData,
+              decoration: InputDecoration(
+                hintText: "Search BOM / Component",
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: searchController.text.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    searchController.clear();
+                    filterData('');
+                  },
+                )
+                    : null,
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(12),
 
@@ -257,54 +304,54 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 12),
 
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+              decoration: BoxDecoration(
+                color: Colors.white,
 
-                      borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16),
 
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(.04),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(.04),
 
-                          blurRadius: 8,
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+
+              child: Scrollbar(
+                controller: horizontalCtrl,
+
+                thumbVisibility: true,
+
+                child: SingleChildScrollView(
+                  controller: horizontalCtrl,
+
+                  scrollDirection: Axis.horizontal,
+
+                  child: SizedBox(
+                    width: totalWidth < width ? width : totalWidth,
+
+                    child: Column(
+                      children: [
+                        header(),
+
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: filteredData.length,
+
+                            itemBuilder: (_, index) {
+                              return tableRow(filteredData[index], index);
+                            },
+                          ),
                         ),
                       ],
                     ),
-
-                    child: Scrollbar(
-                      controller: horizontalCtrl,
-
-                      thumbVisibility: true,
-
-                      child: SingleChildScrollView(
-                        controller: horizontalCtrl,
-
-                        scrollDirection: Axis.horizontal,
-
-                        child: SizedBox(
-                          width: totalWidth < width ? width : totalWidth,
-
-                          child: Column(
-                            children: [
-                              header(),
-
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: data.length,
-
-                                  itemBuilder: (_, index) {
-                                    return tableRow(data[index], index);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
+                ),
+              ),
+            ),
           ),
 
           Padding(
@@ -712,7 +759,8 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
           SizedBox(
             width: selectW,
             child: Checkbox(
-              value: data[index].selected,
+              // value: data[index].selected,
+              value: item.selected,
               activeColor: C.success,
 
               onChanged: (bool? value) {

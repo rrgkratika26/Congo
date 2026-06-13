@@ -62,11 +62,11 @@ class AddRecutPcsPopup {
           component: component,
         );
         // 🔥 PRINT FULL RESPONSE
-        debugPrint("Fabric Cut Size API Response: $data");
+        // debugPrint("Fabric Cut Size API Response: $data");
 
         // 🔥 OPTIONAL: print specific fields
-        debugPrint("Width: ${data['fabricsize_addqty']}");
-        debugPrint("Length: ${data['cutsize_addwt']}");
+        // debugPrint("Width: ${data['fabricsize_addqty']}");
+        // debugPrint("Length: ${data['cutsize_addwt']}");
 
         setState(() {
           cutWidthCtrl.text = data['fabricsize_addqty'].toString();

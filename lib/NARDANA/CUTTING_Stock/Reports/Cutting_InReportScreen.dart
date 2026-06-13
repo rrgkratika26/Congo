@@ -109,7 +109,7 @@ class _Cutting_InReportSCreenState
 
   /// ================= TOTALS =================
   double get totalMtr =>
-      reportList.fold(0, (sum, e) => sum + e.rollSize);
+      reportList.fold(0, (sum, e) => sum + e.rollWt);
 
   // double get totalWt =>
   //     reportList.fold(0, (sum, e) => sum + e.);
@@ -173,7 +173,7 @@ class _Cutting_InReportSCreenState
                   _HeaderCell("Party", 180),
                   _HeaderCell("Component", 120),
                   _HeaderCell("WO Qty", 100),
-                  _HeaderCell("Roll Size", 100),
+                  _HeaderCell("Roll Wt", 100),
                   _HeaderCell("PCS", 100),
                   _HeaderCell("No Of PCS", 120),
                   _HeaderCell("Wastage", 100),
@@ -192,7 +192,8 @@ class _Cutting_InReportSCreenState
                   _DataCell(e.partyName, 180),
                   _DataCell(e.compName, 120),
                   _DataCell(e.woQty.toString(), 100),
-                  _DataCell(e.rollSize as String, 100),
+                  _DataCell(e.rollWt.toStringAsFixed(2), 100),
+                  // _DataCell(e.rollSize.toStringAsFixed(0), 100),
                   _DataCell(e.pcs.toStringAsFixed(2), 100),
                   _DataCell(e.noOfPcs.toString(), 120),
                   _DataCell(e.wastage.toStringAsFixed(2), 100),

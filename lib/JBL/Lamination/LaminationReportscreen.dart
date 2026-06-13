@@ -962,7 +962,7 @@ class _LaminationReportScreenState extends State<LaminationReportScreen>
   String _search = '';
   late TextEditingController _searchCtrl;
 
-  DateTime _fromDate = DateTime.now();
+  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 6));
   DateTime _toDate = DateTime.now();
 
   late Map<String, String> _baseParams;
@@ -1231,8 +1231,10 @@ class _LaminationReportScreenState extends State<LaminationReportScreen>
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: C.appBar3,
+                          strokeWidth: 5,
+                          backgroundColor: Colors.transparent,
+
+                          color: C.actionOrange,
                         ),
                       ),
                     ),

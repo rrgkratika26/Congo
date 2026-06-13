@@ -1877,7 +1877,9 @@ class _LoginPageState extends State<LoginPage>
                 ),
               ),
               // ── Update this list for your deployed units ───────────────
-              items: ['UNIT-CONGO'].map((String value) {
+              // items: ['UNIT-CONGO'].map((String value) {
+              items: ['UNIT-NARDANA'].map((String value) {
+
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Padding(

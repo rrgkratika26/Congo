@@ -59,7 +59,7 @@ class LoomOrder {
       id: json['id'] ?? 0,
       articleNo: json['articlE_NUM']?.toString() ?? "",
         poNumber: json['pO_NUM']?.toString() ?? '',
-      bom: json['bom']?.toString() ?? '',
+      bom: json['boM_NO']?.toString() ?? '',
       orderNo: json['orderNo']?.toString() ?? '',
       loomOrderNo: json['loomOrderNo']?.toString() ?? '',
       woNo: json['woNo']?.toString() ?? '',

@@ -13,8 +13,8 @@ class LaminationDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("Selected Plant 👉 $plant");
-    debugPrint("Selected Date 👉 $date");
+    // debugPrint("Selected Plant 👉 $plant");
+    // debugPrint("Selected Date 👉 $date");
     return Scaffold(
       appBar: AppBar(
         title: Text('Lamination Report'),

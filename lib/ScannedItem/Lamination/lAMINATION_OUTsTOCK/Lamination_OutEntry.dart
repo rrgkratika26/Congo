@@ -11,6 +11,7 @@ import 'laminationOut_model.dart';
 
 class RollEntryForm extends StatefulWidget {
   final Roll roll;
+
   const RollEntryForm({super.key, required this.roll});
 
   @override
@@ -30,7 +31,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
   String? _selectedMachineType;
   String? _selectedLaminationType;
   final _batchNoCtrl = TextEditingController();
-  final List<String> _laminationTypes = ["SL", "LL", "L", "UL"];
+  final List<String> _laminationTypes = ["SL"];
   final List<String> _machineTypes = ["LAMI-1", "LAMI-2"];
 
   bool _isCodeGenerated = false;
@@ -218,11 +219,11 @@ class _RollEntryFormState extends State<RollEntryForm> {
     // _partyCtrl.text = r.machineno;
     // _partyCtrl.text = r.machineno ?? '';
 
-    debugPrint("PARTY CTRL => ${_partyCtrl.text}");
-    debugPrint("MACHINE NO => ${r.machineno}");
-    debugPrint("PARTY NAME => ${r.partyName}");
-    debugPrint("OPName1 => $_selectedOperator");
-    debugPrint("partyname as bom no =>${_model?.bomNo}");
+    // debugPrint("PARTY CTRL => ${_partyCtrl.text}");
+    // debugPrint("MACHINE NO => ${r.machineno}");
+    // debugPrint("PARTY NAME => ${r.partyName}");
+    // debugPrint("OPName1 => $_selectedOperator");
+    // debugPrint("partyname as bom no =>${_model?.bomNo}");
 
     _poCtrl.text = r.workOrderNo;
     // ✅ Article Number (purchsE_ORDER)
@@ -439,7 +440,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
               children: [
                 Icon(Icons.check_circle, color: Colors.white, size: 16),
                 SizedBox(width: 8),
-                Text("Saved successfully"),
+                Text("Saved successfully ...\n New Barcode Generated"),
               ],
             ),
             backgroundColor: C.success,
@@ -511,28 +512,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
       ],
     ),
     actions: [
-      TextButton.icon(
-        icon: const Icon(Icons.list_alt_rounded, size: 20, color: Colors.white),
-        label: const Text(
-          "New ",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        style: TextButton.styleFrom(
-          backgroundColor: C.primary, // highlight color from your theme
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            // For Naradana
-            builder: (_) => const LamRollPrintScreennaradan(title: "Lamination Rolls"),
 
-            // For VISA
-            // builder: (_) => const LamRollPrintScreen(title: "Lamination Rolls"),//visa
-          ),
-        ),
-      ),
 
       if (!_isLoading)
         IconButton(
@@ -694,6 +674,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
               _twoCol(
                 _dropdown(
                   label: "Machine Type",
+
                   value: _selectedMachineType,
                   items: _machineTypes,
                   onChanged: (v) => setState(() => _selectedMachineType = v),
@@ -764,9 +745,9 @@ class _RollEntryFormState extends State<RollEntryForm> {
               const SizedBox(height: 5),
 
               _twoCol(
-                _field("Cut Type", _laminationCtrl),
+                _field("Cut Type", _laminationCtrl,readOnly: true),
 
-                _field("Special ID", _specialIdCtrl),
+                _field("Special ID", _specialIdCtrl,readOnly: true),
               ),
 
               const SizedBox(height: 8),
@@ -878,7 +859,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
               child: _infoTile("Party Name", _model?.rollData.machineno ?? "—"),
             ),
             const SizedBox(width: 10),
-            Expanded(child: _infoTile("BOM", _model?.bomNo ?? "—")),
+            Expanded(child: _infoTile("Order No", _model?.bomNo ?? "—")),
           ],
         ),
 
@@ -1207,40 +1188,71 @@ class _RollEntryFormState extends State<RollEntryForm> {
     ),
     child: Row(
       children: [
-        SizedBox(
-          height: 44,
-          child: ElevatedButton.icon(
-            onPressed: _isSaving ? null : _onSave,
-            icon: _isSaving
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(
-                    Icons.check_rounded,
-                    size: 16,
+        Row(
+          children: [
+            SizedBox(
+              height: 44,
+              child: ElevatedButton.icon(
+                onPressed: _isSaving ? null : _onSave,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.check_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                label: Text(
+                  _isSaving ? "Saving..." : "Save Entry",
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
-            label: Text(
-              _isSaving ? "Saving..." : "Save Entry",
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: C.success,
+                  disabledBackgroundColor: C.success.withOpacity(0.5),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: C.success,
-              disabledBackgroundColor: C.success.withOpacity(0.5),
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+          ],
+        ),
+        SizedBox(width: 8,),
+        TextButton.icon(
+          icon: const Icon(Icons.list_alt_rounded, size: 20, color: Colors.white),
+          label: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: const Text(
+              "New Barcode List",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+          style: TextButton.styleFrom(
+
+            backgroundColor: C.success, // highlight color from your theme
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              // For Naradana
+              builder: (_) => const LamRollPrintScreennaradan(title: "Lamination Rolls"),
+
+              // For VISA
+              // builder: (_) => const LamRollPrintScreen(title: "Lamination Rolls"),//visa
             ),
           ),
         ),

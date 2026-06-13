@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 
+import '../../AdminDashBoard/DepartmentDashboard.dart';
 import '../../Color/Colorclass.dart';
+import '../../services/GlobalLoader/GloabalUnit.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
 import '../../util/sharedpreference/shared_preference.dart';
 import 'ModelClass/CombineToLoomModel.dart';
@@ -19,7 +24,9 @@ class GenerateCodeScreen extends StatefulWidget {
 
 class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
   bool dropdownLoading = true;
+  final appCtrl = Get.find<AppController>();
 
+  late String unit = appCtrl.unit.value;
   List<FabricDropdownModel> typeList = [];
   List<FabricDropdownModel> fabricTypeList = [];
   List<FabricDropdownModel> colorList = [];
@@ -48,7 +55,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
   final extraMtrController = TextEditingController();
 
   final extraKgController = TextEditingController();
-  String? unit = AppSession.unit;
+
   Map<String, PartyNameModel> partyMap = {};
   double actualMtr = 0;
   double actualKg = 0;
@@ -93,7 +100,6 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
     int roundedExtraKg = extraKg.round();
 
     extraKgController.text = roundedExtraKg.toString();
-
 
     setState(() {
       actualMtr = reqMtr + extraMtr;
@@ -143,10 +149,9 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
     }
   }
 
-
   Future<void> loadDropdownData() async {
     try {
-      final response = await NaradanaApiService().getFabricDropdowns();
+      final response = await NaradanaApiService().getFabricDropdowns(unit);
 
       for (var item in response) {
         switch (item.type) {
@@ -202,7 +207,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
 
     Map<String, dynamic> body = {
       "ordeR_NO": int.tryParse(widget.data.orderNo.toString()) ?? 0,
-
+      "boM_NO": widget.data.BomNo.toString(),
       "fabriC_CODE": generatedFabricCode,
 
       "requireD_MTR": widget.data.mtr.toString(),
@@ -243,7 +248,9 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
         ),
       );
 
-      Navigator.pop(context);
+
+      Get.to(() => NewAdminDashboard());
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -331,10 +338,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
         items: list.map((e) {
           return DropdownMenuItem<String>(
             value: e.code,
-            child: Text(
-              e.name,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: Text(e.name, overflow: TextOverflow.ellipsis),
           );
         }).toList(),
 
@@ -502,11 +506,9 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
                 color: Colors.white,
               ),
             ),
-
-
           ],
         ),
-backgroundColor: C.appBar1,
+        backgroundColor: C.appBar1,
         // flexibleSpace: Container(
         //   decoration: const BoxDecoration(
         //     gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
@@ -524,23 +526,17 @@ backgroundColor: C.appBar1,
               width: double.infinity,
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-
-                  color: Colors.teal.shade200,
+                color: Colors.teal.shade200,
 
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  const Text(
-                    "Generated Fabric Code",
-                    style: TextStyle(
-                      color: C.textHigh,
-                      fontSize: 13,
-                    ),
+                  Text(
+                    "Bom No : ${widget.data.BomNo}",
+                    style: const TextStyle(color: C.textHigh, fontSize: 13),
                   ),
-
                   const SizedBox(height: 1),
 
                   Text(
@@ -553,6 +549,7 @@ backgroundColor: C.appBar1,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   /// Article
                   Text(
                     "Article : ${partyData?.articleNum ?? widget.data.articleNum}",
@@ -824,8 +821,6 @@ backgroundColor: C.appBar1,
   }
 
   Future<void> _loadData() async {
-    unit = await AppSession.getUnit();
-
     if (unit == null) return;
 
     try {

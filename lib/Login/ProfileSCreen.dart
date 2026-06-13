@@ -1,3 +1,4 @@
+import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -119,21 +120,21 @@ class ProfileScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 6),
-        
+
                             Text(
-                              "Unit: ${unit ?? "N/A"}",
+                              "Unit: ${unit ?? AppGlobals.unit}",
                               style: const TextStyle(color: C.textHigh,),
                             ),
-        
+
                             const SizedBox(height: 4),
-        
+
                             Text(
                               "Department: ${department ?? "N/A"}",
                               style: const TextStyle(color: C.textHigh,),
                             ),
-        
+
                             const SizedBox(height: 4),
-        
+
                             Text(
                               "User Type: ${userType ?? "N/A"}",
                               style: const TextStyle(color: C.textHigh,),
@@ -144,16 +145,16 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-        
+
                 const SizedBox(height: 30),
-        
+
                 /// 🔹 Menu Tiles
                 // _buildTile(Icons.contact_phone, "Contact Us"),
                 // _buildTile(Icons.description, "Terms & Conditions"),
                 // _buildTile(Icons.security, "Privacy Policies"),
                 // _buildTile(Icons.info_outline, "About Us"),
                 const SizedBox(height: 80),
-        
+
                 /// 🔹 Logout Button
                 Center(
                   child: SizedBox(
