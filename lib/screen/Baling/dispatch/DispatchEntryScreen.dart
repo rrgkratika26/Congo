@@ -189,8 +189,7 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
     try {
       final now = DateTime.now();
 
-      final formattedDate =
-          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      final formattedDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
 
       // ✅ CREATE ENTRIES LIST
       final entries = barcodeDataList.map((barcodeData) {
@@ -265,6 +264,8 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         setState(() {
           barcodeDataList.clear();
         });
+        // ✅ THIS WILL POP SCREEN
+        Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

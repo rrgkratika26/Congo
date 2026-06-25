@@ -6,6 +6,7 @@ import 'package:IMS/util/sharedpreference/shared_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 import '../../Color/Colorclass.dart';
 import 'SavedListScreenLomm.dart';
@@ -319,7 +320,8 @@ class _LoomFormState extends State<LoomForm> {
     );
 
     final body = {
-      "date": DateTime.now().toIso8601String(),
+      // "date": DateTime.now().toString().split(' ')[0],
+      "date": DateFormat('yyyy-MM-dd').format(DateTime.now()),
       "machine": selectedMachine,
       "boM_NO": bomNoController.text,
       // "operator": selectedOperator1,
@@ -391,6 +393,12 @@ class _LoomFormState extends State<LoomForm> {
       print("========== API DEBUG END ==========");
 
       if (res.statusCode == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SavedListScreen(),
+          ),
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: C.success,
@@ -402,7 +410,7 @@ class _LoomFormState extends State<LoomForm> {
             ),
           ),
         );
-        Navigator.pop(context); // Go back to previous screen
+         // Go back to previous screen
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -479,6 +487,12 @@ class _LoomFormState extends State<LoomForm> {
                         DropdownButtonFormField<String>(
                           value: selectedSupervisor,
                           hint: Text("Select Supervisor"),
+                          decoration: InputDecoration(
+                            labelText: "Sup. Name",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           items: supervisors.map((e) {
                             return DropdownMenuItem(value: e, child: Text(e));
                           }).toList(),
@@ -575,49 +589,57 @@ class _LoomFormState extends State<LoomForm> {
                           readOnly: true,
                         ),
                       ]),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildField(
-                              "Req.netWt (Kg)",
-                              controller: reqQntyKgController,
-                            ),
-                          ),
-
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildField(
-                              "Req.netWt (Mtr)",
-                              controller: reqQntyMtrController,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildField(
-                              "Qty (Kg)",
-                              controller: qtyKgController,
-                            ),
-                          ),
-
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _buildField(
-                              "Qty (Mtr)",
-                              controller: qtyMtrController,
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: _buildField(
+                      //         "Req.netWt (Kg)",
+                      //         controller: reqQntyKgController,
+                      //       ),
+                      //     ),
+                      //
+                      //     const SizedBox(width: 10),
+                      //     Expanded(
+                      //       child: _buildField(
+                      //         "Req.netWt (Mtr)",
+                      //         controller: reqQntyMtrController,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      // SizedBox(height: 10),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: _buildField(
+                      //         "Qty (Kg)",
+                      //         controller: qtyKgController,
+                      //       ),
+                      //     ),
+                      //
+                      //     const SizedBox(width: 10),
+                      //     Expanded(
+                      //       child: _buildField(
+                      //         "Qty (Mtr)",
+                      //         controller: qtyMtrController,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
 
                       // ✅ NEW ROW (Loom No + Machine)
                       _row([
                         DropdownButtonFormField<String>(
                           isExpanded: true,
                           value: selectedMachine,
+                          decoration: InputDecoration(
+                            labelText: "Loom Type",
+                            fillColor: C.brand50,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+
                           hint: const Text("Select Loom Type"),
                           items: machines.map((e) {
                             return DropdownMenuItem(value: e, child: Text(e));
@@ -656,7 +678,13 @@ class _LoomFormState extends State<LoomForm> {
                               machineTypes.contains(selectedMachineType)
                               ? selectedMachineType
                               : null,
-
+                          decoration: InputDecoration(
+                            labelText: "Loom No",
+                            fillColor: C.brand50,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           hint: const Text("Select Loom No"),
                           items: machineTypes
                               .map(
@@ -679,6 +707,13 @@ class _LoomFormState extends State<LoomForm> {
                         DropdownButtonFormField<String>(
                           isExpanded: true,
                           value: selectedOperator1,
+                          decoration: InputDecoration(
+                            labelText: "Operator 1",
+                            fillColor: C.brand50,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           hint: const Text("Select Operator1"),
                           items: operators.map((e) {
                             return DropdownMenuItem(value: e, child: Text(e));
@@ -692,6 +727,16 @@ class _LoomFormState extends State<LoomForm> {
                       _row([
                         DropdownButtonFormField<String>(
                           isExpanded: true,
+                          decoration: InputDecoration(
+                            alignLabelWithHint: true,
+
+                            labelText: "Operator 2",
+
+                            fillColor: C.brand50,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           value: selectedOperator2,
                           hint: const Text("Select Operator2"),
                           items: operators.map((e) {
@@ -942,7 +987,7 @@ class _LoomFormState extends State<LoomForm> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Loom Production Form",
+                      "Loom Entry Form",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -976,7 +1021,7 @@ class _LoomFormState extends State<LoomForm> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: C.warning,
+                      backgroundColor: C.border,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 6,
@@ -992,7 +1037,11 @@ class _LoomFormState extends State<LoomForm> {
                     },
                     child: const Text(
                       "Saved List",
-                      style: TextStyle(color: Colors.white, fontSize: 11),
+                      style: TextStyle(
+                        color: C.primaryDark,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],

@@ -17,9 +17,9 @@ class VisaApiService {
   // static const String baseUrlJBL = 'http://190.92.175.47:80/JblAPI/api';
   // static String baseUrlJBL = 'http://190.92.175.47:80/Visa/api';
   // static const String baseUrlJBL = 'http://190.92.175.47:80/Innoweave/api';
-  static const String baseUrlJBL ='http://192.168.29.125:7165/api';
+  // static const String baseUrlJBL ='http://192.168.29.125:7165/api';
 
-  // static const String baseUrlJBL = 'http://190.92.175.47:80/Nardana/api';
+  static const String baseUrlJBL = 'http://190.92.175.47:80/Nardana/api';
   // static const String baseUrlJBL = 'http://190.92.175.47:80/ASIA_API/api';
 
   static Future<List<LoomProcessModel>> getLoomProcess() async {
@@ -171,6 +171,7 @@ class VisaApiService {
       final request = http.MultipartRequest('POST', url);
 
       request.headers.addAll(await InStockService.authHeaders());
+      print("STATUS batch url: $url");
 
       request.fields['partyName'] = partyName;
       request.fields['date'] = date;
@@ -180,7 +181,6 @@ class VisaApiService {
       final response = await request.send();
       final resBody = await response.stream.bytesToString();
 
-      print("STATUS CODE: ${response.statusCode}");
       print("BODY: $resBody");
 
       if (response.statusCode == 200) {

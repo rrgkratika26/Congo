@@ -1,6 +1,8 @@
 class RollData {
   final int id;
   final int srno;
+  final String? bomNo;
+
   final String machine;
   final String operator;
   final String supervisor;
@@ -39,6 +41,7 @@ class RollData {
   RollData.fromJson(Map<String, dynamic> json)
       : id = int.tryParse(json['id']?.toString() ?? '0') ?? 0,
         srno = int.tryParse(json['srno']?.toString() ?? '0') ?? 0,
+  bomNo = json['boM_NO']?.toString() ?? '',
         machine = json['machine']?.toString() ?? '',
         operator = json['operator']?.toString() ?? '',
         supervisor = json['supervisor']?.toString() ?? '',

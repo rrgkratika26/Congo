@@ -137,9 +137,22 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
         _page = nextPage;
         _items.addAll(data);
         _hasMore = data.isNotEmpty;
-
-        _applyFilter(_searchText); // ✅ VERY IMPORTANT
       });
+
+// Apply filter immediately
+      if (_searchText.isEmpty) {
+        setState(() {
+          _filteredItems = List.from(_items);
+        });
+      } else {
+        setState(() {
+          _filteredItems = _items.where((item) {
+            return item.id.toString().toLowerCase().contains(_searchText) ||
+                item.barcode.toLowerCase().contains(_searchText) ||
+                item.rollCode.toString().toLowerCase().contains(_searchText);
+          }).toList();
+        });
+      }
     } catch (e) {
       _setStatus("❌ Pagination error: $e");
     }
@@ -300,8 +313,9 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
     return ListView.builder(
       addAutomaticKeepAlives: false,
       addRepaintBoundaries: true,
+
       controller: _scrollController,
-      itemCount: _filteredItems.length + (_hasMore ? 1 : 0),
+      itemCount: _filteredItems.length + (_loading ? 1 : 0),
       itemBuilder: (context, index) {
         // 🔹 Loader at bottom while pagination
         if (index == _filteredItems.length) {

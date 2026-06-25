@@ -130,7 +130,7 @@ class _WebNardanaStockScreenState extends State<WebNardanaStockScreen> {
     }
   }
 
-  String _fmt(DateTime d) => DateFormat('dd MMM yy').format(d);
+  String _fmt(DateTime d) => DateFormat('dd-MM-yyyy').format(d);
 
   @override
   Widget build(BuildContext context) {

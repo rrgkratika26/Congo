@@ -194,6 +194,14 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: C.bg,
+      appBar: AppBar(
+        title: const Text("Baling Reports", style: TextStyle(color: C.bg)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: C.appBar1),
+        ),
+        // C.primary,
+        iconTheme: IconThemeData(color: C.bg),
+      ),
       body: Column(
         children: [
           _buildFilterBar(),
@@ -207,7 +215,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
 
   Widget _summaryBar() {
     return Container(
-      color: C.primary,
+      color: C.bg,
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
@@ -226,7 +234,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(.08),
+          color: C.primaryDark,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -436,6 +444,8 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
           _headerCell('BAG QTY\n(IN PCS)', _colBagQty),
           _headerCell('BAG NWT', _colBagNwt),
           _headerCell('GROSS WT', _colGrossWt),
+          // _headerCell('Pallet', _colGrossWt),
+
           _headerCell('Date', _colDate),
           _headerCell('Time', _colTime),
         ],
@@ -514,6 +524,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
             bold: zeroWt,
             textColor: zeroWt ? Colors.black87 : null,
           ),
+
           _dataCell(item.date, _colDate),
           _dataCell(item.time, _colTime),
         ],

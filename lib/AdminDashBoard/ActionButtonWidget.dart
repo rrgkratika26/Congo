@@ -49,6 +49,12 @@ const Map<MenuAction, _ActionConfig> _configs = {
     color: Color(0xFF8B5CF6),
     bgColor: Color(0xFFF5F3FF),
   ),
+  MenuAction.bail_Stock: _ActionConfig(
+    label: 'Bail Stock',
+    description: 'View stock report',
+    color: Color(0xFF8B5CF6),
+    bgColor: Color(0xFFF5F3FF),
+  ),
   MenuAction.entry: _ActionConfig(
     label: 'ENTRY',
     description: 'New entry',
@@ -83,6 +89,8 @@ enum MenuAction {
   LOOM,
   OUT,
   stock,
+  bail_Stock,
+  bailing_Report,
   entry,
   report,
   Bag_Report,
@@ -92,6 +100,7 @@ enum MenuAction {
   Pcs_Issue,
   OverAll_Report,
   Approval,
+  recent_entries,
   Re_cut_Issue,
   StoreIssue,
   FIBC_Store,
@@ -110,7 +119,11 @@ enum MenuAction {
   Issue_to_QC,
   Order_Planning,
   Order_Composition,
-  To_Loom,
+  combine_To_Loom,
+  saved_List,
+  cuttingWise,
+  rollWise,
+  componentWise,
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -254,12 +267,12 @@ List<MenuAction> getActionsForMenu(String label) {
       return [
         MenuAction.Order_Planning,
         MenuAction.Order_Composition,
-        MenuAction.To_Loom,
+        MenuAction.combine_To_Loom,
       ];
     case 'LOOM':
-      return [MenuAction.IN, MenuAction.Out_Report, MenuAction.report];
+      return [MenuAction.IN,  MenuAction.saved_List,MenuAction.Out_Report];
     case 'LAMINATION':
-      return [MenuAction.IN, MenuAction.OUT, MenuAction.report];
+      return [MenuAction.IN, MenuAction.OUT, MenuAction.In_Report,MenuAction.Out_Report];
     case 'CUTTING':
       return [
         MenuAction.IN,
@@ -269,13 +282,16 @@ List<MenuAction> getActionsForMenu(String label) {
         MenuAction.stock,
 
         MenuAction.In_Report,
-        MenuAction.report,
+        MenuAction.rollWise,
+        MenuAction.componentWise,
+        MenuAction.cuttingWise,
       ];
     case 'RMD':
       return [
         MenuAction.IN,
         MenuAction.OUT,
-        MenuAction.report,
+        MenuAction.In_Report,
+        MenuAction.Out_Report,
         MenuAction.stock,
         // MenuAction.transfer,
       ];
@@ -293,7 +309,9 @@ List<MenuAction> getActionsForMenu(String label) {
     case 'BALING':
       return [
         MenuAction.entry,
-        MenuAction.report,
+        MenuAction.bailing_Report,
+
+        MenuAction.bail_Stock,
         MenuAction.dispatch,
         MenuAction.stock,
       ];
@@ -304,8 +322,8 @@ List<MenuAction> getActionsForMenu(String label) {
         MenuAction.report,
         MenuAction.stock,
       ];
-    case 'LEDGER':
-      return [MenuAction.Webbing_Ledger];
+    // case 'LEDGER':
+    //   return [MenuAction.Webbing_Ledger];
     case 'MARKETING':
       return [
         MenuAction.Inquirey_Report,
@@ -315,7 +333,7 @@ List<MenuAction> getActionsForMenu(String label) {
       ];
 
     case 'TAPELINE':
-      return [MenuAction.IN, MenuAction.OUT];
+      return [MenuAction.IN,MenuAction.recent_entries, MenuAction.OUT];
     case 'MACHINE':
       return [MenuAction.scan];
 

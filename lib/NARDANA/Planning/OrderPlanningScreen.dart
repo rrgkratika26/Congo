@@ -200,72 +200,79 @@ class _OrderPlanningScreenState extends State<OrderPlanningScreen> {
           ),
 
           Expanded(
-            child: isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: C.appBar3),
-                  )
-                : Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(.05),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-
-                    child: Scrollbar(
-                      controller: _horizCtrl,
-                      thumbVisibility: true,
-
-                      child: SingleChildScrollView(
+            
+            child: RefreshIndicator(
+              color: C.appBar3,
+              onRefresh:() async {
+              await  loadOrders();
+              },
+              child: isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: C.appBar3),
+                    )
+                  : Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+              
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+              
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(.05),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+              
+                      child: Scrollbar(
                         controller: _horizCtrl,
-                        scrollDirection: Axis.horizontal,
-
-                        child: SizedBox(
-                          width: totalWidth < screenWidth
-                              ? screenWidth
-                              : totalWidth,
-
-                          child: Column(
-                            children: [
-                              _header(),
-
-                              Expanded(
-                                child: ListView.builder(
-                                  controller: _listCtrl,
-
-                                  itemCount:
-                                      filtered.length + (isLoadingMore ? 1 : 0),
-
-                                  itemBuilder: (_, index) {
-                                    if (index == filtered.length) {
-                                      return const Padding(
-                                        padding: EdgeInsets.all(15),
-
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                            color: C.appBar3,
+                        thumbVisibility: true,
+              
+                        child: SingleChildScrollView(
+                          controller: _horizCtrl,
+                          scrollDirection: Axis.horizontal,
+              
+                          child: SizedBox(
+                            width: totalWidth < screenWidth
+                                ? screenWidth
+                                : totalWidth,
+              
+                            child: Column(
+                              children: [
+                                _header(),
+              
+                                Expanded(
+                                  child: ListView.builder(
+                                    controller: _listCtrl,
+              
+                                    itemCount:
+                                        filtered.length + (isLoadingMore ? 1 : 0),
+              
+                                    itemBuilder: (_, index) {
+                                      if (index == filtered.length) {
+                                        return const Padding(
+                                          padding: EdgeInsets.all(15),
+              
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              color: C.appBar3,
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    }
-
-                                    return _row(filtered[index], index);
-                                  },
+                                        );
+                                      }
+              
+                                      return _row(filtered[index], index);
+                                    },
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+            ),
           ),
         ],
       ),
@@ -288,12 +295,12 @@ class _OrderPlanningScreenState extends State<OrderPlanningScreen> {
 
       child: Row(
         children: [
-          head("GEN.INQUIRY", cInquiry),
+          head("BOM No.", cInquiry),
           head("CUSTOMER NAME", cCustomer),
           head("ARTICLE NO.", cArticle),
-          head("TODAY DATE", cDate),
-          head("QUANTITY", cQty),
           head("PO NO", cPo),
+          head("QUANTITY", cQty),
+          head("TODAY DATE", cDate),
         ],
       ),
     );
@@ -367,6 +374,17 @@ class _OrderPlanningScreenState extends State<OrderPlanningScreen> {
             item.articleNo,
             cArticle,
           ),
+          cell(
+            item.poNum,
+            cPo,
+          ),
+
+
+          cell(
+            item.quantity,
+            cQty,
+          ),
+
 
           cell(
             item.todayDate
@@ -374,16 +392,6 @@ class _OrderPlanningScreenState extends State<OrderPlanningScreen> {
                 .split(" ")[0] ??
                 "-",
             cDate,
-          ),
-
-          cell(
-            item.quantity,
-            cQty,
-          ),
-
-          cell(
-            item.poNum,
-            cPo,
           ),
         ],
       ),

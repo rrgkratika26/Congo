@@ -67,6 +67,7 @@ dependencies:
   form_autosave_kit: ^0.0.2
   xtools: ^1.0.0
   dio: ^5.9.2
+  qr_flutter: ^4.1.0
 
 
 

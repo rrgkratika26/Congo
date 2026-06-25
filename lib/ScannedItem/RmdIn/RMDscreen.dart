@@ -288,7 +288,7 @@ class _RmdScreenState extends State<RmdScreen> {
                               Text(
                                 tempStartDate != null
                                     ? DateFormat(
-                                        'dd MMM yyyy',
+                                        'dd-MM-yyyy',
                                       ).format(tempStartDate!)
                                     : 'Select Date',
                                 style: TextStyle(
@@ -370,7 +370,7 @@ class _RmdScreenState extends State<RmdScreen> {
                               Text(
                                 tempEndDate != null
                                     ? DateFormat(
-                                        'dd MMM yyyy',
+                                        'dd-MM-yyyy',
                                       ).format(tempEndDate!)
                                     : 'Select Date',
                                 style: TextStyle(

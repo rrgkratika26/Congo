@@ -128,7 +128,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
         //     ),
         //   ),
         // ),
-        actions: [IconButton(onPressed: () {  }, icon: Icon(Icons.filter_alt_outlined),)],
+
       ),
 
       body: Column(
@@ -158,11 +158,12 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
               ),
             ),
           ),
+
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.only(left: 10,right: 10),
 
             child: Container(
-              padding: const EdgeInsets.all(10),
+
 
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -178,7 +179,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
               ),
 
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
 
                 children: [
                   Expanded(
@@ -235,71 +236,76 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
                     ),
                   ),
 
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5),
 
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: 28,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        SizedBox(
 
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: C.success,
+                          height: 28,
 
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                          ),
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: C.success,
 
-                          onPressed: () {
-                            selectAll(true);
-                          },
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
 
-                          icon: const Icon(
-                            Icons.done_all,
-                            size: 16,
-                            color: Colors.white,
-                          ),
+                            onPressed: () {
+                              selectAll(true);
+                            },
 
-                          label: const Text(
-                            "All",
-                            style: TextStyle(color: Colors.white, fontSize: 11),
-                          ),
-                        ),
-                      ),
+                            icon: const Icon(
+                              Icons.done_all,
+                              size: 16,
+                              color: Colors.white,
+                            ),
 
-                      const SizedBox(height: 8),
-
-                      SizedBox(
-                        height: 28,
-
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: C.warning,
-
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                          ),
-
-                          onPressed: () {
-                            selectAll(false);
-                          },
-
-                          icon: const Icon(
-                            Icons.close,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-
-                          label: const Text(
-                            "Clear",
-                            style: TextStyle(color: Colors.white, fontSize: 11),
+                            label: const Text(
+                              "All",
+                              style: TextStyle(color: Colors.white, fontSize: 11),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+
+                        const SizedBox(height: 8),
+
+                        SizedBox(
+                          height: 28,
+
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: C.warning,
+
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+
+                            onPressed: () {
+                              selectAll(false);
+                            },
+
+                            icon: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+
+                            label: const Text(
+                              "Clear",
+                              style: TextStyle(color: Colors.white, fontSize: 11),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
+
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -352,10 +358,11 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
                 ),
               ),
             ),
+
           ),
 
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(18),
 
             child: SizedBox(
               width: double.infinity,
@@ -725,8 +732,8 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
           head("BOM", bomW),
           head("COMPONENT", componentW),
           head("FABRIC", fabricW),
-          head("MTR", w),
-          head("KG", w),
+          head("Order MTR", w),
+          head("Order KG", w),
           head("ID", w),
           head("PO", w),
           head("ARTICLE", w),
@@ -768,18 +775,18 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
                   if (orderComponent == "SINGLE") {
 
-                    // Remove all selections first
-                    for (int i = 0; i < data.length; i++) {
-                      data[i].selected = false;
+                    // Clear all selections
+                    for (var element in data) {
+                      element.selected = false;
                     }
 
-                    // Select only clicked row
-                    data[index].selected = value ?? false;
+                    // Select only clicked filtered item
+                    item.selected = value ?? false;
 
                   } else {
 
-                    // CLUB mode → allow multiple selection
-                    data[index].selected = value ?? false;
+                    // Multiple selection in CLUB
+                    item.selected = value ?? false;
                   }
 
                 });

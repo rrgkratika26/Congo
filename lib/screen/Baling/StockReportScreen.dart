@@ -188,6 +188,14 @@ class _StockReportScreenState extends State<StockReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Baling Stock Reports", style: TextStyle(color: C.bg)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: C.appBar1),
+        ),
+        // C.primary,
+        iconTheme: IconThemeData(color: C.bg),
+      ),
       backgroundColor: const Color(0xFFF1F8F2),
       body: Column(
         children: [
@@ -203,7 +211,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
   // ====================== SUMMARY BAR ======================
   Widget _summaryBar() {
     return Container(
-      color: C.primary,
+      color: C.bg,
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
@@ -222,7 +230,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(.08),
+          color: C.primaryDark,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

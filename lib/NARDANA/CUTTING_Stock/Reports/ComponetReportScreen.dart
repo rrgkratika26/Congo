@@ -104,19 +104,19 @@ class _ComponentReportScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: C.primaryBlue,
-      //   title: const Text("Component Report",
-      //       style: TextStyle(color: C.bg)),
-      //   centerTitle: true,
-      //   actions: [
-      //     IconButton(
-      //       onPressed: _pickDateRange,
-      //       icon: const Icon(Icons.calendar_month, color: C.bg),
-      //     )
-      //   ],
-      //   iconTheme: IconThemeData(color: C.bg),
-      // ),
+      appBar: AppBar(
+        backgroundColor: C.primary,
+        title: const Text("Component Wise Report",
+            style: TextStyle(color: C.bg)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: _pickDateRange,
+            icon: const Icon(Icons.calendar_month, color: C.bg),
+          )
+        ],
+        iconTheme: IconThemeData(color: C.bg),
+      ),
 
       body: Padding(
         padding: const EdgeInsets.all(12),
@@ -130,18 +130,18 @@ class _ComponentReportScreenState
                   ? const Center(child: CircularProgressIndicator(color: C.appBar3,))
                   : reportList.isEmpty
                   ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.search_off, size: 50, color: Colors.grey),
-                const SizedBox(height: 10),
-                const Text("No Data Found"),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: fetchReport,
-                  child: const Text("Retry"),
-                )
-              ],
-            )
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.search_off, size: 50, color: Colors.grey),
+                  const SizedBox(height: 10),
+                  const Text("No Data Found"),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: fetchReport,
+                    child: const Text("Retry"),
+                  )
+                ],
+              )
                   : _buildTable(),
             ),
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:IMS/NARDANA/Planning/CombineToLoom.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -185,19 +186,19 @@ class _SelectedOrderScreenState extends State<SelectedOrderScreen> {
                     return;
                   }
 
-                  if (widget.orderType == "CLUB") {
-                    if (!isClubValid()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.red,
-
-                          content: Text("For Club BOM and Fabric must be same"),
-                        ),
-                      );
-
-                      return;
-                    }
-                  }
+                  // if (widget.orderType == "CLUB") {
+                  //   if (!isClubValid()) {
+                  //     ScaffoldMessenger.of(context).showSnackBar(
+                  //       const SnackBar(
+                  //         backgroundColor: Colors.red,
+                  //
+                  //         content: Text("For Club BOM and Fabric must be same"),
+                  //       ),
+                  //     );
+                  //
+                  //     return;
+                  //   }
+                  // }
 
                   showDialog(
                     context: context,
@@ -219,10 +220,12 @@ class _SelectedOrderScreenState extends State<SelectedOrderScreen> {
                       response = await NaradanaApiService().clubSave(selected);
                     }
 
-                    Navigator.pop(context);
+                    // Navigator.pop(context);
 
                     final responseData = jsonDecode(response.body);
-
+                    Get.offAll(
+                            () =>CombineToLoomScreen()
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         backgroundColor: Colors.green,
@@ -232,10 +235,7 @@ class _SelectedOrderScreenState extends State<SelectedOrderScreen> {
 
                     await Future.delayed(const Duration(seconds: 1));
 
-                    Get.offAll(
-                          () => NewAdminDashboard(),
-                      transition: Transition.cupertino,
-                    );
+
                   } catch (e) {
                     Navigator.pop(context);
 

@@ -81,9 +81,11 @@ class AddRecutPcsPopupNardana {
           borderRadius: BorderRadius.circular(16),
         ),
         child: ConstrainedBox(
+
           constraints: const BoxConstraints(
             maxHeight: 650,
             maxWidth: 420,
+            
           ),
           child: StatefulBuilder(
             builder: (context, setState) {
@@ -277,7 +279,7 @@ class AddRecutPcsPopupNardana {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: C.primary,
+                          backgroundColor: C.primaryDark,
                         ),
                         onPressed: () async {
                           if (selectedWo == null ||
@@ -323,7 +325,7 @@ class AddRecutPcsPopupNardana {
                             ? const CircularProgressIndicator(
                           color: C.appBar3,
                         )
-                            : const Text("Save"),
+                            : const Text("Save",style: TextStyle(color: C.bg),),
                       ),
                     ),
                   ],

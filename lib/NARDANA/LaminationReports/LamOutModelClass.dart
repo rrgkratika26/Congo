@@ -1,6 +1,8 @@
 class LamNardanaOutModel {
   final int id;
   final String rollCode;
+
+  final String bomNo;
   final String barcode;
   final String batchNo;
   final String loomType;
@@ -78,7 +80,7 @@ class LamNardanaOutModel {
     required this.fabricGsm,
     required this.laminationType,
     required this.cutSlipType,
-    required this.specialIdentification,
+    required this.specialIdentification, required this.bomNo,
   });
 
   factory LamNardanaOutModel.fromJson(Map<String, dynamic> json) {
@@ -121,6 +123,7 @@ class LamNardanaOutModel {
       laminationType: json["laminationType"] ?? '',
       cutSlipType: json["cutSlipType"] ?? '',
       specialIdentification: json["specialIdentification"] ?? '',
+      bomNo: json["boM_NO"] ?? '',
     );
   }
 }

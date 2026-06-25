@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../Color/Colorclass.dart';
+import '../../NARDANA/LaminationReports/LaminationOutNewEntryList.dart';
 import '../../services/JBL_apis/jbl_api_bailing_reports.dart';
 import '../../util/sharedpreference/shared_preference.dart';
 import 'ProductDetailModleclass.dart';
@@ -191,6 +192,15 @@ class _JBLFormScreenState extends State<JBLFormScreen>
 
       if (res["statusCode"] == 200 && data["success"] == true) {
         _snack(data["message"] ?? "Saved successfully");
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const LamRollPrintScreennaradan(
+              title: "Lamination Rolls",
+            ),
+          ),
+              (route) => false,
+        );
       } else {
         _snack(data["message"] ?? "Save failed", error: true);
       }

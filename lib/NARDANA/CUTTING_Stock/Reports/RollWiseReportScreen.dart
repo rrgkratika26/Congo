@@ -109,18 +109,18 @@ class _RollWiseReportScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: C.primaryBlue,
-      //   title: const Text("Roll Wise Report",style: TextStyle(color: C.bg),),
-      //   centerTitle: true,
-      //   actions: [
-      //     IconButton(
-      //       onPressed: _pickDateRange,
-      //       icon: const Icon(Icons.calendar_month,color: C.bg,),
-      //     )
-      //   ],
-      //   iconTheme: IconThemeData(color: C.bg),
-      // ),
+      appBar: AppBar(
+        backgroundColor: C.primary,
+        title: const Text("Roll Wise Report",style: TextStyle(color: C.bg),),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: _pickDateRange,
+            icon: const Icon(Icons.calendar_month,color: C.bg,),
+          )
+        ],
+        iconTheme: IconThemeData(color: C.bg),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

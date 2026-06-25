@@ -80,8 +80,8 @@ class OutReportDetailsScreen extends StatelessWidget {
                       ),
                       const Divider(height: 20),
                       _infoRow('Fabric Code', item['FABRIC_CODE']?.toString() ?? '-'),
-     //for jbl                 // _infoRow('Roll Code', item['ROLL CODE']?.toString() ?? '-'),
-     //             _infoRow('Roll Code', item['rollCode']?.toString() ?? '-'), // visa
+                    // _infoRow('Roll Code', item['ROLL CODE']?.toString() ?? '-'),
+                    //_infoRow('Roll Code', item['rollCode']?.toString() ?? '-'), // visa
 
                       _infoRow('Net Weight (Kg)', item['NET_WEIGHT (Kg)']?.toString() ?? '-'),
                       _infoRow('Roll Length (Mtr)', item['ROLL_LENGTH (Mtr)']?.toString() ?? '-'),

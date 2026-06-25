@@ -14,6 +14,7 @@ import '../../../services/GlobalLoader/GloabalUnit.dart';
 import '../../../services/NardanaApis/NardanaApi.dart';
 import '../../../services/visa_apis/visa_api.dart';
 import '../cutOutModelClass/ModelClassOutstock.dart';
+import 'ReceiveCutPcs.dart';
 
 class CuttingOutStockFormNardana extends StatefulWidget {
   final CuttingOutstockNaradana production;
@@ -38,7 +39,7 @@ class _CuttingOutStockFormNardanaState
   final _apiService = VisaApiService();
   final _inStockService = InStockService();
   final _formKey = GlobalKey<FormState>();
-  List<String> _laminationList = ['SL'];
+  List<String> _laminationList = [''];
   List<String> _baffleList = [];
   String _woType = "WITH_WO"; // default
   String _rollFinish = "NO";
@@ -62,8 +63,8 @@ class _CuttingOutStockFormNardanaState
   List<String> _fabricWidthList = [];
   String? _selectedFabricWidth;
 
-  List<String> _gsmList = [];
-  String? _selectedGsm;
+  // List<String> _gsmList = [];
+  // String? _selectedGsm;
 
   List<_NameValue> _operatorList = [];
   List<_NameValue> _supervisorList = [];
@@ -72,7 +73,7 @@ class _CuttingOutStockFormNardanaState
 
   // ── Loading flags ──────────────────────────────────────────────
   bool _isLoadingFabricWidth = false;
-  bool _isLoadingGsm = false;
+  // bool _isLoadingGsm = false;
   bool _isLoadingBomComponents = false;
   bool _isLoadingOperator = false;
   bool _isLoadingSupervisor = false;
@@ -96,10 +97,12 @@ class _CuttingOutStockFormNardanaState
   final TextEditingController _cutLengthCtrl = TextEditingController();
   final TextEditingController _baffleCtrl = TextEditingController();
   final TextEditingController _operatorCtrl = TextEditingController();
-  // late TextEditingController _grossWeightCtrl;
+
   final TextEditingController _fabricTypeCtrl = TextEditingController();
 
-  final TextEditingController _fabricConstCtrl = TextEditingController(text: 'SL');
+  final TextEditingController _fabricConstCtrl = TextEditingController(
+    text: '',
+  );
   final TextEditingController _colorCtrl = TextEditingController();
   final TextEditingController _specialIdCtrl = TextEditingController();
   final TextEditingController _fabricGsmCtrl = TextEditingController();
@@ -137,24 +140,30 @@ class _CuttingOutStockFormNardanaState
   // Format time → HH:mm:ss
   late final currentTime =
       "${now.hour.toString().padLeft(2, '0')}:"
-      "${now.minute.toString().padLeft(2, '0')}:"
-      "${now.second.toString().padLeft(2, '0')}";
+      "${now.minute.toString().padLeft(2, '0')}";
+      // "${now.second.toString().padLeft(2, '0')}";
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initialLoad();
+    });
+
     // _loadUnit();
     final p = widget.production;
 
     _rollWeightCtrl.addListener(_onRollWeightChanged);
     // ─── BASIC INFO ───
-    _partyNameCtrl.text = p.partyname ?? "";
-    _poNoCtrl.text = p.workOrderNo ?? "";
-    _articleNoCtrl.text = p.workOrderNo ?? "";
+
+    _partyNameCtrl.text = widget.production.component;
+    // _partyNameCtrl.text = p.component ?? "" ;
+    _poNoCtrl.text = p.workOrderNo;
+    _articleNoCtrl.text = p.workOrderNo;
 
     _bomCtrl.text = "";
-    _componentCtrl.text = p.component ?? "";
+    _componentCtrl.text = p.component;
 
-    _selectedGsm = p.fabricGsm;
+    // _selectedGsm = p.fabricGsm;
     _selectedFabricWidth = p.fabricWidth;
     // _dateCtrl = TextEditingController(
     //     text: formatDate(p.date) // ✅ API date use karo
@@ -171,14 +180,14 @@ class _CuttingOutStockFormNardanaState
     _reqQtyMtrCtrl.text = p.requiredQtyMtr.toString();
 
     // ─── FABRIC ───
-    _fabricTypeCtrl.text = p.fabricType ?? "";
-    _fabricConstCtrl.text = 'SL';
+    _fabricTypeCtrl.text = p.fabricType;
+    _fabricConstCtrl.text = p.laminationType;
 
-    _colorCtrl.text = p.color ?? "";
+    _colorCtrl.text = p.color;
 
-    _fabricGsmCtrl.text = p.fabricGsm ?? "";
+    _fabricGsmCtrl.text = p.fabricGsm;
 
-    _fabricWidthCtrl.text = p.fabricWidth ?? "";
+    _fabricWidthCtrl.text = p.fabricWidth;
 
     _fabricBaffleCtrl.text = p.cutType ?? "";
     _baffleCtrl.text = " ";
@@ -237,7 +246,7 @@ class _CuttingOutStockFormNardanaState
     _cutSizeQtyCtrl.addListener(_calculateNetWeight);
     _fabricGsmCtrl.addListener(_calculateNetWeight);
     // ─── API CALLS ───
-    _initialLoad();
+    // _initialLoad();
   }
 
   @override
@@ -318,18 +327,18 @@ class _CuttingOutStockFormNardanaState
   Future<void> _initialLoad() async {
     setState(() => _isLoading = true);
 
-    await _loadOperators();
-    await _loadSupervisors();
-    await _loadLaminationAndBaffle();
-
-    // Important data next
-    await _fetchArticleNo(); // includes BOM + cutsize
-
-    // Less important last
-    await _loadGsm();
-    await _loadFabricWidth();
-
-    setState(() => _isLoading = false);
+    try {
+      await Future.wait([
+        _loadOperators(),
+        _loadSupervisors(),
+        _loadLaminationAndBaffle(),
+        // _loadGsm(),
+        _loadFabricWidth(),
+        _fetchArticleNo(),
+      ]);
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _calculateUseAndFinalRem() {
@@ -396,23 +405,25 @@ class _CuttingOutStockFormNardanaState
     });
   }
 
-  Future<void> _loadGsm() async {
-    setState(() => _isLoadingGsm = true);
-    final data = await VisaApiService.getGsmOrFabricWidth(type: "GSM");
-    setState(() {
-      _gsmList = data;
-
-      if (data.contains(_selectedGsm)) {
-        // ✅ keep previous value
-      } else {
-        _selectedGsm = data.isNotEmpty ? data.first : null;
-      }
-
-      _fabricGsmCtrl.text = _selectedGsm ?? '';
-      _isLoadingGsm = false;
-    });
-    _calculateNetWeight();
-  }
+  // Future<void> _loadGsm() async {
+  //   setState(() => _isLoadingGsm = true);
+  //   final data = await VisaApiService.getGsmOrFabricWidth(type: "GSM");
+  //   setState(() {
+  //     _gsmList = data;
+  //     _selectedGsm = data.isNotEmpty ? data.first : null;
+  //     _fabricGsmCtrl.text = _selectedGsm ?? '';
+  //
+  //     if (data.contains(_selectedGsm)) {
+  //       // ✅ keep previous value
+  //     } else {
+  //       _selectedGsm = data.isNotEmpty ? data.first : null;
+  //     }
+  //
+  //     _fabricGsmCtrl.text = _selectedGsm ?? '';
+  //     _isLoadingGsm = false;
+  //   });
+  //   _calculateNetWeight();
+  // }
 
   Future<void> _loadOperators() async {
     setState(() => _isLoadingOperator = true);
@@ -478,8 +489,15 @@ class _CuttingOutStockFormNardanaState
           _componentList = comps;
 
           if (boms.isNotEmpty) {
-            _selectedBomNo = boms.first;
-            _bomCtrl.text = boms.first;
+            final previousBom = widget.production.bomNo; // from previous screen
+
+            if (previousBom.isNotEmpty && boms.contains(previousBom)) {
+              _selectedBomNo = previousBom;
+            } else {
+              _selectedBomNo = boms.first;
+            }
+
+            _bomCtrl.text = _selectedBomNo!;
           }
 
           if (comps.isNotEmpty) {
@@ -519,12 +537,12 @@ class _CuttingOutStockFormNardanaState
 
       return double.tryParse(value) ?? 0;
     }
+
     final gsm = parseGsm(_fabricGsmCtrl.text);
     final qty = double.tryParse(_cutSizeQtyCtrl.text) ?? 0;
 
     final isDouble =
-        _fabricBaffleCtrl.text == "CRF" ||
-            _fabricBaffleCtrl.text == "C00";
+        _fabricBaffleCtrl.text == "CRF" || _fabricBaffleCtrl.text == "C00";
 
     double netWt;
 
@@ -616,10 +634,29 @@ class _CuttingOutStockFormNardanaState
     }
   }
 
+  // String _generateBatchNumber() {
+  //   final party = _partyNameCtrl.text.trim(); // ✅ your controller
+  //   final po = _poNoCtrl.text.trim(); // (optional if needed)
+  //   final shift = _selectedShift ?? '';
+  //
+  //   final now = DateTime.now();
+  //   final date = now.day.toString(); // 8
+  //   final month = now.month.toString().padLeft(2, '0'); // 05
+  //
+  //   String partyCode = '';
+  //   if (party.length >= 3) {
+  //     partyCode = party.substring(0, 3).toUpperCase();
+  //   } else {
+  //     partyCode = party.toUpperCase();
+  //   }
+  //
+  //   return "$partyCode$date$month${shift}LO";
+  // }
+
   String _generateBatchNumber() {
-    final party = _partyNameCtrl.text.trim(); // ✅ your controller
-    final po = _poNoCtrl.text.trim(); // (optional if needed)
-    final shift = _selectedShift ?? '';
+    final party = _partyNameCtrl.text.trim();
+    final po = _poNoCtrl.text.trim();
+    final shift = _selectedShift ?? ''; // or any shift field if you have
 
     final now = DateTime.now();
     final date = now.day.toString(); // 8
@@ -632,11 +669,15 @@ class _CuttingOutStockFormNardanaState
       partyCode = party.toUpperCase();
     }
 
-    return "$partyCode$date$month${shift}LO";
+    return "$partyCode$date$month${shift}CU";
   }
 
   void _setBatchNumber() {
     final batch = _generateBatchNumber();
+    print("Party Name: ${_partyNameCtrl.text}");
+    print("PO No: ${_poNoCtrl.text}");
+    print("Shift: $_selectedShift");
+    print("Generated Batch Number: $batch");
 
     setState(() {
       _batchNoCtrl.text = batch;
@@ -651,7 +692,7 @@ class _CuttingOutStockFormNardanaState
         "${_baffleCtrl.text}-"
         "${_selectedShift ?? ''}-"
         "${_fabricGsmCtrl.text}-"
-        "${_laminationCtrl.text}-"
+        "${_fabricConstCtrl.text}-"
         "${_colorCtrl.text}-"
         "${_cutTypeCtrl.text}-"
         "${_fabricBaffleCtrl.text}";
@@ -678,6 +719,10 @@ class _CuttingOutStockFormNardanaState
       final message = await NaradanaApiService.saveCutting(payload);
 
       if (message.contains("Success") || message.contains("Successfully")) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ReceiveCutPcsNardana()),
+        );
         _showSnack(message, Colors.green);
       } else {
         _showSnack(message, Colors.red);
@@ -761,7 +806,7 @@ class _CuttingOutStockFormNardanaState
       "fabricGsm": _fabricGsmCtrl.text,
       "fabricWidth": _fabricWidthCtrl.text,
       "fabricBaffleType": _cutTypeCtrl.text,
-      "laminationType": _laminationCtrl.text,
+      "laminationType": _fabricConstCtrl.text,
       "grossWeight": _grossWeightCtrl.text,
 
       // "grossWeight": widget.production.requiredQtyMtr.toString(),
@@ -772,7 +817,7 @@ class _CuttingOutStockFormNardanaState
 
       "remark": _remarkCtrl.text,
       "avgweightgm": _avgWeightMtrCtrl.text,
-
+      "wastage": _wastageCtrl.text,
       "batchNo": _batchNoCtrl.text,
       "cutWidth": _cutLengthCmCtrl.text,
       "cutLength": _cutWidthCtrl.text,
@@ -979,25 +1024,28 @@ class _CuttingOutStockFormNardanaState
                   ),
           ]),
           _row([
-            _isLoadingGsm
-                ? _loadingLabelBox("Fabric GSM")
-                : _genericDropdownStr(
-                    label: "Fabric GSM",
-                    items: _gsmList,
-                    value: _selectedGsm,
-                    onChanged: (v) {
-                      setState(() {
-                        _selectedGsm = v;
-                        _fabricGsmCtrl.text = v ?? '';
-                      });
-
-                      _fetchCutSize();
-
-                      // ✅ Dono call karo
-                      // _loadFabricWidth();
-                      _loadGsm();
-                    },
-                  ),
+            _field(
+              "Fabric GSM",
+              _fabricGsmCtrl,
+              readOnly: true,
+            ),
+            // _isLoadingGsm
+            //     ? _loadingLabelBox("Fabric GSM")
+            //     : _genericDropdownStr(
+            //         label: "Fabric GSM",
+            //         items: _gsmList,
+            //         value: _selectedGsm,
+            //         onChanged: (v) {
+            //           setState(() {
+            //             _selectedGsm = v;
+            //             _fabricGsmCtrl.text = v ?? '';
+            //           });
+            //
+            //           _fetchCutSize();
+            //
+            //
+            //         },
+            //       ),
             _isLoadingFabricWidth
                 ? _loadingLabelBox("Fabric Width")
                 : _genericDropdownStr(
@@ -1807,8 +1855,6 @@ class _CuttingOutStockFormNardanaState
       ),
     ),
   );
-
-
 }
 
 class _NameValue {

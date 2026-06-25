@@ -2,6 +2,7 @@ class CuttingOutstockNaradana {
   final String active;
   final int id;
   final int rollCode;
+  final String bomNo;
   final String barcode;
   final String supervisorName;
   final String operatorName;
@@ -73,6 +74,7 @@ class CuttingOutstockNaradana {
     required this.location,
     required this.component,
     required this.productionType,
+    required this.bomNo,
   });
 
   factory CuttingOutstockNaradana.fromJson(Map<String, dynamic> json) {
@@ -86,6 +88,7 @@ class CuttingOutstockNaradana {
       date: json['date'] ?? '',
       time: json['time'] ?? '',
       weekNo: json['weeK_NO'] ?? '',
+      bomNo: json['boM_NO'] ?? '',
       partyname: json['partyname'] ?? '',
       workOrderNo: json['worK_ORDER_NO'] ?? '',
       orderType: json['ordeR_TYPE'] ?? '',

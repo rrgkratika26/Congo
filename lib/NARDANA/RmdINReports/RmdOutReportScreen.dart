@@ -109,22 +109,20 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
     }
   }
 
-  void _clear() {
-    setState(() {
-      _query = '';
-      _searchCtrl.clear();
-      _from = DateTime.now();
-      _to = DateTime.now();
 
-    });
-    _load();
-  }
 
-  String _fmt(DateTime d) => DateFormat('dd MMM yy').format(d);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("RMD Out Reports", style: TextStyle(color: C.bg)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: C.appBar1),
+        ),
+        // C.primary,
+        iconTheme: IconThemeData(color: C.bg),
+      ),
       backgroundColor: C.bg,
       body: SafeArea(
         child: Column(
@@ -156,7 +154,8 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
   Widget _topBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-      color: C.primary,
+      color: C.bg,
+
       child: Column(
         children: [
           Row(
@@ -165,18 +164,39 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                 child: TextField(
                   controller: _searchCtrl,
                   onChanged: (v) => setState(() => _query = v),
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                  style: const TextStyle(fontSize: 14, color: C.bg),
                   decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: C.border),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
                     hintText: 'Search barcode, party, supervisor…',
-                    hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
-                    prefixIcon: const Icon(Icons.search, color: Colors.white54, size: 20),
+                    hintStyle: const TextStyle(color: C.brand700, fontSize: 13),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: C.brand700,
+                      size: 20,
+                    ),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white54, size: 18),
-                      onPressed: () => setState(() {
-                        _query = '';
-                        _searchCtrl.clear();
-                      }),
+                      icon: const Icon(
+                        Icons.close,
+                        color: C.textHigh,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _query = '';
+                          _searchCtrl.clear();
+                        });
+                      },
                     )
                         : null,
                     filled: true,
@@ -189,14 +209,20 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(width: 8),
+
               IconButton(
                 onPressed: _pickDateRange,
-                icon: const Icon(Icons.calendar_today, size: 22, color: Colors.white),
+                icon: const Icon(
+                  Icons.calendar_today,
+                  size: 22,
+                  color: C.primaryDark,
+                ),
               ),
-              // CountText(count: _filtered.length,)
             ],
           ),
+
           _summaryBar(),
         ],
       ),
@@ -212,8 +238,8 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
       child: Row(
         children: [
           _box("Records", '$_totalRecords', C.bg),
-          _box("Roll Weight(Kg)", _totalNet.toStringAsFixed(2), C.bg),
-          _box("Roll Length(mtr)", _totalLength.toStringAsFixed(2), C.bg),
+          _box("Roll Wt(Kg)", _totalNet.toStringAsFixed(2), C.bg),
+          _box("Roll Len(mtr)", _totalLength.toStringAsFixed(2), C.bg),
         ],
       ),
     );
@@ -225,7 +251,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: color.withOpacity(.08),
+          color: C.primaryDark,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -314,46 +340,45 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
               columns: [
                 _col('Sr'),
                 _col('RollCode'),
-
                 _col('Barcode'),
-                _col('Batch No'),
-                _col('Loom Type'),
-                _col('Loom No'),
+                // _col('Batch No'),
+                // _col('Loom Type'),
+                // _col('Loom No'),
 
                 _col('Fabric code'),
                 _col('Fab Width'),
                 _col('Fab GSM'),
-                _col('Clr'),
+                // _col('Clr'),
 
                 _col('Gross Wt(Kg)'),
                 _col('NetWt(Kg)'),
                 _col('TareWt'),
-                _col('Roll Len'),
+                // _col('Roll Len'),
                 _col('AvgWt'),
 
                 _col('Operator'),
-                _col('Loom Op1'),
+                // _col('Loom Op1'),
                 _col('Supervisor'),
-                _col('Issue dept'),        // ✅ NEW
+                // _col('Issue dept'),        // ✅ NEW
                 _col('Party name'),
-                _col('WO'),
-                _col('Cont No'),        // ✅ NEW
+                _col('PO No'),
+                // _col('Cont No'),        // ✅ NEW
 
-                _col('ReqQty Kg'),         // ✅ NEW
-                _col('ReqQty Mtr'),        // ✅ NEW
+                // _col('ReqQty Kg'),         // ✅ NEW
+                // _col('ReqQty Mtr'),        // ✅ NEW
 
-                _col('Dept'),
-                _col('Issue To Dept.'),
+                // _col('Dept'),
+                // _col('Issue To Dept.'),
                 _col('Status'),
-                _col('In'),
-                _col('Out'),
+                // _col('In'),
+                // _col('Out'),
 
-                _col('Mash'),
-                _col('Lam Type'),
-                _col('Fab Type/Use'),       // ✅ NEW
-                _col('Sp.Id'),         // ✅ NEW
-                _col('Fab Type/baffle'),            // ✅ NEW
-                _col('Cut type'),           // ✅ NEW
+                // _col('Mash'),
+                // _col('Lam Type'),
+                // _col('Fab Type/Use'),       // ✅ NEW
+                // _col('Sp.Id'),         // ✅ NEW
+                // _col('Fab Type/baffle'),            // ✅ NEW
+                // _col('Cut type'),           // ✅ NEW
 
                 _col('Date'),
                 _col('Time'),
@@ -370,20 +395,14 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
 
                     DataCell(_cell('${r.srNo}', bold: true)),
                     DataCell(_cell('${r.rollCode}', bold: true)),
-
-
                     DataCell(_cell(r.barcode, mono: true, w: 95)),
-                    DataCell(_cell(r.batchNo, w: 90)),
-
-                    DataCell(_cell('${r.loomType}', w: 35)),
-                    DataCell(_cell('${r.loomNo}', w: 35)),
-
-
+                    // DataCell(_cell(r.batchNo, w: 90)),
+                    // DataCell(_cell('${r.loomType}', w: 35)),
+                    // DataCell(_cell('${r.loomNo}', w: 35)),
                     DataCell(_cell(r.fabricCode, w: 175)),
-
                     DataCell(_cell(r.fabricWidth, w: 45)),
                     DataCell(_cell(r.fabricGsm, w: 55)),
-                    DataCell(_cell(r.color, w: 45)),
+                    // DataCell(_cell(r.color, w: 45)),
 
                     DataCell(_cell(r.grossWeight.toString(), w: 55)),
 
@@ -394,35 +413,35 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                       w: 55,
                     )),
                     DataCell(_cell(r.tareWeight.toString(), w: 50)),
-                    DataCell(_cell(r.rollLength.toString(), w: 65)),
+                    // DataCell(_cell(r.rollLength.toString(), w: 65)),
                     DataCell(_cell(r.avgWeight.toString(), w: 55)),
                     DataCell(_cell(r.operatorName, w: 90)),
-                    DataCell(_cell(r.loomOperator, w: 90)),
+                    // DataCell(_cell(r.loomOperator, w: 90)),
                     DataCell(_cell(r.supervisorName, w: 100)),
-                    DataCell(_cell(r.rmdSupervisor, w: 100)),   // ✅ NEW
+                    // DataCell(_cell(r.rmdSupervisor, w: 100)),   // ✅ NEW
                     DataCell(_cell(r.partyName, w: 110)),
-                    DataCell(_cell(r.workOrderNo, w: 100)),
-                    DataCell(_cell('${r.contNo}', w: 70)),      // ✅ NEW
-                    DataCell(_cell(r.reqQtyKg.toString(), w: 80)),   // ✅ NEW
-                    DataCell(_cell(r.reqQtyMtr.toString(), w: 80)),  // ✅ NEW
+                    DataCell(_cell(r.workOrderNo, w: 120)),
+                    // DataCell(_cell('${r.contNo}', w: 70)),      // ✅ NEW
+                    // DataCell(_cell(r.reqQtyKg.toString(), w: 80)),   // ✅ NEW
+                    // DataCell(_cell(r.reqQtyMtr.toString(), w: 80)),  // ✅ NEW
 
-                    DataCell(_cell(r.department, w: 70)),
-                    DataCell(_cell(r.issueToDept, w: 70)),
+                    // DataCell(_cell(r.department, w: 70)),
+                    // DataCell(_cell(r.issueToDept, w: 70)),
 
                     DataCell(_statusBadge(r.status)),
 
-                    DataCell(_cell(r.entryIn, w: 40)),
-                    DataCell(_cell(r.entryOut, w: 45)),
+                    // DataCell(_cell(r.entryIn, w: 40)),
+                    // DataCell(_cell(r.entryOut, w: 45)),
 
-                    DataCell(_cell(r.mash, w: 55)),
-                    DataCell(_cell(r.laminationType, w: 45)),
+                    // DataCell(_cell(r.mash, w: 55)),
+                    // DataCell(_cell(r.laminationType, w: 45)),
 
-                    DataCell(_cell(r.fabricType, w: 60)),          // ✅ NEW
-                    DataCell(_cell(r.fabricConstruction, w: 60)),  // ✅ NEW
-                    DataCell(_cell(r.cutType, w: 60)),             // ✅ NEW
-                    DataCell(_cell(r.specialId, w: 50)),           // ✅ NEW
+                    // DataCell(_cell(r.fabricType, w: 60)),          // ✅ NEW
+                    // DataCell(_cell(r.fabricConstruction, w: 60)),  // ✅ NEW
+                    // DataCell(_cell(r.cutType, w: 60)),             // ✅ NEW
+                    // DataCell(_cell(r.specialId, w: 50)),           // ✅ NEW
 
-                    DataCell(_cell(DateFormat('dd-MM').format(r.date), w: 65)),
+                    DataCell(_cell(DateFormat('dd-MM-yyyy').format(r.date), w: 65)),
                     DataCell(_cell(r.time, w: 70)),
                   ],
                 );
@@ -435,12 +454,14 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
   }
   DataColumn _col(String text) {
     return DataColumn(
-      label: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: _primary,
+      label: Center(
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: _primary,
+          ),
         ),
       ),
     );
@@ -459,7 +480,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
         text,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
           fontFamily: mono ? 'monospace' : null,
           color: color ?? Colors.black87,

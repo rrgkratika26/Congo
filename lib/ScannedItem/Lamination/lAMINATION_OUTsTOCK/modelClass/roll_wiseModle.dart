@@ -3,6 +3,8 @@ class Roll {
   final bool active;
   final int srNo;
   final String rollCode;
+  final String bomNo;
+
   final String barcode;
   final String fabricCode;
   final String grossWeight;
@@ -23,6 +25,7 @@ class Roll {
     required this.netWeight,
     required this.rollLength,
     required this.avgWeight,
+    required this.bomNo,
   });
 
   factory Roll.fromJson(Map<String, dynamic> json) => Roll(
@@ -37,6 +40,7 @@ class Roll {
     netWeight: json['netWeight'],
     rollLength: json['rollLength'],
     avgWeight: json['avgWeight'],
+    bomNo: json['boM_NO'],
   );
 
 }

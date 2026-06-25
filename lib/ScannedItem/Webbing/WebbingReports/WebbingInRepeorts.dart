@@ -81,7 +81,7 @@ class _WebbingInReportState extends State<WebbingInReport> {
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
+    return DateFormat('dd-MM-yyyy').format(date);
   }
 
   @override

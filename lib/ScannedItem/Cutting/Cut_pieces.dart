@@ -79,7 +79,7 @@ class _ReceiveCutPcsScreenState extends State<ReceiveCutPcsScreen> {
 
       bool dateMatch = true;
       if (fromDate != null && toDate != null) {
-        final itemDate = DateFormat("dd-MMM-yyyy").parse(item.date);
+        final itemDate = DateFormat("dd-MM-yyyy").parse(item.date);
         dateMatch =
             itemDate.isAfter(fromDate!.subtract(const Duration(days: 1))) &&
             itemDate.isBefore(toDate!.add(const Duration(days: 1)));

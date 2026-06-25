@@ -52,7 +52,6 @@ class _FormScreenState extends State<FormScreen> {
   late TextEditingController _remarkController;
   late TextEditingController _requiredBagController;
   late TextEditingController _printStatusController;
-
   DateTime _selectedDate = DateTime.now();
   String? _printStatus;
   // String _supervisorName = 'SELECT SUPERVISOR';
@@ -66,7 +65,6 @@ class _FormScreenState extends State<FormScreen> {
   // List<String> _supervisors = ['SELECT SUPERVISOR'];
   List<String> _supervisors = [];
   List<Map<String, dynamic>> itemsList = [];
-
 
   @override
   void initState() {
@@ -140,7 +138,6 @@ class _FormScreenState extends State<FormScreen> {
     });
   }
 
-
   void addItem() {
     if (_bagTypeController.text.isEmpty ||
         _bagSizeController.text.isEmpty ||
@@ -149,7 +146,6 @@ class _FormScreenState extends State<FormScreen> {
         _shift == null ||
         _lineNo == null ||
         _supervisorName == null) {
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Fill all required item fields")),
       );
@@ -162,7 +158,6 @@ class _FormScreenState extends State<FormScreen> {
       bagQty: int.parse(_bagQtyController.text),
       bagWeight: int.parse(_bagWtController.text),
       shift: _shift!,
-
     );
 
     setState(() {
@@ -174,14 +169,15 @@ class _FormScreenState extends State<FormScreen> {
             : _contractorController.text.trim(),
 
         "remark": _remarkController.text.trim().isEmpty
-            ? "N/A"
+            ? ""
             : _remarkController.text.trim(),
         "shift": _shift!,
         "bagQty": item.bagQty,
         "lineNo": _lineNo!,
         "supervisorName": _supervisorName!,
         "operatorName": _shift!,
-        "tableQuantity": int.tryParse(_requiredBagController.text) ?? widget.requiredBag,
+        "tableQuantity":
+            int.tryParse(_requiredBagController.text) ?? widget.requiredBag,
       });
     });
     // debugPrint("FINAL ITEMS COUNT: ${itemsList.length}");
@@ -336,10 +332,7 @@ class _FormScreenState extends State<FormScreen> {
       debugPrint("SAVE ERROR: $e");
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
   }
@@ -376,7 +369,6 @@ class _FormScreenState extends State<FormScreen> {
         foregroundColor: C.bg,
         elevation: 0,
         iconTheme: IconThemeData(color: C.bg),
-
       ),
       body: Form(
         key: _formKey,
@@ -401,7 +393,10 @@ class _FormScreenState extends State<FormScreen> {
                           ? const SizedBox(
                               height: 18,
                               width: 18,
-                              child: CircularProgressIndicator(color: C.appBar3,strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                color: C.appBar3,
+                                strokeWidth: 2,
+                              ),
                             )
                           : null,
                     ),
@@ -855,7 +850,7 @@ class _FormScreenState extends State<FormScreen> {
             );
             if (date != null) {
               setState(() {
-                _selectedDate = date;
+                _selectedDate = DateTime(date.year, date.month, date.day);
               });
             }
           },
@@ -870,8 +865,7 @@ class _FormScreenState extends State<FormScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    '${_selectedDate.month.toString().padLeft(2, '0')}/${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.year}',
-                    style: const TextStyle(fontSize: 14),
+                    "${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}",
                   ),
                 ),
                 const Icon(

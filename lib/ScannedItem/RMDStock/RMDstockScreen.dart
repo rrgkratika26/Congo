@@ -136,7 +136,7 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
     _fetchData();
   }
 
-  String _fmt(DateTime d) => DateFormat('dd MMM yy').format(d);
+  String _fmt(DateTime d) => DateFormat('dd-MM-yyyy').format(d);
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +339,7 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
                     // ✅ FIXED: _statusBadge sirf Container return karta hai
                     // DataCell usse yahan wrap karta hai — double DataCell nahi
                     DataCell(_statusBadge(r.status)),
-                    DataCell(_cell(DateFormat('dd-MM-yy').format(r.date))),
+                    DataCell(_cell(DateFormat('dd-MM-yyyy').format(r.date))),
                     DataCell(_cell(r.time)),
                   ],
                 );

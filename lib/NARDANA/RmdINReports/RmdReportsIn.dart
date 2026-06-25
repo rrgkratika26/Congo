@@ -6,8 +6,6 @@ import '../../services/NardanaApis/NardanaApi.dart';
 import '../../util/widget/CountRecords/CountRecords.dart';
 import 'RmdInReportsModel.dart';
 
-
-
 // ── Screen ───────────────────────────────────────────────────────────────────
 
 class RmdInReportScreen extends StatefulWidget {
@@ -34,7 +32,8 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
     return _allReports.where((r) {
       final q = _query.toLowerCase();
 
-      final matchQ = q.isEmpty ||
+      final matchQ =
+          q.isEmpty ||
           r.barcode.toLowerCase().contains(q) ||
           r.supervisorName.toLowerCase().contains(q) ||
           r.partyName.toLowerCase().contains(q) ||
@@ -55,22 +54,15 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
       return matchQ && matchFrom && matchTo;
     }).toList();
   }
-// ====================== USE IN YOUR SCREEN ======================
+  // ====================== USE IN YOUR SCREEN ======================
 
   double get _totalNet =>
-      ReportTotalHelper.totalNetWeight(
-        _filtered,
-            (e) => e.netWeight,
-      );
+      ReportTotalHelper.totalNetWeight(_filtered, (e) => e.netWeight);
 
   double get _totalLength =>
-      ReportTotalHelper.totalRollLength(
-        _filtered,
-            (e) => e.rollLength,
-      );
+      ReportTotalHelper.totalRollLength(_filtered, (e) => e.rollLength);
 
-  int get _totalRecords =>
-      ReportTotalHelper.totalRecords(_filtered);
+  int get _totalRecords => ReportTotalHelper.totalRecords(_filtered);
   // CountText(count: _filtered.length);
 
   @override
@@ -117,17 +109,15 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
     } catch (e) {
       debugPrint('UI ERROR: $e');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load data')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to load data')));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
   }
-
-
 
   // String _fmt(DateTime d) => DateFormat('dd MMM yy').format(d);
 
@@ -140,29 +130,37 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _topBar(),
-
-            _isLoading
-                ? const Expanded(
-                child: Center(child: CircularProgressIndicator(color: C.appBar3,)))
-                : _filtered.isEmpty
-                ? Expanded(child: _emptyState())
-                : Expanded(
-              child: Column(
-                children: [
-
-                  Expanded(child: _table(_filtered)),
-
-                  _paginationBar()
-                ],
-              ),
-            ),
-          ],
+      backgroundColor: C.bg,
+      appBar: AppBar(
+        title: const Text("RMD In Reports", style: TextStyle(color: C.bg)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: C.appBar1),
         ),
+        // C.primary,
+        iconTheme: IconThemeData(color: C.bg),
+      ),
+      body: Column(
+        children: [
+          _topBar(),
+
+          _isLoading
+              ? const Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(color: C.appBar3),
+                  ),
+                )
+              : _filtered.isEmpty
+              ? Expanded(child: _emptyState())
+              : Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(child: _table(_filtered)),
+
+                      _paginationBar(),
+                    ],
+                  ),
+                ),
+        ],
       ),
     );
   }
@@ -172,7 +170,7 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
   Widget _topBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-      color: C.appBar1,
+      color: C.bg,
 
       child: Column(
         children: [
@@ -184,23 +182,38 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
                   onChanged: (v) => setState(() => _query = v),
                   style: const TextStyle(fontSize: 14, color: C.bg),
                   decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: C.brand700,),borderRadius: BorderRadius.all(Radius.circular(10))),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: C.border),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
                     hintText: 'Search barcode, party, supervisor…',
-                    hintStyle: const TextStyle(
-                        color: C.brand700, fontSize: 13),
-                    prefixIcon: const Icon(Icons.search,
-                        color: C.brand700, size: 20),
+                    hintStyle: const TextStyle(color: C.brand700, fontSize: 13),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: C.brand700,
+                      size: 20,
+                    ),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
-                      icon: const Icon(Icons.close,
-                          color: C.textHigh, size: 18),
-                      onPressed: () {
-                        setState(() {
-                          _query = '';
-                          _searchCtrl.clear();
-                        });
-                      },
-                    )
+                            icon: const Icon(
+                              Icons.close,
+                              color: C.textHigh,
+                              size: 18,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _query = '';
+                                _searchCtrl.clear();
+                              });
+                            },
+                          )
                         : null,
                     filled: true,
                     fillColor: Colors.white12,
@@ -215,13 +228,14 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
 
               const SizedBox(width: 8),
 
-
               IconButton(
                 onPressed: _pickDateRange,
-                icon: const Icon(Icons.calendar_today,size: 22, color: Colors.white),
+                icon: const Icon(
+                  Icons.calendar_today,
+                  size: 22,
+                  color: C.primaryDark,
+                ),
               ),
-
-
             ],
           ),
 
@@ -279,16 +293,13 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
     );
   }
 
-
   Widget _table(List<RmdInReport> data) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(10),
       child: Card(
         elevation: 2,
         shadowColor: Colors.black12,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: SingleChildScrollView(
@@ -306,45 +317,60 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
                 DataColumn(label: _head('Sr')),
                 DataColumn(label: _head('Roll Code')),
                 DataColumn(label: _head('Barcode')),
-                // DataColumn(label: _head('Batch')),
-                DataColumn(label: _head('Loom Type')),
-                DataColumn(label: _head('Loom No')),
                 DataColumn(label: _head('Fabric Code')),
                 DataColumn(label: _head('Fab width')),
                 DataColumn(label: _head('GSM mtr/gm')),
-                DataColumn(label: _head('Clr')),
-                DataColumn(label: _head('Gross Wt(Kg)')),
                 DataColumn(label: _head('Net Wt(Kg)')),
-                DataColumn(label: _head('Tare')),
-                DataColumn(label: _head('Roll Len(mtr)')),
                 DataColumn(label: _head('Avg Wt(gm)')),
-                DataColumn(label: _head('Op Name')),
-                DataColumn(label: _head('Loom Op1')),
-                DataColumn(label: _head('Supervisor Name')),
                 DataColumn(label: _head('Party name')),
-                DataColumn(label: _head('WO No.')),
-                DataColumn(label: _head('Cont No.')),
-                DataColumn(label: _head('Req.Qty(Kg)')),
-                DataColumn(label: _head('Req.Qty(Mtr)')),
-
-                DataColumn(label: _head('Dept')),
-                DataColumn(label: _head('Issue to Dept')),
-                DataColumn(label: _head('Status')),
-                DataColumn(label: _head('Entry In')),
-                DataColumn(label: _head('Entry Out')),
-                DataColumn(label: _head('Mash')),
-                DataColumn(label: _head('Fab Type/use')),
-
-                DataColumn(label: _head('Lam Type')),
-                DataColumn(label: _head('Cut Type')),
-                DataColumn(label: _head('Sp Id')),
-                DataColumn(label: _head('Fab Type/Baffle')),
-
-
-
-                // DataColumn(label: _head('From')),
+                DataColumn(label: _head('PO No.')),
                 DataColumn(label: _head('Date')),
                 DataColumn(label: _head('Time')),
+
+
+
+
+
+
+
+                // DataColumn(label: _head('Loom Type')),
+                // DataColumn(label: _head('Loom No')),
+                // DataColumn(label: _head('Roll Len(mtr)')),
+                // DataColumn(label: _head('Cont No.')),
+                // DataColumn(label: _head('Issue to Dept')),
+                // DataColumn(label: _head('Status')),
+                // DataColumn(label: _head('Entry In')),
+                // DataColumn(label: _head('Entry Out')),
+                // DataColumn(label: _head('Mash')),
+
+
+
+
+
+
+                // DataColumn(label: _head('Batch')),
+
+                // DataColumn(label: _head('Clr')),
+                // DataColumn(label: _head('Gross Wt(Kg)')),
+                // DataColumn(label: _head('Tare')),
+
+                // DataColumn(label: _head('Op Name')),
+                // DataColumn(label: _head('Loom Op1')),
+                // DataColumn(label: _head('Supervisor Name')),
+                // DataColumn(label: _head('Req.Qty(Kg)')),
+                // DataColumn(label: _head('Req.Qty(Mtr)')),
+
+                // DataColumn(label: _head('Dept')),
+
+                // DataColumn(label: _head('Fab Type/use')),
+
+                // DataColumn(label: _head('Lam Type')),
+                // DataColumn(label: _head('Cut Type')),
+                // DataColumn(label: _head('Sp Id')),
+                // DataColumn(label: _head('Fab Type/Baffle')),
+
+                // DataColumn(label: _head('From')),
+
               ],
 
               rows: List.generate(data.length, (i) {
@@ -355,70 +381,80 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
                     i.isEven ? Colors.white : const Color(0xFFF8FAFF),
                   ),
                   cells: [
-
                     DataCell(_cell('${r.srNo}', isBold: true)),
                     DataCell(_cell('${r.rollCode}', isBold: true)),
-
-
                     DataCell(_cell(r.barcode, mono: true)),
-
-                    // DataCell(_cell(r.batchNo)),
-
-                    DataCell(_cell('${r.loomType}')),
-                    DataCell(_cell('${r.loomNo}')),
-
                     DataCell(_cell(r.fabricCode, width: 150)),
-
                     DataCell(_cell(r.fabricWidth)),
                     DataCell(_cell(r.fabricGsm)),
-                    DataCell(_cell(r.color)),
 
-                    DataCell(_cell(r.grossWeight.toStringAsFixed(1))),
 
-                    DataCell(_cell(
-                      r.netWeight.toStringAsFixed(1),
-                      color: Colors.green.shade700,
-                      isBold: true,
-                    )),
 
-                    DataCell(_cell(r.tareWeight.toStringAsFixed(1))),
 
-                    DataCell(_cell(r.rollLength.toStringAsFixed(0))),
+
+                    // DataCell(_cell(r.batchNo)),
+                    // DataCell(_cell('${r.loomType}')),
+                    // DataCell(_cell('${r.loomNo}')),
+                    DataCell(
+                      _cell(
+                        r.netWeight.toStringAsFixed(1),
+                        color: Colors.green.shade700,
+                        isBold: true,
+                      ),
+                    ),
                     DataCell(_cell(r.avgWeight.toStringAsFixed(1))),
-
-                    DataCell(_cell(r.operatorName)),
-                    DataCell(_cell(r.loomOperator)),
-
-                    DataCell(_cell(r.supervisorName)),
                     DataCell(_cell(r.partyName)),
-
                     DataCell(_cell(r.workOrderNo)),
-                    DataCell(_cell('${r.contNo}')),
-                    DataCell(_cell('${r.reqQtKg}')),
-                    DataCell(_cell('${r.reqQtMtr}')),
+                    DataCell(_cell(DateFormat('dd-MM-yyyy').format(r.date))),
+                    DataCell(_cell(r.time)),
+
+
+                    // DataCell(_cell(r.color)),
+
+                    // DataCell(_cell(r.grossWeight.toStringAsFixed(1))),
 
 
 
-                    DataCell(_cell(r.department)),
-                    DataCell(_cell(r.issueToDept)),
+                    // DataCell(_cell(r.tareWeight.toStringAsFixed(1))),
 
-                    DataCell(_statusBadge(r.status)),
 
-                    DataCell(_cell(r.entryIn)),
-                    DataCell(_cell(r.entryOut)),
+                    // DataCell(_cell(r.issueToDept)),
+                    // DataCell(_cell('${r.contNo}')),
+                    // DataCell(_cell(r.rollLength.toStringAsFixed(0))),
+                    //
+                    // DataCell(_statusBadge(r.status)),
+                    //
+                    // DataCell(_cell(r.entryIn)),
+                    // DataCell(_cell(r.entryOut)),
+                    //
+                    // DataCell(_cell(r.mash)),
 
-                    DataCell(_cell(r.mash)),
-                    DataCell(_cell(r.fabTypeuse)),
 
-                    DataCell(_cell(r.spId)),
-                    DataCell(_cell(r.laminationType)),
-                    DataCell(_cell(r.fabTypeBaffle)),
-                    DataCell(_cell(r.cutType)),
+
+
+
+
+                    // DataCell(_cell(r.operatorName)),
+                    // DataCell(_cell(r.loomOperator)),
+
+                    // DataCell(_cell(r.supervisorName)),
+
+                    // DataCell(_cell('${r.reqQtKg}')),
+                    // DataCell(_cell('${r.reqQtMtr}')),
+
+                    // DataCell(_cell(r.department)),
+
+
+
+                    // DataCell(_cell(r.fabTypeuse)),
+
+                    // DataCell(_cell(r.spId)),
+                    // DataCell(_cell(r.laminationType)),
+                    // DataCell(_cell(r.fabTypeBaffle)),
+                    // DataCell(_cell(r.cutType)),
 
                     // DataCell(_cell(r.fromRoll)),
 
-                    DataCell(_cell(DateFormat('dd-MM-yy').format(r.date))),
-                    DataCell(_cell(r.time)),
                   ],
                 );
               }),
@@ -431,9 +467,7 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
 
   // ── Empty State ────────────────────────────────────────────────────────────
 
-  Widget _emptyState() => const Center(
-    child: Text('No records found'),
-  );
+  Widget _emptyState() => const Center(child: Text('No records found'));
 
   Widget _statusBadge(String status) {
     final s = status.toLowerCase();
@@ -462,14 +496,11 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
       ),
       child: Text(
         status,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: fg,
-        ),
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: fg),
       ),
     );
   }
+
   Widget _head(String text) {
     return Text(
       text,
@@ -482,12 +513,12 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
   }
 
   Widget _cell(
-      String text, {
-        double? width,
-        bool isBold = false,
-        bool mono = false,
-        Color? color,
-      }) {
+    String text, {
+    double? width,
+    bool isBold = false,
+    bool mono = false,
+    Color? color,
+  }) {
     return SizedBox(
       width: width,
       child: Text(
@@ -534,4 +565,3 @@ class _RmdInReportScreenState extends State<RmdInReportScreen> {
     );
   }
 }
-

@@ -203,6 +203,8 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
                 bomNo: entry.worK_ORDER_NO,
                 poNumber: entry.poNumber,
                   remaining: entry.remaining,
+                requiredBag: entry.requiredBag,
+
 
               ),
             ),
@@ -259,8 +261,8 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
                 const SizedBox(height: 12),
                 _buildInfoRow(
                   Icons.shopping_cart_outlined,
-                  'Quantity',
-                  entry.quantity.toString(),
+                  'Req Bag',
+                  entry.requiredBag.toString(),
                   false,
                 ),
                 const SizedBox(height: 12),

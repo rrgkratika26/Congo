@@ -2,6 +2,8 @@ class LaminationReportModel {
   final String id;
   final String rollCode;
   final String barcode;
+  final String bomNo;
+
   final String batchNo;
   final String loomType;
   final String loomNo;
@@ -75,7 +77,7 @@ class LaminationReportModel {
     required this.fabricGsm,
     required this.laminationType,
     required this.cutSlipType,
-    required this.specialIdentification,
+    required this.specialIdentification, required this.bomNo,
   });
 
   factory LaminationReportModel.fromJson(Map<String, dynamic> json) {
@@ -117,6 +119,7 @@ class LaminationReportModel {
       laminationType: json['laminationType']?.toString() ?? '',
       cutSlipType: json['cutSlipType']?.toString() ?? '',
       specialIdentification: json['specialIdentification']?.toString() ?? '',
+      bomNo: json['boM_NO']?.toString() ?? '',
     );
   }
 
@@ -125,6 +128,7 @@ class LaminationReportModel {
       'id': id,
       'rollCode': rollCode,
       'barcode': barcode,
+      'bomNo': bomNo,
       'batchNo': batchNo,
       'loomType': loomType,
       'loomNo': loomNo,

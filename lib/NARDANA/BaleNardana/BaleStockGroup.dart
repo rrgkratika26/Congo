@@ -111,7 +111,7 @@ class _BaleStockGroupScreenState extends State<BaleStockGroupScreen> {
           decoration: const BoxDecoration(color: C.primary),
         ),
         title: const Text(
-          "Bale Stock",
+          "Bale Overall Stock Report",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,

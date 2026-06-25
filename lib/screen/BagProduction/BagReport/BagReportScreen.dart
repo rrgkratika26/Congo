@@ -163,7 +163,7 @@ class _BagReportScreenState extends State<BagReportScreen> {
                     horizontal: 16,
                     vertical: 12,
                   ),
-                  color: const Color(0xFF42A5F6).withOpacity(0.2),
+                  color: C.bg,
                   child: Row(
                     children: [
                       const Icon(
@@ -176,7 +176,7 @@ class _BagReportScreenState extends State<BagReportScreen> {
                         'Showing $count of $count entries',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: C.primaryDark,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -293,7 +293,7 @@ class _BagReportScreenState extends State<BagReportScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    DateFormat('dd/MM/yyyy').format(date),
+                    DateFormat('dd-MM-yyyy').format(date),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

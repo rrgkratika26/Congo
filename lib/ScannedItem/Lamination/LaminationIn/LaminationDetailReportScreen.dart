@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../Color/Colorclass.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 
 class LaminationDetailScreen extends StatelessWidget {
@@ -17,10 +18,11 @@ class LaminationDetailScreen extends StatelessWidget {
     // debugPrint("Selected Date 👉 $date");
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lamination Report'),
+        iconTheme: IconThemeData(color: C.bg),
+        title: Text('Lamination Report',style: TextStyle(color: C.bg),),
 
         centerTitle: true,
-        backgroundColor: Colors.orange.shade100,
+        backgroundColor: C.appBar1,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _service.getLaminationScannedItems(date: date, plant: plant),
@@ -47,6 +49,7 @@ class LaminationDetailScreen extends StatelessWidget {
 
               return Card(
                 elevation: 4,
+                shadowColor: C.primaryDark,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -72,7 +75,7 @@ class LaminationDetailScreen extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.orange.shade500,
+                              color: C.primaryDark,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text(
@@ -86,6 +89,10 @@ class LaminationDetailScreen extends StatelessWidget {
                         ],
                       ),
                       const Divider(height: 20),
+                      _infoRow(
+                        'BOM No.',
+                        item['BOM_NO']?.toString() ?? '-',
+                      ),
                       _infoRow(
                         'Fabric Code',
                         item['FABRIC_CODE']?.toString() ?? '-',

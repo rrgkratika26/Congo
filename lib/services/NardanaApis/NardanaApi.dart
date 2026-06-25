@@ -36,12 +36,12 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class NaradanaApiService {
-  static const String _baseUrl = 'http://192.168.29.125:7165/api';
+  // static const String _baseUrl = 'http://192.168.29.125:7165/api';
   // static const String _baseUrl = 'http://fibcsoftware.in:4430/api/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Visa/api';
-  // static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String _baseUrl ='http://190.92.175.47:80/API/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Nardana';
@@ -99,7 +99,6 @@ class NaradanaApiService {
     };
   }
 
-
   // ======== DROPDOWN DATA =================
 
   Future<List<LoomReport>> fetchLoomData({
@@ -122,12 +121,16 @@ class NaradanaApiService {
       );
 
       final response = await http.get(uri, headers: await authHeaders());
-
-      _logApi(method: "GET", url: uri, response: response);
+      debugPrint("URL: $uri");
+      debugPrint("STATUS CODE: ${response.statusCode}");
+      debugPrint("BODY: ${response.body}");
+      debugPrint("LOOM API RESPONSE: $uri");
       _checkUnauthorized(response);
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
+        debugPrint("LOOM API RESPONSE: $data");
+
         return data.map((e) => LoomReport.fromJson(e)).toList();
       } else {
         throw Exception("Failed to fetch loom data");
@@ -147,7 +150,7 @@ class NaradanaApiService {
       final fromDate = from != null
           ? DateFormat('yyyy-MM-dd').format(from)
           : DateFormat(
-              'yyyy-MM-dd',
+        'yyyy-MM-dd',
             ).format(DateTime.now().subtract(const Duration(days: 1)));
 
       final toDate = to != null
@@ -230,7 +233,7 @@ class NaradanaApiService {
         '$_baseUrl/Lamination/GetLaminationInReport'
         "?fromDate=${DateFormat('yyyy-MM-dd').format(from)}"
         "&toDate=${DateFormat('yyyy-MM-dd').format(to)}"
-        "&pageNumber=1&pageSize=10000",
+        "&pageNumber=1&pageSize=10",
       );
 
       final response = await http.get(
@@ -240,6 +243,7 @@ class NaradanaApiService {
       _logApi(method: "GET", url: uri, response: response);
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
+        debugPrint("Response adata: $jsonList");
         return jsonList
             .map((json) => LaminationReportModel.fromJson(json))
             .toList();
@@ -295,9 +299,9 @@ class NaradanaApiService {
 
     final res = await http.get(uri, headers: await authHeaders());
 
-    // debugPrint("URL: $uri");
-    // debugPrint("STATUS: ${res.statusCode}");
-    // debugPrint("BODY: ${res.body}");
+    debugPrint("URL: $uri");
+    debugPrint("STATUS: ${res.statusCode}");
+    debugPrint("BODY: ${res.body}");
 
     if (res.statusCode == 200) {
       final jsonData = jsonDecode(res.body);
@@ -325,6 +329,11 @@ class NaradanaApiService {
     final response = await http.get(url, headers: await authHeaders());
 
     if (response.statusCode == 200) {
+      print("📡 Status Code => ${response.statusCode}");
+
+      print("URL=> ${url}");
+
+      print("📦 webbing Response Body => ${response.body}");
       final decoded = json.decode(response.body);
 
       if (decoded['success'] == true) {
@@ -469,6 +478,7 @@ class NaradanaApiService {
     _logApi(method: "GET", url: url, response: response);
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
+      print("Fabric WebStock Grouping Report => $data.");
 
       return data.map((e) => CuttingFabricSummaryModel.fromJson(e)).toList();
     } else {
@@ -648,7 +658,7 @@ class NaradanaApiService {
     final res = await http.get(url, headers: await authHeaders());
     print("🌐 GET => $url");
     // print("📡 Status => ${res.statusCode}");
-    debugPrint("📦 Response => ${res.body}");
+    debugPrint("📦 Response => ${res.body}", wrapWidth: 50);
     print("======================================");
     if (res.statusCode == 200) {
       final jsonData = jsonDecode(res.body);
@@ -687,7 +697,7 @@ class NaradanaApiService {
       Uri.parse(url),
       headers: await authHeaders(),
     );
-
+    debugPrint("Response Bom and Component Body: ${response.body}");
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -1185,9 +1195,22 @@ class NaradanaApiService {
 
               "stock": "",
 
-              "order_required_mtr": e.reqMtr,
-              "order_required_kg": e.reqKg,
-              "order_required_pcs": e.reqPcs,
+              "order_required_mtr":
+                  ((double.tryParse(e.reqMtr) ?? 0) +
+                          ((double.tryParse(e.reqMtr) ?? 0) *
+                              (double.tryParse(e.wastage) ?? 0) /
+                              100))
+                      .round()
+                      .toString(),
+              "order_required_kg":(
+                  (double.tryParse(e.reqKg) ?? 0) +
+                      ((double.tryParse(e.reqKg) ?? 0) *
+                          (double.tryParse(e.wastage) ?? 0) / 100)
+              ).round().toString(),
+              "order_required_pcs": (
+                  (double.tryParse(e.quantity) ?? 0) +
+                      (double.tryParse(e.wastage) ?? 0)
+              ).round().toString(),
 
               "combined_column": e.combinedColumn,
             },
@@ -1368,9 +1391,8 @@ class NaradanaApiService {
     }
   }
 
-  Future<dynamic> forwardToLoom(
-      {
-        required  String? unit,
+  Future<dynamic> forwardToLoom({
+    required String? unit,
 
     required int orderNo,
     required String fabricCode,
@@ -1385,9 +1407,7 @@ class NaradanaApiService {
     required String articleNum,
   }) async {
     try {
-      final url = Uri.parse(
-        '$_baseUrl/Planning/ForwardToLoom?unit=$unit',
-      );
+      final url = Uri.parse('$_baseUrl/Planning/ForwardToLoom?unit=$unit');
 
       final body = {
         "ordeR_NO": orderNo,
@@ -1480,7 +1500,6 @@ class NaradanaApiService {
 
       debugPrint("Forward URL => $url");
 
-
       debugPrint("Request => $body");
 
       final response = await http.post(
@@ -1509,8 +1528,8 @@ class NaradanaApiService {
         "$_baseUrl/Dashboard/MarketingCount"
         "?unit=$unit"
         "&type=$type"
-        "&fromDate=${DateFormat('yyyy-MM-dd').format(fromDate)}"
-        "&toDate=${DateFormat('yyyy-MM-dd').format(toDate)}";
+        "&fromDate=${DateFormat('dd-MM-yyyy').format(fromDate)}"
+        "&toDate=${DateFormat('dd-MM-yyyy').format(toDate)}";
 
     try {
       final response = await http.get(

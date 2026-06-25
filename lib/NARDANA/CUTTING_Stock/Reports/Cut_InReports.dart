@@ -112,7 +112,7 @@ class _CuttingInReportState extends State<CuttingInReport> {
       appBar: AppBar(
         backgroundColor: C.primary,
 
-        title: const Text("In Reports",style: TextStyle(color: C.bg),),
+        title: const Text("Cutting In Reports",style: TextStyle(color: C.bg),),
         centerTitle: true,
         elevation: 1,
         actions: [
@@ -187,43 +187,43 @@ class _CuttingInReportState extends State<CuttingInReport> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Row(
                     children: const [
-                      _HeaderCell("ID", 70),
-                      _HeaderCell("Roll Code", 100),
-                      _HeaderCell("Barcode", 120),
+                      _HeaderCell("ID", 50),
+                      _HeaderCell("Roll Code", 80),
+                      _HeaderCell("Barcode", 100),
                       _HeaderCell("Batch No", 120),
-                      _HeaderCell("Loom Type", 110),
-                      _HeaderCell("Loom No", 90),
-                      _HeaderCell("Fabric Code", 180),
-                      _HeaderCell("Gross Wt", 100),
-                      _HeaderCell("Net Wt", 100),
-                      _HeaderCell("Roll Length", 110),
+                      _HeaderCell("Loom Type", 90),
+                      _HeaderCell("Loom No", 50),
+                      _HeaderCell("Fabric Code", 200),
+                      _HeaderCell("Gross Wt", 80),
+                      _HeaderCell("Net Wt", 80),
+                      _HeaderCell("Roll Length", 90),
                       _HeaderCell("Avg Wt", 100),
                       _HeaderCell("Operator", 140),
                       _HeaderCell("Time", 90),
                       _HeaderCell("Loom Operator", 140),
                       _HeaderCell("GSM/Mtr", 100),
-                      _HeaderCell("Supervisor", 140),
-                      _HeaderCell("Party", 120),
-                      _HeaderCell("WO No", 170),
-                      _HeaderCell("Cont No", 170),
-                      _HeaderCell("Req Qty Kg", 110),
-                      _HeaderCell("Req Qty Mtr", 120),
+                      _HeaderCell("Supervisor", 100),
+                      _HeaderCell("Cont No", 80),
+                      _HeaderCell("PO No", 150),
+                      _HeaderCell("Party name", 150),
+                      _HeaderCell("Req Qty Kg", 90),
+                      _HeaderCell("Req Qty Mtr", 100),
                       _HeaderCell("Tare Weight", 140),
                       _HeaderCell("Department", 120),
-                      _HeaderCell("Issue Dept", 120),
-                      _HeaderCell("Status", 100),
-                      _HeaderCell("Entry In", 100),
-                      _HeaderCell("Entry Out", 100),
-                      _HeaderCell("Mash", 90),
-                      _HeaderCell("Fabric Use", 120),
-                      _HeaderCell("Fabric Const", 130),
-                      _HeaderCell("Color", 90),
+                      _HeaderCell("Issue Dept", 90),
+                      _HeaderCell("Status", 80),
+                      _HeaderCell("Entry In", 80),
+                      _HeaderCell("Entry Out", 80),
+                      _HeaderCell("Mash", 50),
+                      _HeaderCell("Fabric Use", 90),
+                      _HeaderCell("Fabric Const", 100),
+                      _HeaderCell("Color", 50),
                       _HeaderCell("Fabric Width", 120),
                       _HeaderCell("Fabric GSM", 110),
-                      _HeaderCell("Lamination", 120),
-                      _HeaderCell("Cut Slip", 110),
-                      _HeaderCell("Special ID", 120),
-                      _HeaderCell("Date", 120),
+                      _HeaderCell("Lamin", 60),
+                      _HeaderCell("Cut Slip", 50),
+                      _HeaderCell("Spec ID", 50),
+                      _HeaderCell("Date", 90),
                     ],
                   ),
                 ),
@@ -244,33 +244,33 @@ class _CuttingInReportState extends State<CuttingInReport> {
                           ),
                           child: Row(
                             children: [
-                              _DataCell(item.id.toString(), 70),
+                              _DataCell(item.id.toString(), 50),
 
-                              _DataCell(item.rollCode, 100),
+                              _DataCell(item.rollCode, 80),
 
-                              _DataCell(item.barcode, 120),
+                              _DataCell(item.barcode, 100),
 
                               _DataCell(item.batchNo, 120),
 
-                              _DataCell(item.loomType, 110),
+                              _DataCell(item.loomType, 90),
 
-                              _DataCell(item.loomNo, 90),
+                              _DataCell(item.loomNo, 50),
 
-                              _DataCell(item.fabricCode, 180),
+                              _DataCell(item.fabricCode, 200),
 
                               _DataCell(
                                 item.grossWeight.toStringAsFixed(2),
-                                100,
+                                80,
                               ),
 
                               _DataCell(
                                 item.netWeight.toStringAsFixed(2),
-                                100,
+                                80,
                               ),
 
                               _DataCell(
                                 item.rollLength.toStringAsFixed(0),
-                                110,
+                                90,
                               ),
 
                               _DataCell(
@@ -289,69 +289,69 @@ class _CuttingInReportState extends State<CuttingInReport> {
                                 100,
                               ),
 
-                              _DataCell(item.supervisorName, 140),
+                              _DataCell(item.supervisorName, 100),
 
-                              _DataCell(item.partyName, 120),
+                              _DataCell(item.partyName, 80),
 
-                              _DataCell(item.workOrderNo, 170),
+                              _DataCell(item.workOrderNo, 150),
 
-                              _DataCell(item.contNo, 170),
+                              _DataCell(item.contNo, 150),
 
                               _DataCell(
                                 item.requiredQuantityKg
                                     .toStringAsFixed(2),
-                                110,
+                                90,
                               ),
 
                               _DataCell(
                                 item.requiredQuantityMtr
                                     .toStringAsFixed(2),
-                                120,
+                                100,
                               ),
 
                               _DataCell(item.tareWeight, 140),
 
                               _DataCell(item.department, 120),
 
-                              _DataCell(item.issueToDept, 120),
+                              _DataCell(item.issueToDept, 90),
 
-                              _DataCell(item.status, 100),
+                              _DataCell(item.status, 80),
 
-                              _DataCell(item.entryIn, 100),
+                              _DataCell(item.entryIn, 80),
 
-                              _DataCell(item.entryOut, 100),
+                              _DataCell(item.entryOut, 80),
 
-                              _DataCell(item.mash, 90),
+                              _DataCell(item.mash, 50),
 
                               _DataCell(
                                 item.fabricTypeFabricUse,
-                                120,
+                                90,
                               ),
 
                               _DataCell(
                                 item.fabricConstruction,
-                                130,
+                                100,
                               ),
 
-                              _DataCell(item.color, 90),
+                              _DataCell(item.color, 50),
 
                               _DataCell(item.fabricWidth, 120),
 
                               _DataCell(item.fabricGsm, 110),
 
-                              _DataCell(item.laminationType, 120),
+                              _DataCell(item.laminationType, 60),
 
-                              _DataCell(item.cutSlipType, 110),
+                              _DataCell(item.cutSlipType, 50),
 
                               _DataCell(
                                 item.specialIdentification,
-                                120,
+                                50,
                               ),
 
                               _DataCell(
                                 DateFormat('dd-MM-yyyy')
                                     .format(item.date),
-                                120,
+                                90,
                               ),
                             ],
                           ),

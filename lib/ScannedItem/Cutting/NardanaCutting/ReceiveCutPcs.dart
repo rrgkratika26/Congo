@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../Color/Colorclass.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
+import 'CutPcsIssueNardana.dart';
 import 'modelclass/CuttingAprrovalModelNardana.dart';
 
 class ReceiveCutPcsNardana extends StatefulWidget {
@@ -63,6 +64,12 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
         });
 
         if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CutPieceIssuedScreenNardana(),
+            ),
+          );
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Cutting Approved Successfully"),
@@ -328,7 +335,7 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
                 DataCell(                                              // ✅ safe date format
                   Text(
                     item.parsedDate != null
-                        ? DateFormat("dd-MMM-yyyy").format(item.parsedDate!)
+                        ? DateFormat("dd-MM-yyyy").format(item.parsedDate!)
                         : item.date,
                   ),
                 ),

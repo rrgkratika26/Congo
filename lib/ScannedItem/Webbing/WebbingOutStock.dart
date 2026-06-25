@@ -38,7 +38,7 @@ class _WebOutStockState extends State<WebOutStock> {
 
   // ---------------- STATIC ISSUE TO ----------------
   // ---------------- STATIC ISSUE TO ----------------
-  final List<String> issueToList = ['LAMINATION', 'CUTTING', 'OTHERS'];
+  final List<String> issueToList = ['CUTTING','FINISHING','OTHERS'];
 
   String? selectedIssueTo; // Local state for IssueTo
   String department = 'WEBBING';

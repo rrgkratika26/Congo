@@ -258,9 +258,11 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
             DataColumn(label: Text('Sr')),
             DataColumn(label: Text('Roll Code')),
             DataColumn(label: Text('Barcode')),
+
+            DataColumn(label: Text('Bom No')),
             DataColumn(label: Text('Batch No')),
-            DataColumn(label: Text('Loom Type')),
-            DataColumn(label: Text('Loom No')),
+            // DataColumn(label: Text('Loom Type')),
+            // DataColumn(label: Text('Loom No')),
             DataColumn(label: Text('Fabric Code')),
             DataColumn(label: Text('Gross Wt(kg)'), numeric: true),
             DataColumn(label: Text('Net Wt(kg)'), numeric: true),
@@ -278,20 +280,20 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
             DataColumn(label: Text('Req.Qty(Kg)')),
             DataColumn(label: Text('Req.Qty(mtr)')),
             DataColumn(label: Text('tare(Kg)')),
-            DataColumn(label: Text('Dept')),
+            // DataColumn(label: Text('Dept')),
             DataColumn(label: Text('Issue to Dept')),
             DataColumn(label: Text('Status')),
-            DataColumn(label: Text('Entry In')),
-            DataColumn(label: Text('Entry Out')),
-            DataColumn(label: Text('Mash')),
-            DataColumn(label: Text('Fab Type/Use')),
-            DataColumn(label: Text('Cut Type')),
-            DataColumn(label: Text('CLR')),
-            DataColumn(label: Text('Fab Width')),
-            DataColumn(label: Text('Fab GSM')),
-            DataColumn(label: Text('Lam Type')),
-            DataColumn(label: Text('Fab Type/Baffle')),
-            DataColumn(label: Text('Sp. Id')),
+            // DataColumn(label: Text('Entry In')),
+            // DataColumn(label: Text('Entry Out')),
+            // DataColumn(label: Text('Mash')),
+            // DataColumn(label: Text('Fab Type/Use')),
+            // DataColumn(label: Text('Cut Type')),
+            // DataColumn(label: Text('CLR')),
+            // DataColumn(label: Text('Fab Width')),
+            // DataColumn(label: Text('Fab GSM')),
+            // DataColumn(label: Text('Lam Type')),
+            // DataColumn(label: Text('Fab Type/Baffle')),
+            // DataColumn(label: Text('Sp. Id')),
 
           ],
           source: _LoomDataSource(data),
@@ -404,10 +406,11 @@ class _LoomDataSource extends DataTableSource {
         DataCell(
           Text(r.barcode, style: const TextStyle(fontFamily: 'monospace')),
         ),
+        DataCell(Text(r.bomNo)),
         DataCell(Text(r.batchNo)),
 
-        DataCell(_badge(r.loomType, isLohia)),
-        DataCell(Text('${r.loomNo}')),
+        // DataCell(_badge(r.loomType, isLohia)),
+        // DataCell(Text('${r.loomNo}')),
 
         DataCell(
           SizedBox(
@@ -460,22 +463,22 @@ class _LoomDataSource extends DataTableSource {
 
         DataCell(Text(r.department)),
         DataCell(Text(r.issueToDept)),
-        DataCell(Text(r.status)),
-
-        DataCell(Text(r.entryIn)),
-        DataCell(Text(r.entryOut)),
-
-        DataCell(Text(r.mesh)),
-        DataCell(Text(r.fabricType)),
-        DataCell(Text(r.specialIdentification)),
-
-        DataCell(Text(r.color)),
-        DataCell(Text(r.fabricWidth)),
-        DataCell(Text(r.fabricGsm)),
-
-        DataCell(Text(r.laminationType)),
-        DataCell(Text(r.fabricConstruction)), // Lam/Baffle (better fit)
-        DataCell(Text(r.cutSlipType)),
+        // DataCell(Text(r.status)),
+        //
+        // DataCell(Text(r.entryIn)),
+        // DataCell(Text(r.entryOut)),
+        //
+        // DataCell(Text(r.mesh)),
+        // DataCell(Text(r.fabricType)),
+        // DataCell(Text(r.specialIdentification)),
+        //
+        // DataCell(Text(r.color)),
+        // DataCell(Text(r.fabricWidth)),
+        // DataCell(Text(r.fabricGsm)),
+        //
+        // DataCell(Text(r.laminationType)),
+        // DataCell(Text(r.fabricConstruction)), // Lam/Baffle (better fit)
+        // DataCell(Text(r.cutSlipType)),
 
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
+import 'package:IMS/util/sharedpreference/shared_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../QRScan/QrScanScreen.dart';
@@ -57,7 +58,7 @@ class _WebbingInStockState extends State<WebbingInStock> {
       // Debug print parameters
       print("======= CHECK BARCODE API PARAMS =======");
       print("barcode: $barcode");
-      print("plant: ${controller.selectedLocation ?? "UNIT-SILVASSA"}");
+      print("plant:${AppSession.unit} ");
       print("department: $department");
       print("supervisor: ${controller.selectedSupervisor}");
       print("operator: ${controller.selectedOperator}");
@@ -68,7 +69,7 @@ class _WebbingInStockState extends State<WebbingInStock> {
 
 
         barcode: barcode,
-        plant: controller.selectedLocation ?? AppGlobals.unit,
+        plant: AppGlobals.unit,
         department: department,
         supervisor: controller.selectedSupervisor!,
         operator: controller.selectedOperator!,

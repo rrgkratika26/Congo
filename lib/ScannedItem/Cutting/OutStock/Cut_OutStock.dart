@@ -1545,9 +1545,6 @@
 //   const _NameValue(this.label, this.value);
 // }
 
-
-
-
 import 'dart:async';
 
 import 'package:IMS/Color/Colorclass.dart';
@@ -1573,17 +1570,17 @@ class CuttingOutStockForm extends StatefulWidget {
 
 class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   // ─────────────── Theme ───────────────
-  static const _primary    = Color(0xFF1A56DB);
-  static const _surface    = Color(0xFFF8FAFF);
-  static const _border     = Color(0xFFDDE3F0);
+  static const _primary = Color(0xFF1A56DB);
+  static const _surface = Color(0xFFF8FAFF);
+  static const _border = Color(0xFFDDE3F0);
   static const _labelColor = Colors.black;
-  static const _inputBg    = Colors.white;
+  static const _inputBg = Colors.white;
   static const _readOnlyBg = Color(0xFFF4F6FB);
 
   // ─────────────── Services ───────────────
-  final _apiService    = VisaApiService();
+  final _apiService = VisaApiService();
   final _inStockService = InStockService();
-  final _formKey       = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   // ─────────────── Debounce ───────────────
   Timer? _debounce;
@@ -1592,86 +1589,86 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   String? _selectedShift;
   final List<String> _shiftOptions = ['A', 'B'];
 
-  List<String> _bomNumbers     = [];
-  String?      _selectedBomNo;
+  List<String> _bomNumbers = [];
+  String? _selectedBomNo;
 
-  List<String> _componentList    = [];
-  String?      _selectedComponent;
+  List<String> _componentList = [];
+  String? _selectedComponent;
 
-  List<String> _fabricWidthList  = [];
-  String?      _selectedFabricWidth;
+  List<String> _fabricWidthList = [];
+  String? _selectedFabricWidth;
 
-  List<String> _gsmList          = [];
-  String?      _selectedGsm;
+  List<String> _gsmList = [];
+  String? _selectedGsm;
 
-  List<String> _laminationList   = ['L', 'UL', 'SL'];
-  String?      _selectedLamination;
+  List<String> _laminationList = ['L', 'UL', 'SL'];
+  String? _selectedLamination;
 
-  List<_NameValue> _operatorList   = [];
+  List<_NameValue> _operatorList = [];
   List<_NameValue> _supervisorList = [];
   String? _operator2;
   String? _selectedSupervisor;
 
   // ─────────────── Loading flags ───────────────
-  bool _isLoadingFabricWidth   = false;
-  bool _isLoadingGsm           = false;
+  bool _isLoadingFabricWidth = false;
+  bool _isLoadingGsm = false;
   bool _isLoadingBomComponents = false;
-  bool _isLoadingOperator      = false;
-  bool _isLoadingSupervisor    = false;
-  bool _isLoading              = false;
+  bool _isLoadingOperator = false;
+  bool _isLoadingSupervisor = false;
+  bool _isLoading = false;
 
   // ─────────────── Controllers ───────────────
-  final _partyNameCtrl     = TextEditingController();
-  final _poNoCtrl          = TextEditingController();
-  final _articleNoCtrl     = TextEditingController();
-  final _bomCtrl           = TextEditingController();
-  final _componentCtrl     = TextEditingController();
-  final _reqFabricCtrl     = TextEditingController();
-  final _dateCtrl          = TextEditingController();
-  final _timeCtrl          = TextEditingController();
-  final _reqQtyKgCtrl      = TextEditingController();
-  final _reqQtyMtrCtrl     = TextEditingController();
+  final _partyNameCtrl = TextEditingController();
+  final _poNoCtrl = TextEditingController();
+  final _articleNoCtrl = TextEditingController();
+  final _bomCtrl = TextEditingController();
+  final _componentCtrl = TextEditingController();
+  final _reqFabricCtrl = TextEditingController();
+  final _dateCtrl = TextEditingController();
+  final _timeCtrl = TextEditingController();
+  final _reqQtyKgCtrl = TextEditingController();
+  final _reqQtyMtrCtrl = TextEditingController();
 
-  final _machineStartCtrl  = TextEditingController();
-  final _machineEndCtrl    = TextEditingController();
-  final _cutLengthCtrl     = TextEditingController();
-  final _baffleCtrl        = TextEditingController();
+  final _machineStartCtrl = TextEditingController();
+  final _machineEndCtrl = TextEditingController();
+  final _cutLengthCtrl = TextEditingController();
+  final _baffleCtrl = TextEditingController();
 
-  final _fabricTypeCtrl    = TextEditingController();
-  final _colorCtrl         = TextEditingController();
-  final _specialIdCtrl     = TextEditingController();
-  final _fabricGsmCtrl     = TextEditingController();
-  final _fabricWidthCtrl   = TextEditingController();
-  final _fabricBaffleCtrl  = TextEditingController();
-  final _fabricConstCtrl   = TextEditingController();
-  final _laminationCtrl    = TextEditingController();
-  final _cutTypeCtrl       = TextEditingController();
-  final _batchNoCtrl       = TextEditingController();
+  final _fabricTypeCtrl = TextEditingController();
+  final _colorCtrl = TextEditingController();
+  final _specialIdCtrl = TextEditingController();
+  final _fabricGsmCtrl = TextEditingController();
+  final _fabricWidthCtrl = TextEditingController();
+  final _fabricBaffleCtrl = TextEditingController();
+  final _fabricConstCtrl = TextEditingController();
+  final _laminationCtrl = TextEditingController();
+  final _cutTypeCtrl = TextEditingController();
+  final _batchNoCtrl = TextEditingController();
 
-  final _grossWeightCtrl   = TextEditingController();
-  final _tareWeightCtrl    = TextEditingController();
-  final _rollWeightCtrl    = TextEditingController();
-  final _rollLengthCtrl    = TextEditingController();
-  final _avgWeightMtrCtrl  = TextEditingController();
+  final _grossWeightCtrl = TextEditingController();
+  final _tareWeightCtrl = TextEditingController();
+  final _rollWeightCtrl = TextEditingController();
+  final _rollLengthCtrl = TextEditingController();
+  final _avgWeightMtrCtrl = TextEditingController();
 
   // Weight & Output
-  final _cutWidthCtrl      = TextEditingController();
-  final _cutLengthCmCtrl   = TextEditingController();
-  final _cutSizeQtyCtrl    = TextEditingController();
-  final _netWtCtrl         = TextEditingController();
-  final _wastageCtrl       = TextEditingController();
-  final _tillRemCtrl       = TextEditingController();
-  final _useCtrl           = TextEditingController();
-  final _finalRemCtrl      = TextEditingController();
+  final _cutWidthCtrl = TextEditingController();
+  final _cutLengthCmCtrl = TextEditingController();
+  final _cutSizeQtyCtrl = TextEditingController();
+  final _netWtCtrl = TextEditingController();
+  final _wastageCtrl = TextEditingController();
+  final _tillRemCtrl = TextEditingController();
+  final _useCtrl = TextEditingController();
+  final _finalRemCtrl = TextEditingController();
 
-  final _remarkCtrl        = TextEditingController();
-  final _generateCodeCtrl  = TextEditingController();
+  final _remarkCtrl = TextEditingController();
+  final _generateCodeCtrl = TextEditingController();
 
   // ─────────────── initState ───────────────
   @override
   void initState() {
     super.initState();
-    final p   = widget.production;
+    final p = widget.production;
     final now = DateTime.now();
 
     // Date / Time
@@ -1683,34 +1680,34 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
         "${now.second.toString().padLeft(2, '0')}";
 
     // ── Pre-fill from production object ──────────────────────────
-    _partyNameCtrl.text    = p.partyname;
-    _poNoCtrl.text         = p.workorderno;
-    _bomCtrl.text          = p.workorderno;
-    _reqFabricCtrl.text    = _buildFabricCode(p);
+    _partyNameCtrl.text = p.partyname;
+    _poNoCtrl.text = p.workorderno;
+    _bomCtrl.text = p.workorderno;
+    _reqFabricCtrl.text = _buildFabricCode(p);
     _generateCodeCtrl.text = _buildFabricCode(p);
-    _dateCtrl.text         = dateStr;
-    _timeCtrl.text         = timeStr;
-    _reqQtyKgCtrl.text     = p.requiredNetWeight.toString();
-    _reqQtyMtrCtrl.text    = p.requiredQtyMtr.toString();
+    _dateCtrl.text = dateStr;
+    _timeCtrl.text = timeStr;
+    _reqQtyKgCtrl.text = p.requiredNetWeight.toString();
+    _reqQtyMtrCtrl.text = p.requiredQtyMtr.toString();
 
-    _baffleCtrl.text       = p.cuttype;
-    _fabricTypeCtrl.text   = p.typeuse;
-    _colorCtrl.text        = p.color;
+    _baffleCtrl.text = p.cuttype;
+    _fabricTypeCtrl.text = p.typeuse;
+    _colorCtrl.text = p.color;
     _fabricBaffleCtrl.text = p.buffle;
-    _fabricConstCtrl.text  = p.fabricwidth;
-    _cutTypeCtrl.text      = p.sid;
+    _fabricConstCtrl.text = p.fabricwidth;
+    _cutTypeCtrl.text = p.sid;
 
-    _grossWeightCtrl.text  = p.jobwork.toString();
-    _tareWeightCtrl.text   = p.weekno.toString();
-    _rollLengthCtrl.text   = p.quantity.toString();
-    _rollWeightCtrl.text   = p.netwt.toStringAsFixed(2);
+    _grossWeightCtrl.text = p.jobwork.toString();
+    _tareWeightCtrl.text = p.weekno.toString();
+    _rollLengthCtrl.text = p.quantity.toString();
+    _rollWeightCtrl.text = p.netwt.toStringAsFixed(2);
     _avgWeightMtrCtrl.text = p.requiredNetWeight.toStringAsFixed(2);
 
-    _cutLengthCtrl.text    = '0.00';
+    _cutLengthCtrl.text = '0.00';
 
     // Pre-select dropdowns (validated after list loads)
-    _selectedGsm          = p.gsm;
-    _selectedFabricWidth  = p.fabricwidth;
+    _selectedGsm = p.gsm;
+    _selectedFabricWidth = p.fabricwidth;
 
     // ── Listeners ──────────────────────────────────────────────
     _machineEndCtrl.addListener(_calculateCutLength);
@@ -1737,15 +1734,45 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   void dispose() {
     _debounce?.cancel();
     for (final c in [
-      _partyNameCtrl, _poNoCtrl, _articleNoCtrl, _bomCtrl, _componentCtrl,
-      _reqFabricCtrl, _dateCtrl, _timeCtrl, _reqQtyKgCtrl, _reqQtyMtrCtrl,
-      _machineStartCtrl, _machineEndCtrl, _cutLengthCtrl, _baffleCtrl,
-      _fabricTypeCtrl, _colorCtrl, _specialIdCtrl, _fabricGsmCtrl,
-      _fabricWidthCtrl, _fabricBaffleCtrl, _fabricConstCtrl, _laminationCtrl,
-      _cutTypeCtrl, _batchNoCtrl, _grossWeightCtrl, _tareWeightCtrl,
-      _rollWeightCtrl, _rollLengthCtrl, _avgWeightMtrCtrl, _cutWidthCtrl,
-      _cutLengthCmCtrl, _cutSizeQtyCtrl, _netWtCtrl, _wastageCtrl,
-      _tillRemCtrl, _useCtrl, _finalRemCtrl, _remarkCtrl, _generateCodeCtrl,
+      _partyNameCtrl,
+      _poNoCtrl,
+      _articleNoCtrl,
+      _bomCtrl,
+      _componentCtrl,
+      _reqFabricCtrl,
+      _dateCtrl,
+      _timeCtrl,
+      _reqQtyKgCtrl,
+      _reqQtyMtrCtrl,
+      _machineStartCtrl,
+      _machineEndCtrl,
+      _cutLengthCtrl,
+      _baffleCtrl,
+      _fabricTypeCtrl,
+      _colorCtrl,
+      _specialIdCtrl,
+      _fabricGsmCtrl,
+      _fabricWidthCtrl,
+      _fabricBaffleCtrl,
+      _fabricConstCtrl,
+      _laminationCtrl,
+      _cutTypeCtrl,
+      _batchNoCtrl,
+      _grossWeightCtrl,
+      _tareWeightCtrl,
+      _rollWeightCtrl,
+      _rollLengthCtrl,
+      _avgWeightMtrCtrl,
+      _cutWidthCtrl,
+      _cutLengthCmCtrl,
+      _cutSizeQtyCtrl,
+      _netWtCtrl,
+      _wastageCtrl,
+      _tillRemCtrl,
+      _useCtrl,
+      _finalRemCtrl,
+      _remarkCtrl,
+      _generateCodeCtrl,
     ]) {
       c.dispose();
     }
@@ -1780,14 +1807,15 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   // ════════════════════════════════════════════════════════════════
   void _calculateCutLength() {
     final start = double.tryParse(_machineStartCtrl.text) ?? 0;
-    final end   = double.tryParse(_machineEndCtrl.text)   ?? 0;
-    _cutLengthCtrl.text =
-        (end - start).clamp(0, double.infinity).toStringAsFixed(2);
+    final end = double.tryParse(_machineEndCtrl.text) ?? 0;
+    _cutLengthCtrl.text = (end - start)
+        .clamp(0, double.infinity)
+        .toStringAsFixed(2);
   }
 
   void _calculateRollWeight() {
-    final gross      = double.tryParse(_grossWeightCtrl.text) ?? 0;
-    final tare       = double.tryParse(_tareWeightCtrl.text)  ?? 0;
+    final gross = double.tryParse(_grossWeightCtrl.text) ?? 0;
+    final tare = double.tryParse(_tareWeightCtrl.text) ?? 0;
     final rollWeight = (gross - tare).clamp(0, double.infinity);
     _rollWeightCtrl.text = rollWeight.toStringAsFixed(2);
     _calculateAvgWeight();
@@ -1798,23 +1826,24 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     final weight = double.tryParse(_rollWeightCtrl.text) ?? 0;
     final length = double.tryParse(_rollLengthCtrl.text) ?? 0;
     setState(() {
-      _avgWeightMtrCtrl.text =
-      length > 0 ? (weight * 1000 / length).toStringAsFixed(2) : '0.00';
+      _avgWeightMtrCtrl.text = length > 0
+          ? (weight * 1000 / length).toStringAsFixed(2)
+          : '0.00';
     });
   }
 
   void _calculateNetWeight() {
-    final cutWidth  = double.tryParse(_cutWidthCtrl.text.trim())    ?? 0.0;
+    final cutWidth = double.tryParse(_cutWidthCtrl.text.trim()) ?? 0.0;
     final cutLength = double.tryParse(_cutLengthCmCtrl.text.trim()) ?? 0.0;
-    final gsm       = double.tryParse(_fabricGsmCtrl.text.trim())   ?? 0.0;
-    final qty       = double.tryParse(_cutSizeQtyCtrl.text.trim())  ?? 0.0;
+    final gsm = double.tryParse(_fabricGsmCtrl.text.trim()) ?? 0.0;
+    final qty = double.tryParse(_cutSizeQtyCtrl.text.trim()) ?? 0.0;
 
     if (cutWidth <= 0 || cutLength <= 0 || gsm <= 0 || qty <= 0) {
       _netWtCtrl.text = '0.00';
       return;
     }
 
-    final baffle        = _fabricBaffleCtrl.text.trim().toUpperCase();
+    final baffle = _fabricBaffleCtrl.text.trim().toUpperCase();
     final isDoubleLayer = baffle == 'CRF' || baffle == 'C00';
 
     double netWt = (cutWidth * cutLength * gsm * qty) / 10000000;
@@ -1825,14 +1854,14 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   }
 
   void _calculateUseAndFinalRem() {
-    final net     = double.tryParse(_netWtCtrl.text)    ?? 0;
-    final wastage = double.tryParse(_wastageCtrl.text)  ?? 0;
-    final tillRem = double.tryParse(_tillRemCtrl.text)  ?? 0;
+    final net = double.tryParse(_netWtCtrl.text) ?? 0;
+    final wastage = double.tryParse(_wastageCtrl.text) ?? 0;
+    final tillRem = double.tryParse(_tillRemCtrl.text) ?? 0;
 
-    final use      = net + wastage;
+    final use = net + wastage;
     double finalRem = (tillRem - use).clamp(0, double.infinity);
 
-    _useCtrl.text      = use.toStringAsFixed(2);
+    _useCtrl.text = use.toStringAsFixed(2);
     _finalRemCtrl.text = finalRem.toStringAsFixed(2);
   }
 
@@ -1853,8 +1882,8 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
       if (!data.contains(_selectedFabricWidth)) {
         _selectedFabricWidth = data.isNotEmpty ? data.first : null;
       }
-      _fabricWidthCtrl.text  = _selectedFabricWidth ?? '';
-      _isLoadingFabricWidth  = false;
+      _fabricWidthCtrl.text = _selectedFabricWidth ?? '';
+      _isLoadingFabricWidth = false;
     });
   }
 
@@ -1867,7 +1896,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
         _selectedGsm = data.isNotEmpty ? data.first : null;
       }
       _fabricGsmCtrl.text = _selectedGsm ?? '';
-      _isLoadingGsm       = false;
+      _isLoadingGsm = false;
     });
     _calculateNetWeight();
   }
@@ -1877,7 +1906,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     try {
       final data = await _inStockService.getCuttingOperators();
       setState(() {
-        _operatorList    = data.map((e) => _NameValue(e, e)).toList();
+        _operatorList = data.map((e) => _NameValue(e, e)).toList();
         _isLoadingOperator = false;
       });
     } catch (_) {
@@ -1890,7 +1919,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     try {
       final data = await _inStockService.getCuttingSupervisors();
       setState(() {
-        _supervisorList    = data.map((e) => _NameValue(e, e)).toList();
+        _supervisorList = data.map((e) => _NameValue(e, e)).toList();
         _isLoadingSupervisor = false;
       });
     } catch (_) {
@@ -1908,7 +1937,8 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
       final result = await _apiService.getArticleNo(sidInt);
       setState(() => _articleNoCtrl.text = result ?? widget.production.modelno);
       await _loadBomAndComponents(
-          articleOverride: result ?? widget.production.modelno);
+        articleOverride: result ?? widget.production.modelno,
+      );
     } catch (e) {
       setState(() => _articleNoCtrl.text = widget.production.modelno);
       _showSnack("Article fetch failed: $e", Colors.red);
@@ -1920,25 +1950,26 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     setState(() => _isLoadingBomComponents = true);
     try {
       final data = await VisaApiService.getBomAndComponents(
-        po:      widget.production.workorderno,
+        po: widget.production.workorderno,
         article: articleOverride ?? _articleNoCtrl.text.trim(),
       );
-      final boms  = List<String>.from(data['bomNumbers']  ?? []);
-      final comps = List<String>.from(data['components']  ?? []);
+      final boms = List<String>.from(data['bomNumbers'] ?? []);
+      final comps = List<String>.from(data['components'] ?? []);
       setState(() {
-        _bomNumbers    = boms;
+        _bomNumbers = boms;
         _componentList = comps;
         if (boms.isNotEmpty) {
           _selectedBomNo = boms.first;
-          _bomCtrl.text  = boms.first;
+          _bomCtrl.text = boms.first;
         }
         if (comps.isNotEmpty) {
-          _selectedComponent  = comps.first;
+          _selectedComponent = comps.first;
           _componentCtrl.text = comps.first;
         }
         _isLoadingBomComponents = false;
       });
-      await _fetchCutSize();
+      // ❌ REMOVE await
+      Future.microtask(() => _fetchCutSize());
     } catch (e) {
       setState(() => _isLoadingBomComponents = false);
       _showSnack("BOM fetch failed: $e", Colors.red);
@@ -1946,17 +1977,20 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   }
 
   Future<void> _fetchCutSize() async {
-    if (_selectedBomNo == null   || _selectedBomNo!.isEmpty ||
-        _selectedComponent == null || _selectedComponent!.isEmpty) return;
+    if (_selectedBomNo == null ||
+        _selectedBomNo!.isEmpty ||
+        _selectedComponent == null ||
+        _selectedComponent!.isEmpty)
+      return;
 
     try {
       final data = await VisaApiService.getCutSize(
-        woNumber:  _selectedBomNo!,
+        woNumber: _selectedBomNo!,
         component: _selectedComponent!,
       );
       if (data != null) {
         setState(() {
-          _cutWidthCtrl.text    = "${data['cutWidth']  ?? '0'}";
+          _cutWidthCtrl.text = "${data['cutWidth'] ?? '0'}";
           _cutLengthCmCtrl.text = "${data['cutLength'] ?? '0'}";
         });
         await Future.delayed(const Duration(milliseconds: 300));
@@ -1968,14 +2002,14 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   }
 
   Future<void> _loadTillRemaining() async {
-    final code       = widget.production.srno;
+    final code = widget.production.srno;
     final rollWeight = double.tryParse(_rollWeightCtrl.text)?.toInt() ?? 0;
 
     if (code.isEmpty) return;
 
     try {
       final result = await VisaApiService.getRemainingWeight(
-        code:       code,
+        code: code,
         rollWeight: rollWeight,
       );
       if (result != null) {
@@ -2007,7 +2041,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
 
     setState(() {
       _generateCodeCtrl.text = code;
-      _reqFabricCtrl.text    = code;
+      _reqFabricCtrl.text = code;
     });
     _loadTillRemaining();
   }
@@ -2022,11 +2056,15 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
 
     setState(() => _isLoading = true);
     try {
+      print("partyName: ${widget.production.machineno.trim()}");
+      print("date: ${_dateCtrl.text.trim()}");
+      print("loomType: Cutting");
+      print("shift: ${_selectedShift ?? ""}");
       final batchNo = await VisaApiService.generateBatchNo(
         partyName: widget.production.machineno.trim(),
-        date:      _dateCtrl.text.trim(),
-        loomType:  "Cutting",
-        shift:     _selectedShift ?? "",
+        date: _dateCtrl.text.trim(),
+        loomType: "Cutting",
+        shift: _selectedShift ?? "",
       );
       if (batchNo != null) {
         setState(() => _batchNoCtrl.text = batchNo);
@@ -2046,11 +2084,11 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   // ════════════════════════════════════════════════════════════════
   Future<void> _saveForm() async {
     if (_batchNoCtrl.text.isEmpty) {
-      _showSnack("Pehle Batch No generate karo", Colors.orange);
+      _showSnack("Generate Batch No", Colors.orange);
       return;
     }
     if (_selectedShift == null) {
-      _showSnack("Shift required hai", Colors.red);
+      _showSnack("Select Shift ", Colors.red);
       return;
     }
 
@@ -2078,65 +2116,51 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   //  PAYLOAD
   // ════════════════════════════════════════════════════════════════
   Map<String, dynamic> _buildOutStockPayload() => {
-    "req":       "OUTSTOCK",
-    "holdRoll":  "NO",
-    "tillRem":   _tillRemCtrl.text,
-    "sid":       widget.production.sid,
+    "req": "OUTSTOCK",
+    "holdRoll": "NO",
+    "tillRem": _tillRemCtrl.text,
+    "sid": widget.production.sid,
     "Operator2": _operator2 ?? "",
-    "Party":     widget.production.partyname,
-
+    "Party": widget.production.partyname,
     "generatedCode": _generateCodeCtrl.text,
-    "avgWeight":     _avgWeightMtrCtrl.text,
-
+    "avgWeight": _avgWeightMtrCtrl.text,
     "supervisor": _selectedSupervisor ?? "",
-    "operator":   _operator2 ?? "",
-
-    "fabricType":         _fabricTypeCtrl.text,
+    "operator": _operator2 ?? "",
+    "fabricType": _fabricTypeCtrl.text,
     "fabricConstruction": _fabricBaffleCtrl.text,
-    "fabricWidth":        _fabricWidthCtrl.text,
-    "color":              _colorCtrl.text,
-    "gsm":                _fabricGsmCtrl.text,
-    "laminationType":     _laminationCtrl.text,
-    "cutType":            _cutTypeCtrl.text,
-
-    "bomNo":     _componentCtrl.text,
+    "fabricWidth": _fabricWidthCtrl.text,
+    "color": _colorCtrl.text,
+    "gsm": _fabricGsmCtrl.text,
+    "laminationType": _laminationCtrl.text,
+    "cutType": _cutTypeCtrl.text,
+    "bomNo": _componentCtrl.text,
     "partyName": _bomCtrl.text,
-
-    "rollWeight": double.tryParse(_rollWeightCtrl.text)  ?? 0,
-    "rollLength": double.tryParse(_rollLengthCtrl.text)  ?? 0,
-
+    "rollWeight": double.tryParse(_rollWeightCtrl.text) ?? 0,
+    "rollLength": double.tryParse(_rollLengthCtrl.text) ?? 0,
     "department": "CUTTING",
-    "plant":      "FIBC",
-
-    "requiredQtyKg":  widget.production.requiredNetWeight.toString(),
+    "plant": "FIBC",
+    "requiredQtyKg": widget.production.requiredNetWeight.toString(),
     "requiredQtyMtr": widget.production.requiredQtyMtr.toString(),
-
-    "weekNo":   _tareWeightCtrl.text,
-    "machine":  widget.production.machine,
+    "weekNo": _tareWeightCtrl.text,
+    "machine": widget.production.machine,
     "machineNo": widget.production.machineno,
-
-    "modelNo":        _cutSizeQtyCtrl.text,
-    "jobWork":        _grossWeightCtrl.text,
-    "purchaseOrder":  _articleNoCtrl.text,
-
+    "wastage": _wastageCtrl.text,
+    "modelNo": _cutSizeQtyCtrl.text,
+    "jobWork": _grossWeightCtrl.text,
+    "purchaseOrder": _articleNoCtrl.text,
     "shift": _selectedShift ?? "",
-
     "cutLength": _cutLengthCtrl.text,
-    "cutQty":    _cutSizeQtyCtrl.text,
-    "finalRem":  _finalRemCtrl.text,
-
-    "USE":      _useCtrl.text,
-    "wastage":  _wastageCtrl.text,
-    "netWt":    _netWtCtrl.text,
+    "cutQty": _cutSizeQtyCtrl.text,
+    "finalRem": _finalRemCtrl.text,
+    "USE": _useCtrl.text,
+    "netWt": _netWtCtrl.text,
     "cutWidth": _cutWidthCtrl.text,
-
-    "isNormal":  false,
+    "isNormal": false,
     "isCutting": true,
-
     "items": [
       {
-        "isChecked":  false,
-        "batchNo":    widget.production.srno,
+        "isChecked": false,
+        "batchNo": widget.production.srno,
         "storeValue": widget.production.srno,
       },
     ],
@@ -2144,8 +2168,9 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
 
   void _showSnack(String msg, Color color) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -2176,7 +2201,8 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   // ─────────────── AppBar ───────────────
   PreferredSizeWidget _buildAppBar() {
     final now = DateTime.now();
-    final d   = "${now.year}-${now.month.toString().padLeft(2, '0')}-"
+    final d =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-"
         "${now.day.toString().padLeft(2, '0')}";
     return AppBar(
       backgroundColor: C.appBar1,
@@ -2189,27 +2215,34 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.production.machineno,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-          Text(d,
-              style: const TextStyle(fontSize: 11, color: Colors.white70)),
+          Text(
+            widget.production.machineno,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          ),
+          Text(d, style: const TextStyle(fontSize: 11, color: Colors.white70)),
         ],
       ),
       actions: [
         Container(
-          margin:  const EdgeInsets.only(right: 12),
+          margin: const EdgeInsets.only(right: 12),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color:        Colors.white.withOpacity(0.18),
+            color: Colors.white.withOpacity(0.18),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.content_cut_rounded, color: Colors.white70, size: 13),
+              const Icon(
+                Icons.content_cut_rounded,
+                color: Colors.white70,
+                size: 13,
+              ),
               const SizedBox(width: 4),
-              Text(widget.production.department,
-                  style: const TextStyle(color: Colors.white, fontSize: 11)),
+              Text(
+                widget.production.department,
+                style: const TextStyle(color: Colors.white, fontSize: 11),
+              ),
             ],
           ),
         ),
@@ -2226,28 +2259,28 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
         _sectionLabel("Job Info"),
         _card([
           _row([
-            _field("Article No",          _articleNoCtrl, readOnly: true),
-            _field("Purchase Order No",   _poNoCtrl,      readOnly: true),
+            _field("Article No", _articleNoCtrl, readOnly: true),
+            _field("Purchase Order No", _poNoCtrl, readOnly: true),
           ]),
           _row([
             _isLoadingBomComponents
                 ? _loadingLabelBox("BOM")
                 : _genericDropdownStr(
-              label: "BOM",
-              items: _bomNumbers,
-              value: _selectedBomNo,
-              onChanged: (v) {
-                setState(() {
-                  _selectedBomNo = v;
-                  _bomCtrl.text  = v ?? '';
-                });
-                _fetchCutSize();
-              },
-            ),
+                    label: "BOM",
+                    items: _bomNumbers,
+                    value: _selectedBomNo,
+                    onChanged: (v) {
+                      setState(() {
+                        _selectedBomNo = v;
+                        _bomCtrl.text = v ?? '';
+                      });
+                      _fetchCutSize();
+                    },
+                  ),
             _staticDropdown(
-              label:     "Shift",
-              items:     _shiftOptions,
-              value:     _selectedShift,
+              label: "Shift",
+              items: _shiftOptions,
+              value: _selectedShift,
               onChanged: (v) => setState(() => _selectedShift = v),
             ),
           ]),
@@ -2263,16 +2296,16 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
           ]),
           _row([
             _genericDropdown(
-              label:     "Supervisor",
-              items:     _supervisorList.map((e) => e.label).toList(),
-              value:     _selectedSupervisor,
+              label: "Supervisor",
+              items: _supervisorList.map((e) => e.label).toList(),
+              value: _selectedSupervisor,
               isLoading: _isLoadingSupervisor,
               onChanged: (v) => setState(() => _selectedSupervisor = v),
             ),
             _genericDropdown(
-              label:     "Operator",
-              items:     _operatorList.map((e) => e.label).toList(),
-              value:     _operator2,
+              label: "Operator",
+              items: _operatorList.map((e) => e.label).toList(),
+              value: _operator2,
               isLoading: _isLoadingOperator,
               onChanged: (v) => setState(() => _operator2 = v),
             ),
@@ -2284,65 +2317,67 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
         _sectionLabel("Fabric Specs"),
         _card([
           _row([
-            _field("Fabric Type / Use",     _fabricTypeCtrl,   readOnly: true),
-            _field("Fabric Construction",   _fabricBaffleCtrl, readOnly: true),
+            _field("Fabric Type / Use", _fabricTypeCtrl, readOnly: true),
+            _field("Fabric Construction", _fabricBaffleCtrl, readOnly: true),
           ]),
           _row([
             _field("Color", _colorCtrl, readOnly: true),
             _isLoadingBomComponents
                 ? _loadingLabelBox("Component")
                 : _genericDropdownStr(
-              label: "Component",
-              items: _componentList,
-              value: _selectedComponent,
-              onChanged: (v) {
-                setState(() {
-                  _selectedComponent  = v;
-                  _componentCtrl.text = v ?? '';
-                });
-                _fetchCutSize();
-              },
-            ),
+                    label: "Component",
+                    items: _componentList,
+                    value: _selectedComponent,
+                    onChanged: (v) {
+                      setState(() {
+                        _selectedComponent = v;
+                        _componentCtrl.text = v ?? '';
+                      });
+                      _fetchCutSize();
+                    },
+                  ),
           ]),
           _row([
             _isLoadingGsm
                 ? _loadingLabelBox("Fabric GSM")
                 : _genericDropdownStr(
-              label: "Fabric GSM",
-              items: _gsmList,
-              value: _selectedGsm,
-              onChanged: (v) {
-                setState(() {
-                  _selectedGsm        = v;
-                  _fabricGsmCtrl.text = v ?? '';
-                });
-                _calculateNetWeight();
-              },
-            ),
+                    label: "Fabric GSM",
+                    items: _gsmList,
+                    value: _selectedGsm,
+                    onChanged: (v) {
+                      setState(() {
+                        _selectedGsm = v;
+                        _fabricGsmCtrl.text = v ?? '';
+                      });
+                      _calculateNetWeight();
+                    },
+                  ),
             _isLoadingFabricWidth
                 ? _loadingLabelBox("Fabric Width")
                 : _genericDropdownStr(
-              label: "Fabric Width (cm)",
-              items: _fabricWidthList,
-              value: _selectedFabricWidth,
-              onChanged: (v) => setState(() {
-                _selectedFabricWidth  = v;
-                _fabricWidthCtrl.text = v ?? '';
-              }),
-            ),
+                    label: "Fabric Width (cm)",
+                    items: _fabricWidthList,
+                    value: _selectedFabricWidth,
+                    onChanged: (v) => setState(() {
+                      _selectedFabricWidth = v;
+                      _fabricWidthCtrl.text = v ?? '';
+                    }),
+                  ),
           ]),
           _row([
             _field("Baffle / Type", _fabricBaffleCtrl, readOnly: true),
             _staticDropdown(
               label: "Lamination Type",
               items: _laminationList,
-              value: _laminationCtrl.text.isNotEmpty ? _laminationCtrl.text : null,
+              value: _laminationCtrl.text.isNotEmpty
+                  ? _laminationCtrl.text
+                  : null,
               onChanged: (v) => setState(() => _laminationCtrl.text = v ?? ''),
             ),
           ]),
           _row([
-            _field("Cut Type",  _cutTypeCtrl,  readOnly: true),
-            _field("Batch No",  _batchNoCtrl),
+            _field("Cut Type", _cutTypeCtrl, readOnly: true),
+            _field("Batch No", _batchNoCtrl),
           ]),
         ]),
         _gap,
@@ -2351,37 +2386,54 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
         _sectionLabel("Weight & Output"),
         _card([
           _row([
-            _field("Gross Weight (Kg)", _grossWeightCtrl,
-                inputType: TextInputType.number),
-            _field("Tare Weight (Kg)",  _tareWeightCtrl,
-                inputType: TextInputType.number),
+            _field(
+              "Gross Weight (Kg)",
+              _grossWeightCtrl,
+              inputType: TextInputType.number,
+            ),
+            _field(
+              "Tare Weight (Kg)",
+              _tareWeightCtrl,
+              inputType: TextInputType.number,
+            ),
           ]),
           _row([
-            _field("Roll Weight (Kg)",  _rollWeightCtrl, readOnly: true),
-            _field("Roll Length (Mtr)", _rollLengthCtrl,
-                inputType: TextInputType.number),
+            _field("Roll Weight (Kg)", _rollWeightCtrl, readOnly: true),
+            _field(
+              "Roll Length (Mtr)",
+              _rollLengthCtrl,
+              inputType: TextInputType.number,
+            ),
           ]),
           _row([
             _field("Avg Weight / Mtr (g)", _avgWeightMtrCtrl, readOnly: true),
           ]),
           const Divider(height: 20, thickness: 0.5),
           _row([
-            _field("Cut Width (cm)",  _cutWidthCtrl,
-                inputType: TextInputType.number),
-            _field("Cut Length (cm)", _cutLengthCmCtrl,
-                inputType: TextInputType.number),
+            _field(
+              "Cut Width (cm)",
+              _cutWidthCtrl,
+              inputType: TextInputType.number,
+            ),
+            _field(
+              "Cut Length (cm)",
+              _cutLengthCmCtrl,
+              inputType: TextInputType.number,
+            ),
           ]),
           _row([
-            _field("Cut Size Qty", _cutSizeQtyCtrl,
-                inputType: TextInputType.number),
-            _field("Net Wt",  _useCtrl, readOnly: true),
-            _field("Wastage", _wastageCtrl,
-                inputType: TextInputType.number),
+            _field(
+              "Cut Size Qty",
+              _cutSizeQtyCtrl,
+              inputType: TextInputType.number,
+            ),
+            _field("Net Wt", _useCtrl, readOnly: true),
+            _field("Wastage", _wastageCtrl, inputType: TextInputType.number),
           ]),
           _row([
-            _field("Till Rem.",  _tillRemCtrl,  readOnly: true),
-            _field("USE",        _useCtrl,       readOnly: true),
-            _field("Final Rem.", _finalRemCtrl,  readOnly: true),
+            _field("Till Rem.", _tillRemCtrl, readOnly: true),
+            _field("USE", _useCtrl, readOnly: true),
+            _field("Final Rem.", _finalRemCtrl, readOnly: true),
           ]),
         ]),
         _gap,
@@ -2399,17 +2451,22 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
               onPressed: _isLoading ? null : _generateBatchNo,
               icon: _isLoading
                   ? const SizedBox(
-                  width: 14, height: 14,
-                  child: CircularProgressIndicator(
-                      color: C.appBar3, strokeWidth: 1.5))
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        color: C.appBar3,
+                        strokeWidth: 1.5,
+                      ),
+                    )
                   : const Icon(Icons.qr_code_2_rounded, size: 16),
               label: const Text("Generate Fabric Code & Batch No"),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _primary,
-                side:    const BorderSide(color: _primary),
+                side: const BorderSide(color: _primary),
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                shape:   RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ),
@@ -2426,11 +2483,15 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   //  LAYOUT HELPERS
   // ════════════════════════════════════════════════════════════════
   Widget _row(List<Widget> children) {
-    final expanded = children
-        .expand((w) => [Expanded(child: w), const SizedBox(width: 8)])
-        .toList()
-      ..removeLast();
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: expanded);
+    final expanded =
+        children
+            .expand((w) => [Expanded(child: w), const SizedBox(width: 8)])
+            .toList()
+          ..removeLast();
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: expanded,
+    );
   }
 
   Widget _sectionLabel(String title) => Padding(
@@ -2438,30 +2499,31 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     child: Text(
       title.toUpperCase(),
       style: const TextStyle(
-        fontSize: 10, fontWeight: FontWeight.w700,
-        color: _labelColor, letterSpacing: 1.2,
+        fontSize: 10,
+        fontWeight: FontWeight.w700,
+        color: _labelColor,
+        letterSpacing: 1.2,
       ),
     ),
   );
 
   Widget _card(List<Widget> children) => Container(
     decoration: BoxDecoration(
-      color:        Colors.white,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      border:       Border.all(color: _border),
+      border: Border.all(color: _border),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.03),
-          blurRadius: 6, offset: const Offset(0, 2),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
         ),
       ],
     ),
     padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: children
-          .expand((w) => [w, const SizedBox(height: 10)])
-          .toList()
+      children: children.expand((w) => [w, const SizedBox(height: 10)]).toList()
         ..removeLast(),
     ),
   );
@@ -2470,13 +2532,13 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
 
   // ─────────────── Field ───────────────
   Widget _field(
-      String label,
-      TextEditingController ctrl, {
-        bool readOnly        = false,
-        bool highlight       = false,
-        TextInputType inputType = TextInputType.text,
-        int maxLines         = 1,
-      }) {
+    String label,
+    TextEditingController ctrl, {
+    bool readOnly = false,
+    bool highlight = false,
+    TextInputType inputType = TextInputType.text,
+    int maxLines = 1,
+  }) {
     final borderColor = highlight
         ? _primary
         : readOnly
@@ -2486,14 +2548,19 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w600, color: _labelColor)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: _labelColor,
+          ),
+        ),
         const SizedBox(height: 4),
         TextFormField(
-          controller:  ctrl,
-          readOnly:    readOnly,
-          maxLines:    maxLines,
+          controller: ctrl,
+          readOnly: readOnly,
+          maxLines: maxLines,
           keyboardType: inputType,
           style: TextStyle(
             fontSize: 13,
@@ -2501,22 +2568,31 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
             fontWeight: FontWeight.w500,
           ),
           decoration: InputDecoration(
-            isDense:  true,
-            filled:   true,
+            isDense: true,
+            filled: true,
             fillColor: readOnly ? _readOnlyBg : _inputBg,
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: borderColor)),
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: borderColor),
+            ),
             enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                    color: borderColor, width: highlight ? 1.5 : 1.0)),
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: borderColor,
+                width: highlight ? 1.5 : 1.0,
+              ),
+            ),
             focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                    color: readOnly ? _border : _primary, width: 1.5)),
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: readOnly ? _border : _primary,
+                width: 1.5,
+              ),
+            ),
           ),
         ),
       ],
@@ -2529,34 +2605,43 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     required List<String> items,
     required String? value,
     required ValueChanged<String?> onChanged,
-  }) =>
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.w600, color: _labelColor)),
-          const SizedBox(height: 4),
-          _dropdownBox(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: value,
-                isExpanded: true,
-                isDense: true,
-                hint: const Text("Select",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF8A97B5))),
-                items: items
-                    .map((s) => DropdownMenuItem(
-                    value: s,
-                    child: Text(s, style: const TextStyle(fontSize: 13))))
-                    .toList(),
-                onChanged: onChanged,
-              ),
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: _labelColor,
+        ),
+      ),
+      const SizedBox(height: 4),
+      _dropdownBox(
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: value,
+            isExpanded: true,
+            isDense: true,
+            hint: const Text(
+              "Select",
+              style: TextStyle(fontSize: 12, color: Color(0xFF8A97B5)),
             ),
+            items: items
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Text(s, style: const TextStyle(fontSize: 13)),
+                  ),
+                )
+                .toList(),
+            onChanged: onChanged,
           ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 
   // ─────────────── Generic Dropdown (with loading) ───────────────
   Widget _genericDropdown({
@@ -2568,54 +2653,71 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   }) {
     final cleanItems = items.toSet().toList()
       ..removeWhere((e) => e.trim().isEmpty);
-    final safeValue =
-    cleanItems.contains(value) ? value : null;
+    final safeValue = cleanItems.contains(value) ? value : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w600, color: _labelColor)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: _labelColor,
+          ),
+        ),
         const SizedBox(height: 4),
         Container(
           height: 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color:        _inputBg,
+            color: _inputBg,
             borderRadius: BorderRadius.circular(8),
-            border:       Border.all(color: const Color(0xFFBCC8E8)),
+            border: Border.all(color: const Color(0xFFBCC8E8)),
           ),
           child: DropdownButtonHideUnderline(
             child: isLoading
-                ? const Row(children: [
-              SizedBox(
-                  width: 14, height: 14,
-                  child: CircularProgressIndicator(
-                      color: C.appBar3, strokeWidth: 1.5)),
-              SizedBox(width: 8),
-              Text("Loading...", style: TextStyle(fontSize: 12)),
-            ])
+                ? const Row(
+                    children: [
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          color: C.appBar3,
+                          strokeWidth: 1.5,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text("Loading...", style: TextStyle(fontSize: 12)),
+                    ],
+                  )
                 : DropdownButton<String>(
-              value: safeValue,
-              isExpanded: true,
-              isDense: true,
-              style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A2340)),
-              hint: const Text("Select",
-                  style: TextStyle(
-                      fontSize: 12, color: Color(0xFF8A97B5))),
-              items: cleanItems
-                  .map((e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(e,
-                      style: const TextStyle(fontSize: 13))))
-                  .toList(),
-              onChanged: onChanged,
-            ),
+                    value: safeValue,
+                    isExpanded: true,
+                    isDense: true,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1A2340),
+                    ),
+                    hint: const Text(
+                      "Select",
+                      style: TextStyle(fontSize: 12, color: Color(0xFF8A97B5)),
+                    ),
+                    items: cleanItems
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(
+                              e,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: onChanged,
+                  ),
           ),
         ),
       ],
@@ -2631,49 +2733,60 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   }) {
     final cleanItems = items.where((e) => e.trim().isNotEmpty).toList();
     final effectiveValue = cleanItems.firstWhere(
-          (item) => item.trim() == value?.trim(),
+      (item) => item.trim() == value?.trim(),
       orElse: () => '',
     );
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
               style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: _labelColor)),
-          const SizedBox(height: 4),
-          _dropdownBox(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value:          effectiveValue.isNotEmpty ? effectiveValue : null,
-                isExpanded:     true,
-                isDense:        true,
-                menuMaxHeight:  constraints.maxHeight * 0.2,
-                dropdownColor:  Colors.white,
-                hint: const Text("Select",
-                    style: TextStyle(fontSize: 12, color: Color(0xFF8A97B5))),
-                items: cleanItems
-                    .map((s) => DropdownMenuItem(
-                  value: s,
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Text(s,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13)),
-                  ),
-                ))
-                    .toList(),
-                onChanged: onChanged,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: _labelColor,
               ),
             ),
-          ),
-        ],
-      );
-    });
+            const SizedBox(height: 4),
+            _dropdownBox(
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: effectiveValue.isNotEmpty ? effectiveValue : null,
+                  isExpanded: true,
+                  isDense: true,
+                  menuMaxHeight: constraints.maxHeight * 0.2,
+                  dropdownColor: Colors.white,
+                  hint: const Text(
+                    "Select",
+                    style: TextStyle(fontSize: 12, color: Color(0xFF8A97B5)),
+                  ),
+                  items: cleanItems
+                      .map(
+                        (s) => DropdownMenuItem(
+                          value: s,
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              s,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // ─────────────── Dropdown Box ───────────────
@@ -2681,9 +2794,9 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     height: 42,
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     decoration: BoxDecoration(
-      color:        _inputBg,
+      color: _inputBg,
       borderRadius: BorderRadius.circular(8),
-      border:       Border.all(color: const Color(0xFFBCC8E8)),
+      border: Border.all(color: const Color(0xFFBCC8E8)),
     ),
     child: child,
   );
@@ -2693,32 +2806,41 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     height: 42,
     padding: const EdgeInsets.symmetric(horizontal: 12),
     decoration: BoxDecoration(
-      color:        _readOnlyBg,
+      color: _readOnlyBg,
       borderRadius: BorderRadius.circular(8),
-      border:       Border.all(color: _border),
+      border: Border.all(color: _border),
     ),
-    child: const Row(children: [
-      SizedBox(
-          width: 13, height: 13,
-          child: CircularProgressIndicator(color: C.appBar3, strokeWidth: 1.5)),
-      SizedBox(width: 8),
-      Text("Loading...",
-          style: TextStyle(fontSize: 12, color: _labelColor)),
-    ]),
+    child: const Row(
+      children: [
+        SizedBox(
+          width: 13,
+          height: 13,
+          child: CircularProgressIndicator(color: C.appBar3, strokeWidth: 1.5),
+        ),
+        SizedBox(width: 8),
+        Text("Loading...", style: TextStyle(fontSize: 12, color: _labelColor)),
+      ],
+    ),
   );
 
   Widget _loadingLabelBox(String label) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
     children: [
-      Text(label,
-          style: const TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: _labelColor)),
+      Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: _labelColor,
+        ),
+      ),
       const SizedBox(height: 4),
       _loadingBox(),
     ],
   );
 
+  // ─────────────── Action Bar ───────────────
   // ─────────────── Action Bar ───────────────
   Widget _buildActionBar() => Wrap(
     spacing: 8, runSpacing: 8,
@@ -2754,11 +2876,13 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
           ),
         ),
       );
+
 }
 
 // ── Helper class ──────────────────────────────────────────────────
 class _NameValue {
   final String label;
   final String value;
+
   const _NameValue(this.label, this.value);
 }

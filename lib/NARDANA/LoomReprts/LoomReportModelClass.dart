@@ -1,6 +1,9 @@
+import 'package:intl/intl.dart';
+
 class LoomReport {
   final int srNo;
   final int rollCode;
+  final String bomNo;
   final String barcode;
   final String batchNo;
   final String loomType;
@@ -76,7 +79,7 @@ class LoomReport {
     required this.fabricGsm,
     required this.laminationType,
     required this.cutSlipType,
-    required this.specialIdentification,
+    required this.specialIdentification, required this.bomNo,
   });
 
   factory LoomReport.fromJson(Map<String, dynamic> json) {
@@ -95,7 +98,11 @@ class LoomReport {
       avgWeight: double.tryParse(json['avG_WEIGHT'].toString()) ?? 0,
 
       operatorName: json['operatoR_NAME'] ?? '',
-      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
+      // date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
+      date: DateTime.tryParse(
+        json['date']?.toString() ?? '',
+      ) ??
+          DateTime.now(),
       time: json['time'] ?? '',
 
       loomOperator1: json['loomoparetoR1'] ?? '',
@@ -123,6 +130,7 @@ class LoomReport {
       laminationType: json['laminatioN_TYPE'] ?? '',
       cutSlipType: json['cuT_SLIP_TYPE'] ?? '',
       specialIdentification: json['speciaL_IDENTIFICATION'] ?? '',
+      bomNo: json['boM_NO'] ?? '',
     );
   }
 }

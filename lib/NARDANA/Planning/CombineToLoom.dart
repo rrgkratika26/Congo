@@ -55,9 +55,14 @@ class _CombineToLoomScreenState extends State<CombineToLoomScreen> {
       } else {
         filteredList = loomList.where((item) {
           return item.orderNo.toString().toLowerCase().contains(
+            value.toLowerCase(),
+          ) ||
+              item.articleNum.toLowerCase().contains(
                 value.toLowerCase(),
               ) ||
-              item.articleNum.toLowerCase().contains(value.toLowerCase());
+              item.BomNo.toString().toLowerCase().contains(
+                value.toLowerCase(),
+              );
         }).toList();
       }
     });
@@ -94,7 +99,7 @@ class _CombineToLoomScreenState extends State<CombineToLoomScreen> {
                     onChanged: filterData,
 
                     decoration: InputDecoration(
-                      hintText: "Search Order / Article",
+                      hintText: "Search Bom No./ Order / Article",
 
                       prefixIcon: const Icon(Icons.search),
 

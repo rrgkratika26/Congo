@@ -250,7 +250,7 @@ class DispatchBailRecord {
   static DateTime _parseDate(dynamic value) {
     if (value == null) return DateTime.now();
     try {
-      return DateFormat('M/d/yyyy hh:mm:ss a').parse(value.toString());
+      return DateFormat('dd-MM-yyyy').parse(value.toString());
     } catch (_) {
       return DateTime.now();
     }

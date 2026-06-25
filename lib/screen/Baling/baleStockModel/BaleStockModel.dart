@@ -73,9 +73,8 @@ class BaleStockReportModel {
       barcode: json['barcode'] ?? '',
       srNo: json['sR_NO'] ?? '',
       // date: DateFormat("M/d/yyyy hh:mm:ss a").parse(json['date']),
-      date: DateFormat("dd-MMM-yyyy hh:mm:ss a").parse(
-        json['date'].toString(),
-      ),
+      date: DateFormat("M/d/yyyy")
+          .parse(json['date'].toString()),
       time: json['time'] ?? '',
       partyName: json['partY_NAME'] ?? '',
       bomNo: json['boM_NO'] ?? '',

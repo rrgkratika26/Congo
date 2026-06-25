@@ -1288,10 +1288,6 @@
 // }
 //
 
-
-
-
-
 import 'dart:math' show cos, sin, pi;
 
 import 'package:IMS/AdminDashBoard/DepartmentDashboard.dart';
@@ -1317,51 +1313,57 @@ void navigateByRedirect(LoginModel model) {
   final r = model.redirect.trim().toLowerCase();
 
   const routeMap = <String, String>{
-    'inquiry':           AppRoutes.inquiryReport,
-    'inquiry_report':    AppRoutes.inquiryReport,
-    'inquirypannel':     AppRoutes.InquiryPannel,
-    'planning':          AppRoutes.orderPlanning,
-    'order_planning':    AppRoutes.orderPlanning,
+    'inquiry': AppRoutes.inquiryReport,
+    'inquiry_report': AppRoutes.inquiryReport,
+    'inquirypannel': AppRoutes.InquiryPannel,
+    'planning': AppRoutes.orderPlanning,
+    'order_planning': AppRoutes.orderPlanning,
     'order_composition': AppRoutes.orderComposition,
-    'to_loom':           AppRoutes.toLoom,
-    'loom':              AppRoutes.loomIn,
-    'loom_reports':      AppRoutes.loomReports,
-    'loom_savelist':     AppRoutes.loomSaveList,
-    'loomlist':          AppRoutes.loomList,
-    'rmd':               AppRoutes.rmdIn,
-    'rmd_in':            AppRoutes.rmdIn,
-    'rmd_out':           AppRoutes.rmdOut,
-    'rmd_reports':       AppRoutes.rmdNardanaReports,
-    'rmd_stock':         AppRoutes.rmdNardanaStock,
-    'jbl_rmd_in':        AppRoutes.jblRmdIn,
-    'jbl_rmd_out':       AppRoutes.jblRmdOut,
-    'jbl_rmd_stock':     AppRoutes.jblRmdStockReports,
-    'lamination':        AppRoutes.lamination,
-    'lamination_out':    AppRoutes.laminationOutStock,
-    'lam_reports':       AppRoutes.lamNaradanaReports,
-    'jbl_lamination':    AppRoutes.jblLamination,
-    'cutting_out':       AppRoutes.nardanaCutOutList,
-    'cutting_report':    AppRoutes.rollWisereport,
-    'cutting_stock':     AppRoutes.cutGroupStock,
-    'cutting_approval':  AppRoutes.cuttingnardana,
-    'cutting_issue':     AppRoutes.cuttingIssuenardana,
-    'jbl_cutting':       AppRoutes.jblCuttingIn,
-    'bag':               AppRoutes.bagEntry,
-    'bag_report':        AppRoutes.bagReport,
-    'jbl_bag':           AppRoutes.jblBagStoreIssue,
-    'baling':            AppRoutes.baleEntry,
-    'baling_report':     AppRoutes.baleReport,
-    'baling_dispatch':   AppRoutes.baleDispatch,
-    'baling_stock':      AppRoutes.baleStockgroup,
-    'jbl_baling':        AppRoutes.jblBailing,
-    'webbing':           AppRoutes.webbingIn,
-    'webbing_out':       AppRoutes.webbingOut,
-    'webbing_report':    AppRoutes.webbNardanaReport,
-    'webbing_ledger':    AppRoutes.stockLedger,
-    'jbl_webbing':       AppRoutes.jblWebbIn,
-    'jbl_dispatch':      AppRoutes.jblScan,
-    'tapeline':          AppRoutes.tapelineIn,
-    'marketing':         AppRoutes.InquiryPannel,
+    'to_loom': AppRoutes.toLoom,
+    'loom': AppRoutes.loomIn,
+    'loom_reports': AppRoutes.loomReports,
+    'loom_savelist': AppRoutes.loomSaveList,
+    'loomlist': AppRoutes.loomList,
+    'rmd': AppRoutes.rmdIn,
+    'rmd_in': AppRoutes.rmdIn,
+    'rmd_out': AppRoutes.rmdOut,
+    'rmd_reports': AppRoutes.rmdNardanaReports,
+    'rmd_stock': AppRoutes.rmdNardanaStock,
+    'jbl_rmd_in': AppRoutes.jblRmdIn,
+    'jbl_rmd_out': AppRoutes.jblRmdOut,
+    'jbl_rmd_stock': AppRoutes.jblRmdStockReports,
+    'lamination': AppRoutes.lamination,
+    'lamination_out': AppRoutes.laminationOutStock,
+    'lam_in_reports': AppRoutes.lamNaradanaInReport,
+    'lam_out_reports': AppRoutes.lamNaradanaOutReport,
+
+    'jbl_lamination': AppRoutes.jblLamination,
+    'cutting_out': AppRoutes.nardanaCutOutList,
+    'rollWiseReport':    AppRoutes.rollWiseReport,
+    'componentWiseReport':    AppRoutes.componentWiseReport,
+    'cuttingWiseReport':    AppRoutes.cuttingWiseReport,
+
+    'cutting_stock': AppRoutes.cutGroupStock,
+    'cutting_approval': AppRoutes.cuttingnardana,
+    'cutting_issue': AppRoutes.cuttingIssuenardana,
+    'jbl_cutting': AppRoutes.jblCuttingIn,
+    'bag': AppRoutes.bagEntry,
+    'bag_report': AppRoutes.bagReport,
+    'jbl_bag': AppRoutes.jblBagStoreIssue,
+    'baling': AppRoutes.baleEntry,
+    'baling_report':AppRoutes.balingReport,
+    'baleStockReport': AppRoutes.baleStockReport,
+    'baling_dispatch': AppRoutes.baleDispatch,
+    'baling_stock': AppRoutes.baleStockgroup,
+    'jbl_baling': AppRoutes.jblBailing,
+    'webbing': AppRoutes.webbingIn,
+    'webbing_out': AppRoutes.webbingOut,
+    'webbing_report': AppRoutes.webbNardanaReport,
+    'webbing_ledger': AppRoutes.stockLedger,
+    'jbl_webbing': AppRoutes.jblWebbIn,
+    'jbl_dispatch': AppRoutes.jblScan,
+    'tapeline': AppRoutes.tapelineIn,
+    'marketing': AppRoutes.InquiryPannel,
   };
 
   final namedRoute = routeMap[r];
@@ -1436,9 +1438,9 @@ class _LoginPageState extends State<LoginPage>
   // ── Auto-login ────────────────────────────────────────────────────────────
   Future<void> _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    final username   = prefs.getString('username');
-    final password   = prefs.getString('password');
-    final unit       = prefs.getString('unit');
+    final username = prefs.getString('username');
+    final password = prefs.getString('password');
+    final unit = prefs.getString('unit');
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     if (isLoggedIn && username != null && password != null && unit != null) {
@@ -1451,13 +1453,13 @@ class _LoginPageState extends State<LoginPage>
 
         if (response.status == 'ok') {
           await AppSession.saveLogin(
-            user:       response.user,
+            user: response.user,
             department: response.department,
-            userType:   response.userType,
-            unit:       unit,
-            token:      response.token,
-            redirect:   response.redirect,
-            password:   password,
+            userType: response.userType,
+            unit: unit,
+            token: response.token,
+            redirect: response.redirect,
+            password: password,
           );
 
           if (!mounted) return;
@@ -1509,8 +1511,10 @@ class _LoginPageState extends State<LoginPage>
         unit: _selectedUnit!,
       );
 
-      debugPrint('LOGIN RESPONSE | status: ${response.status} '
-          '| dept: ${response.department} | redirect: ${response.redirect}');
+      debugPrint(
+        'LOGIN RESPONSE | status: ${response.status} '
+        '| dept: ${response.department} | redirect: ${response.redirect}',
+      );
 
       if (!mounted) return;
 
@@ -1534,13 +1538,13 @@ class _LoginPageState extends State<LoginPage>
 
         // ── Persist session ───────────────────────────────────────────
         await AppSession.saveLogin(
-          user:       response.user,
+          user: response.user,
           department: response.department,
-          userType:   response.userType,
-          unit:       _selectedUnit!,
-          token:      response.token,
-          redirect:   response.redirect,
-          password:   password,
+          userType: response.userType,
+          unit: _selectedUnit!,
+          token: response.token,
+          redirect: response.redirect,
+          password: password,
         );
 
         _showSnackBar(
@@ -1553,13 +1557,16 @@ class _LoginPageState extends State<LoginPage>
         navigateByRedirect(response);
       } else {
         _showSnackBar(
-          response.message.isNotEmpty ? response.message : 'Invalid credentials',
+          response.message.isNotEmpty
+              ? response.message
+              : 'Invalid credentials',
           isError: true,
         );
       }
     } catch (e) {
       debugPrint('Login error: $e');
-      if (mounted) _showSnackBar('Server error or invalid credentials', isError: true);
+      if (mounted)
+        _showSnackBar('Server error or invalid credentials', isError: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -1582,13 +1589,17 @@ class _LoginPageState extends State<LoginPage>
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
         ),
-        backgroundColor:
-        isError ? const Color(0xFFDC2626) : const Color(0xFF059669),
+        backgroundColor: isError
+            ? const Color(0xFFDC2626)
+            : const Color(0xFF059669),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
         margin: const EdgeInsets.all(16),
@@ -1604,7 +1615,10 @@ class _LoginPageState extends State<LoginPage>
       return const Scaffold(
         backgroundColor: Color(0xFF0B1A3E),
         body: Center(
-          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+          child: CircularProgressIndicator(
+            color: Colors.white,
+            strokeWidth: 2.5,
+          ),
         ),
       );
     }
@@ -1626,9 +1640,24 @@ class _LoginPageState extends State<LoginPage>
         ),
         child: Stack(
           children: [
-            _buildOrb(top: -80,   right: -60, size: 280, color: const Color(0x30FFF176)),
-            _buildOrb(bottom: 80, left: -50,  size: 200, color: const Color(0x45FBC02D)),
-            _buildOrb(top: 220,   left: -30,  size: 140, color: const Color(0x30FFF176)),
+            _buildOrb(
+              top: -80,
+              right: -60,
+              size: 280,
+              color: const Color(0x30FFF176),
+            ),
+            _buildOrb(
+              bottom: 80,
+              left: -50,
+              size: 200,
+              color: const Color(0x45FBC02D),
+            ),
+            _buildOrb(
+              top: 220,
+              left: -30,
+              size: 140,
+              color: const Color(0x30FFF176),
+            ),
 
             SafeArea(
               child: FadeTransition(
@@ -1638,9 +1667,14 @@ class _LoginPageState extends State<LoginPage>
                   child: LayoutBuilder(
                     builder: (context, constraints) => SingleChildScrollView(
                       physics: const ClampingScrollPhysics(),
-                      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: hPad,
+                        vertical: 24,
+                      ),
                       child: ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
                         child: IntrinsicHeight(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1659,7 +1693,7 @@ class _LoginPageState extends State<LoginPage>
                               _buildLoginButton(),
                               const SizedBox(height: 8),
                               _buildDeptHint(),
-                              const Spacer(),
+                              // const Spacer(),
                               _buildFooter(),
                             ],
                           ),
@@ -1679,14 +1713,22 @@ class _LoginPageState extends State<LoginPage>
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   Widget _buildOrb({
-    double? top, double? bottom, double? left, double? right,
-    required double size, required Color color,
+    double? top,
+    double? bottom,
+    double? left,
+    double? right,
+    required double size,
+    required Color color,
   }) {
     return Positioned(
-      top: top, bottom: bottom, left: left, right: right,
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
       child: IgnorePointer(
         child: Container(
-          width: size, height: size,
+          width: size,
+          height: size,
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
       ),
@@ -1696,22 +1738,22 @@ class _LoginPageState extends State<LoginPage>
   Widget _buildLogoSection() {
     return Column(
       children: [
-        Container(
-          width: 150,
-          height: 150,
-          child: ClipOval(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Image.asset(
-                'assets/images/CongoLogo.png',
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ),
+        // Container(
+        //   width: 150,
+        //   height: 150,
+        //   child: ClipOval(
+        //     child: Padding(
+        //       padding: const EdgeInsets.all(10),
+        //       child: Image.asset(
+        //         'assets/images/CongoLogo.png',
+        //         fit: BoxFit.contain,
+        //       ),
+        //     ),
+        //   ),
+        // ),
         const SizedBox(height: 20),
         const Text(
-          'MULTI PACKAGING CONGO',
+          'INVENTORY MANAGEMENT \n                SYSTEM',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w700,
@@ -1722,7 +1764,11 @@ class _LoginPageState extends State<LoginPage>
         const SizedBox(height: 4),
         const Text(
           'Sign in to continue',
-          style: TextStyle(fontSize: 15, color: C.secondaryDark, letterSpacing: 0.3),
+          style: TextStyle(
+            fontSize: 15,
+            color: C.secondaryDark,
+            letterSpacing: 0.3,
+          ),
         ),
       ],
     );
@@ -1752,8 +1798,11 @@ class _LoginPageState extends State<LoginPage>
           child: Row(
             children: [
               const SizedBox(width: 14),
-              Icon(Icons.person_outline_rounded, size: 19,
-                  color: focused ? C.textHigh : C.textHigh),
+              Icon(
+                Icons.person_outline_rounded,
+                size: 19,
+                color: focused ? C.textHigh : C.textHigh,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: TextField(
@@ -1761,7 +1810,10 @@ class _LoginPageState extends State<LoginPage>
                   focusNode: _usernameFocus,
                   textInputAction: TextInputAction.next,
                   style: const TextStyle(
-                      fontSize: 15, color: C.textHigh, fontWeight: FontWeight.w400),
+                    fontSize: 15,
+                    color: C.textHigh,
+                    fontWeight: FontWeight.w400,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Enter username',
                     hintStyle: TextStyle(color: C.textHigh, fontSize: 15),
@@ -1794,16 +1846,17 @@ class _LoginPageState extends State<LoginPage>
                 ? C.textHigh.withOpacity(0.12)
                 : Colors.white.withOpacity(0.07),
             border: Border.all(
-              color: focused
-                  ? C.textHigh
-                  : Colors.white.withOpacity(0.12),
+              color: focused ? C.textHigh : Colors.white.withOpacity(0.12),
             ),
           ),
           child: Row(
             children: [
               const SizedBox(width: 14),
-              Icon(Icons.lock_outline_rounded, size: 19,
-                  color: focused ? C.primaryblue : C.textHigh),
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 19,
+                color: focused ? C.primaryblue : C.textHigh,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: TextField(
@@ -1813,7 +1866,10 @@ class _LoginPageState extends State<LoginPage>
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _handleLogin(),
                   style: const TextStyle(
-                      fontSize: 15, color: C.textHigh, fontWeight: FontWeight.w400),
+                    fontSize: 15,
+                    color: C.textHigh,
+                    fontWeight: FontWeight.w400,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Enter password',
                     hintStyle: TextStyle(color: C.textHigh, fontSize: 15),
@@ -1823,7 +1879,8 @@ class _LoginPageState extends State<LoginPage>
                 ),
               ),
               GestureDetector(
-                onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                onTap: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Icon(
@@ -1863,7 +1920,11 @@ class _LoginPageState extends State<LoginPage>
               borderRadius: BorderRadius.circular(12),
               icon: Padding(
                 padding: const EdgeInsets.only(right: 14),
-                child: Icon(Icons.keyboard_arrow_down_rounded, color: C.bg, size: 22),
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: C.bg,
+                  size: 22,
+                ),
               ),
               hint: Padding(
                 padding: const EdgeInsets.only(left: 14),
@@ -1871,14 +1932,21 @@ class _LoginPageState extends State<LoginPage>
                   children: [
                     Icon(Icons.business_outlined, size: 19, color: C.textHigh),
                     const SizedBox(width: 10),
-                    Text('Select unit',
-                        style: TextStyle(color: C.textHigh, fontSize: 15)),
+                    Text(
+                      'Select unit',
+                      style: TextStyle(color: C.textHigh, fontSize: 15),
+                    ),
                   ],
                 ),
               ),
               // ── Update this list for your deployed units ───────────────
               // items: ['UNIT-CONGO'].map((String value) {
-              items: ['UNIT-NARDANA'].map((String value) {
+                items: ['UNIT-NARDANA'].map((String value) {
+             // items: ['UNIT-SILVASSA'].map((String value) {
+             // items: ['FIBC'].map((String value) {
+             //   items: ['DINESH-POLYFAB', 'JBL'].map((String value) {
+             // items: ['UNIT-1'].map((String value) {
+             //   items: ['INNOWEAVE'].map((String value) {
 
                 return DropdownMenuItem<String>(
                   value: value,
@@ -1886,29 +1954,41 @@ class _LoginPageState extends State<LoginPage>
                     padding: const EdgeInsets.only(left: 14),
                     child: Row(
                       children: [
-                        Icon(Icons.business_outlined, size: 19,
-                            color: Colors.white.withOpacity(0.7)),
+                        Icon(
+                          Icons.business_outlined,
+                          size: 19,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
                         const SizedBox(width: 10),
-                        Text(value,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500)),
+                        Text(
+                          value,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.blue.withOpacity(0.25),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                                color: const Color(0xFF93C5FD).withOpacity(0.4)),
+                              color: const Color(0xFF93C5FD).withOpacity(0.4),
+                            ),
                           ),
-                          child: const Text('Active',
-                              style: TextStyle(
-                                  color: Color(0xFF93C5FD),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500)),
+                          child: const Text(
+                            'Active',
+                            style: TextStyle(
+                              color: Color(0xFF93C5FD),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 4),
                       ],
@@ -1931,16 +2011,16 @@ class _LoginPageState extends State<LoginPage>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.info_outline_rounded,
-                size: 13, color: Colors.indigo),
+            Icon(Icons.info_outline_rounded, size: 13, color: Colors.indigo),
             const SizedBox(width: 5),
             Flexible(
               child: Text(
                 "You'll be redirected to your department automatically",
                 style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.indigo,
-                    letterSpacing: 0.2),
+                  fontSize: 11,
+                  color: Colors.indigo,
+                  letterSpacing: 0.2,
+                ),
               ),
             ),
           ],
@@ -1971,31 +2051,40 @@ class _LoginPageState extends State<LoginPage>
           backgroundColor: C.brand50,
           disabledBackgroundColor: C.bg.withOpacity(0.5),
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           elevation: 0,
         ),
         child: _isLoading
             ? const SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-        )
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
+              )
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
-              'Sign In',
-              style: TextStyle(
-                color: C.primaryDark,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'Sign In',
+                    style: TextStyle(
+                      color: C.primaryDark,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 20,
+                    color: C.primaryDark,
+                  ),
+                ],
               ),
-            ),
-            SizedBox(width: 8),
-            Icon(Icons.arrow_forward_rounded, size: 20, color: C.primaryDark),
-          ],
-        ),
       ),
     );
   }
@@ -2009,9 +2098,10 @@ class _LoginPageState extends State<LoginPage>
             Text(
               'Developed by ',
               style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.white.withOpacity(0.5),
-                  letterSpacing: 1),
+                fontSize: 11,
+                color: Colors.white.withOpacity(0.5),
+                letterSpacing: 1,
+              ),
             ),
             SizedBox(
               height: 35,
@@ -2021,9 +2111,10 @@ class _LoginPageState extends State<LoginPage>
                 errorBuilder: (_, __, ___) => const Text(
                   'RRG SOFTWARE',
                   style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 11),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
                 ),
               ),
             ),

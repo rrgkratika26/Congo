@@ -13,8 +13,9 @@ import 'package:thermal_printer_plus/thermal_printer.dart';
 import '../../../Color/Colorclass.dart';
 import '../../../Visa/Loom/PrintPreview.dart';
 import '../../../services/Bluetooth_services.dart';
+import '../../util/widget/printService.dart';
+import 'LamOutScreen.dart';
 import 'NaradanaModelLami.dart';
-
 
 class LamRollPrintScreennaradan extends StatefulWidget {
   /// Title shown in AppBar — e.g. "Loom Rolls", "Lamination Out"
@@ -30,7 +31,8 @@ class LamRollPrintScreennaradan extends StatefulWidget {
   });
 
   @override
-  State<LamRollPrintScreennaradan> createState() => _LamRollPrintScreennaradanState();
+  State<LamRollPrintScreennaradan> createState() =>
+      _LamRollPrintScreennaradanState();
 
   // ── Static helper — call this after a successful save ──────────────────────
   /// Adds a new roll to the list. Works if screen is already open.
@@ -83,9 +85,7 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
 
     try {
       final List<NewBarcodeNardanaModel> mapped =
-      await NaradanaApiService.getLaminationSavedRolls(
-        date: today,
-      );
+          await NaradanaApiService.getLaminationSavedRolls(date: today);
 
       setState(() {
         _rolls = mapped;
@@ -105,6 +105,102 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
         _selectedIndex = 0;
       });
     }
+  }
+
+  Future<void> _showPrintPreview(NewBarcodeNardanaModel roll) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            const Text("Label Preview"),
+            IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.close),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 400,
+          child: SingleChildScrollView(child: PrintPreviewWidget(roll: roll)),
+        ),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: C.primaryDark),
+                onPressed: () async {
+                  Navigator.pop(context);
+
+                  await _issueRollOnly(roll);
+                },
+                child: const Text(
+                  "Issue",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              SizedBox(width: 5),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                onPressed: () async {
+                  Navigator.pop(context);
+
+                  await _printAndIssueRoll(roll);
+                },
+                child: const Text(
+                  "Print & Issue",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _printAndIssueRoll(NewBarcodeNardanaModel roll) async {
+    final issued = await _issueRollOnly(roll);
+
+    if (!issued) return;
+
+    _selectedIndex = _rolls.indexOf(roll);
+
+    await _onPrint();
+  }
+
+  Future<bool> _issueRollOnly(NewBarcodeNardanaModel roll) async {
+    _setStatus("⏳ Issuing Roll...");
+
+    final printSaved = await NaradanaApiService.printBarcode(
+      barcode: roll.barcode,
+      forwardDepartment: "RMD",
+      hold: "",
+      id: roll.srNo.toString(),
+    );
+
+    if (!printSaved) {
+      _setStatus("❌ Issue failed");
+      return false;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Issued Successfully"),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    _setStatus("✅ Roll Issued");
+    Get.offAll(
+          () => const LamOutScreen(),
+    );
+    return true;
   }
 
   // ── Build ──────────────────────────────────────────────────────────────────
@@ -161,7 +257,11 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
       actions: [
         // Bluetooth settings
         IconButton(
-          icon: const Icon(Icons.bluetooth_rounded, size: 28,color: C.secondaryDark,),
+          icon: const Icon(
+            Icons.bluetooth_rounded,
+            size: 28,
+            color: C.secondaryDark,
+          ),
           tooltip: "Printer",
           onPressed: () => Get.to(() => const BluetoothDeviceListScreen()),
         ),
@@ -253,14 +353,14 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
         child: DataTable(
           columnSpacing: 16,
 
-          dataRowColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.selected)) {
-                return Colors.green.withOpacity(0.2);
-              }
-              return null;
-            },
-          ),
+          dataRowColor: MaterialStateProperty.resolveWith<Color?>((
+            Set<MaterialState> states,
+          ) {
+            if (states.contains(MaterialState.selected)) {
+              return Colors.green.withOpacity(0.2);
+            }
+            return null;
+          }),
 
           columns: const [
             DataColumn(label: Text("SrNo")),
@@ -314,17 +414,16 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
                 });
               },
 
-              color: MaterialStateProperty.resolveWith<Color?>(
-                    (Set<MaterialState> states) {
-                  if (_selectedIndex == index) {
-                    return Colors.lightGreen.withOpacity(0.2);
-                  }
-                  return Colors.transparent;
-                },
-              ),
+              color: MaterialStateProperty.resolveWith<Color?>((
+                Set<MaterialState> states,
+              ) {
+                if (_selectedIndex == index) {
+                  return Colors.lightGreen.withOpacity(0.2);
+                }
+                return Colors.transparent;
+              }),
 
               cells: [
-
                 DataCell(Text(r.srNo.toString())),
                 DataCell(Text(r.rollCode ?? "")),
                 DataCell(Text(r.barcode ?? "")),
@@ -355,16 +454,16 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
                 // DataCell(Text(r.remark ?? "")),
                 DataCell(Text(r.department ?? "")),
                 DataCell(Text(r.fabricCode ?? "")),
+
                 // DataCell(Text(r.issueToDept ?? "")),
                 // DataCell(Text(r.status ?? "")),
                 // DataCell(Text(r.inStock ?? "")),
                 // DataCell(Text(r.location ?? "")),
                 // DataCell(Text(r.hold ?? "")),
-
                 DataCell(
                   ElevatedButton(
-                    onPressed: _printing ? null : () => _printSingle(r),
-
+                    // onPressed: _printing ? null : () => _printSingle(r),
+                    onPressed: _printing ? null : () => _showPrintPreview(r),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _primary,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -372,10 +471,7 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
 
                     child: const Text(
                       "Print",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.white),
                     ),
                   ),
                 ),
@@ -555,7 +651,7 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
       return;
     }
 
-// 🔥 STEP 5: Print
+    // 🔥 STEP 5: Print
     await _onPrint();
   }
 
@@ -582,10 +678,10 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
 
   // ── Android ────────────────────────────────────────────────────────────────
   Future<void> _androidPrint(
-      String address,
-      String name,
-      NewBarcodeNardanaModel roll,
-      ) async {
+    String address,
+    String name,
+    NewBarcodeNardanaModel roll,
+  ) async {
     bool triggered = false;
 
     _btSub?.cancel();
@@ -703,7 +799,7 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
       // PRINT 1
       // ''';
       final String tspl =
-      '''
+          '''
 SIZE 100 mm,100 mm
 GAP 2 mm,1 mm
 DIRECTION 1

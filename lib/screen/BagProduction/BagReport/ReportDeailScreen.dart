@@ -53,7 +53,7 @@ class BagReportDetailScreen extends StatelessWidget {
                   _tile(Icons.person, "Contractor", report.contractor!),
 
                 _tile(Icons.calendar_today, "Date",
-                    DateFormat('dd MMM yyyy').format(report.date)),
+                    DateFormat('dd-MM-yyyy').format(report.date)),
               ],
             ),
 

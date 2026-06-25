@@ -400,7 +400,7 @@ class _RMDStockInState extends State<RMDStockIn> {
               // 🔄 Call SAME API as QR scan
               final result = await InStockService().checkBarcodeIn(
                 barcode: barcode,
-                roll_entry: 'R01',
+                roll_entry: 'RMD',
                 storage: controller.selectedLocation!,
                 operatorName: controller.selectedOperator!,
                 supervisor: controller.selectedSupervisor!,

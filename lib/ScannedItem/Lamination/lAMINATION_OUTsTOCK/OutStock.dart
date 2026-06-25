@@ -67,16 +67,16 @@ class _RollListScreenState extends State<RollListScreen> {
       _filtered = _rolls
           .where(
             (r) =>
-                r.barcode.toLowerCase().contains(q) ||
-                r.fabricCode.toLowerCase().contains(q) ||
-                r.rollCode.toLowerCase().contains(q),
-          )
+        r.barcode.toLowerCase().contains(q) ||
+            r.fabricCode.toLowerCase().contains(q) ||
+            r.rollCode.toLowerCase().contains(q),
+      )
           .toList();
 
       // Reset select-all state when filter changes
       _selectAll =
           _filtered.isNotEmpty &&
-          _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
+              _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
     });
   }
 
@@ -104,7 +104,7 @@ class _RollListScreenState extends State<RollListScreen> {
       }
       _selectAll =
           _filtered.isNotEmpty &&
-          _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
+              _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
     });
   }
 
@@ -234,33 +234,33 @@ class _RollListScreenState extends State<RollListScreen> {
       // ── Finish FAB ──────────────────────────────────────────────────────
       floatingActionButton: hasSelection
           ? FloatingActionButton.extended(
-              onPressed: _isFinishing ? null : _onFinish,
-              backgroundColor: hasSelection ? C.primary : Colors.grey,
-              icon: _isFinishing
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(
-                      Icons.done_all_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-              label: Text(
-                _isFinishing
-                    ? 'Finishing...'
-                    : 'Finish (${_selectedBarcodes.length})',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-            )
+        onPressed: _isFinishing ? null : _onFinish,
+        backgroundColor: hasSelection ? C.primary : Colors.grey,
+        icon: _isFinishing
+            ? const SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white,
+          ),
+        )
+            : const Icon(
+          Icons.done_all_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
+        label: Text(
+          _isFinishing
+              ? 'Finishing...'
+              : 'Finish (${_selectedBarcodes.length})',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      )
           : null,
 
       body: Column(
@@ -291,15 +291,15 @@ class _RollListScreenState extends State<RollListScreen> {
                   ),
                   suffixIcon: _searchCtrl.text.isNotEmpty
                       ? IconButton(
-                          icon: Icon(
-                            Icons.clear_rounded,
-                            color: C.primary.withOpacity(0.7),
-                          ),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            _onSearch('');
-                          },
-                        )
+                    icon: Icon(
+                      Icons.clear_rounded,
+                      color: C.primary.withOpacity(0.7),
+                    ),
+                    onPressed: () {
+                      _searchCtrl.clear();
+                      _onSearch('');
+                    },
+                  )
                       : null,
                   filled: true,
                   fillColor: C.primary.withOpacity(0.15),
@@ -335,19 +335,19 @@ class _RollListScreenState extends State<RollListScreen> {
           Expanded(
             child: _loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: C.primary),
-                  )
+              child: CircularProgressIndicator(color: C.primary),
+            )
                 : _error != null
                 ? _ErrorView(error: _error!, onRetry: loadRollList)
                 : _filtered.isEmpty
                 ? const _EmptyView()
                 : _RollTable(
-                    rolls: _filtered,
-                    selectedBarcodes: _selectedBarcodes,
-                    selectAll: _selectAll,
-                    onToggleSelectAll: _toggleSelectAll,
-                    onToggleRow: _toggleRow,
-                  ),
+              rolls: _filtered,
+              selectedBarcodes: _selectedBarcodes,
+              selectAll: _selectAll,
+              onToggleSelectAll: _toggleSelectAll,
+              onToggleRow: _toggleRow,
+            ),
           ),
         ],
       ),

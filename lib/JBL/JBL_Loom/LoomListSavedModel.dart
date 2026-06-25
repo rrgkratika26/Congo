@@ -52,6 +52,7 @@
 class LoomListModel {
   final int id;
   final int srno;
+  final String flattubegusset;
   final String code;
   final String barcode;
   final String supervisor;
@@ -111,6 +112,7 @@ class LoomListModel {
     required this.machine,
     required this.modelNo,
     required this.department,
+    required this.flattubegusset,
   });
 
   factory LoomListModel.fromJson(Map<String, dynamic> json) {
@@ -148,6 +150,7 @@ class LoomListModel {
       machine: json['machine'] ?? '',
       modelNo: json['modelno'] ?? '',
       department: json['department'] ?? '',
+      flattubegusset: json['flattubegusset'] ?? '',
     );
   }
 }

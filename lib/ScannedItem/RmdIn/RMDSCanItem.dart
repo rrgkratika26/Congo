@@ -78,7 +78,7 @@ class _RmdScanScreenState extends State<RmdScanScreen> {
   Future<void> _processBarcode(String barcode) async {
     final result = await _service.checkBarcodeIn(
       barcode: barcode,
-      roll_entry: "R01",
+      roll_entry: "RMD",
       storage: widget.location,
       operatorName: widget.operatorName,
       supervisor: widget.supervisor,

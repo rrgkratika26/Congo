@@ -190,8 +190,8 @@ class _CutPieceIssuedScreenState extends State<CutPieceIssuedScreen> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      "${DateFormat('dd MMM yyyy').format(fromDate!)}  →  "
-                          "${DateFormat('dd MMM yyyy').format(toDate!)}",
+                      "${DateFormat('dd-MM-yyyy').format(fromDate!)}  →  "
+                          "${DateFormat('dd-MM-yyyy').format(toDate!)}",
                       style: const TextStyle(
                         color: C.brand700,
                         fontSize: 13,
@@ -416,7 +416,7 @@ class _TableRow extends StatelessWidget {
     final cells = [
       item.id?.toString() ?? "—",
       item.receiveDate != null
-          ? DateFormat("dd-MMM-yyyy").format(item.receiveDate!)
+          ? DateFormat("dd-MM-yyyy").format(item.receiveDate!)
           : "—",
       item.receiveOrderNo ?? "—",
       item.component ?? "—",

@@ -62,7 +62,7 @@ class _RecentEntriesScreenState extends State<RecentEntriesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Recent Entries",style: TextStyle(color: C.bg),),
-        backgroundColor: const Color(0xFF1A73E8),
+        backgroundColor: C.appBar1,
         iconTheme: IconThemeData(color: C.bg),
       ),
       body: isLoading

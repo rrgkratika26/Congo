@@ -34,12 +34,12 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class InStockService {
-  static const String baseUrl = 'http://192.168.29.125:7165/api';
+  // static const String baseUrl = 'http://192.168.29.125:7165/api';
   // static const String baseUrl = 'http://fibcsoftware.in:4430/api/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String baseUrl = 'http://190.92.175.47:80/Visa/api';
-  // static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
 
   // static const String baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String baseUrl ='http://190.92.175.47:80/API/api';
@@ -748,7 +748,7 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      debugPrint('SUPERVISOR STATUS: ${response.statusCode}');
+      debugPrint('SUPERVISOR STATUS: $url');
       debugPrint('SUPERVISOR BODY: ${response.body}');
 
       if (response.statusCode == 200) {
@@ -770,7 +770,7 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      debugPrint('Bale SUPERVISOR STATUS: ${response.statusCode}');
+      debugPrint('Bale SUPERVISOR STATUS: $url');
       debugPrint('SUPERVISOR BODY: ${response.body}');
 
       if (response.statusCode == 200) {
@@ -814,8 +814,8 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      debugPrint('BAG PRODUCT Checked By STATUS: ${response.statusCode}');
-      debugPrint('Checked BODY: ${response.body}');
+      // debugPrint('BAG PRODUCT Checked By STATUS: ${response.statusCode}');
+      // debugPrint('Checked BODY: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -918,7 +918,7 @@ class InStockService {
       "items": items, // ✅ important
     };
 
-    debugPrint("SAVE REQUEST: ${jsonEncode(body)}");
+    // debugPrint("SAVE REQUEST: ${jsonEncode(body)}");
 
     final response = await http.post(
       url,
@@ -926,8 +926,8 @@ class InStockService {
       body: jsonEncode(body),
     );
 
-    debugPrint("SAVE STATUS: ${response.statusCode}");
-    debugPrint("SAVE RESPONSE: ${response.body}");
+    // debugPrint("SAVE STATUS: ${response.statusCode}");
+    // debugPrint("SAVE RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -945,9 +945,9 @@ class InStockService {
 
     final response = await http.get(url, headers: await authHeaders());
 
-    debugPrint("STATUS CODE: ${response.statusCode}");
-    debugPrint("RESPONSE: ${response.body}");
-    print("REPORT JSON: $json");
+    // debugPrint("STATUS CODE: ${response.statusCode}");
+    // debugPrint("RESPONSE: ${response.body}");
+
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
 
@@ -969,13 +969,13 @@ class InStockService {
       Uri.parse('$baseUrl/BaleDepartment/bale-in-report'),
       headers: await authHeaders(),
     );
-    debugPrint("STATUS CODE: ${response.statusCode}");
-    debugPrint("RESPONSE: ${response.body}");
+    // debugPrint("URL: $response");
+    // debugPrint(" Bale reports RESPONSE: ${response.body}");
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
 
       final List list = json['data'];
-      debugPrint(list.toString());
+      // debugPrint(list.toString());
 
       return List<BaleEntryModel>.generate(
         list.length,
@@ -992,8 +992,8 @@ class InStockService {
       Uri.parse('$baseUrl/BaleDepartment/GetBaleNextSerialNumber'),
       headers: await authHeaders(),
     );
-    debugPrint("STATUS CODE: ${response.statusCode}");
-    debugPrint("RESPONSE: ${response.body}");
+    // debugPrint("STATUS CODE: ${response.statusCode}");
+    // debugPrint("RESPONSE: ${response.body}");
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
 
@@ -1022,8 +1022,8 @@ class InStockService {
     _logApi(method: "GET", url: uri);
     final response = await http.get(uri, headers: await authHeaders());
     // _checkUnauthorized(response);
-    debugPrint("STATUS CODE: ${response.statusCode}");
-    debugPrint("RESPONSE BALE PRODUCT DETAILS: ${response.body}");
+    // debugPrint("STATUS CODE: ${response.statusCode}");
+    // debugPrint("RESPONSE BALE PRODUCT DETAILS: ${response.body}");
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> json = jsonDecode(response.body);
@@ -1071,9 +1071,9 @@ class InStockService {
   ) async {
     final url = "$baseUrl/BaleDepartment/SaveBaleEntry";
 
-    debugPrint("🌐 API URL: $url");
-    debugPrint("📤 REQUEST BODY:");
-    debugPrint(jsonEncode(payload));
+    // debugPrint("🌐 API URL: $url");
+    // debugPrint("📤 REQUEST BODY:");
+    // debugPrint(jsonEncode(payload));
 
     final response = await http.post(
       Uri.parse(url),
@@ -1081,9 +1081,9 @@ class InStockService {
       body: jsonEncode(payload),
     );
 
-    debugPrint("📥 STATUS CODE: ${response.statusCode}");
-    debugPrint("📥 RESPONSE BODY:");
-    debugPrint(response.body);
+    // debugPrint("📥 STATUS CODE: ${response.statusCode}");
+    // debugPrint("📥 RESPONSE BODY:");
+    // debugPrint(response.body);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -1130,8 +1130,8 @@ class InStockService {
     // _checkUnauthorized(response);
     if (response.statusCode == 200) {
       final body = json.decode(response.body);
-      debugPrint("STATUS CODE: ${response.statusCode}");
-      log("RESPONSE BALE REPORT DETAILS: ${response.body}");
+      // debugPrint("STATUS CODE: ${response.statusCode}");
+      // log("RESPONSE BALE REPORT DETAILS: ${response.body}");
       if (body['success'] == true) {
         return (body['data'] as List)
             .map((e) => BailingReportModel.fromJson(e))
@@ -1153,10 +1153,10 @@ class InStockService {
     );
 
     if (response.statusCode == 200) {
-      debugPrint('Response dispatch initResponse :::::$response');
+      // debugPrint('Response dispatch initResponse :::::$response');
 
       final data = json.decode(response.body);
-      debugPrint('Response dispatch init:::::$data');
+      // debugPrint('Response dispatch init:::::$data');
       // _checkUnauthorized(response);
       cachedDispatchInit = DispatchInitModel.fromJson(data);
       return cachedDispatchInit!;
@@ -1189,12 +1189,12 @@ class InStockService {
       queryParameters: {"customerName": partyName, "bomNumber": bomNumber},
     );
 
-    debugPrint("Article API URL: $uri");
+    // debugPrint("Article API URL: $uri");
 
     final response = await http.get(uri, headers: await authHeaders());
     // _checkUnauthorized(response);
-    debugPrint("Article status: ${response.statusCode}");
-    debugPrint("Article body: ${response.body}");
+    // debugPrint("Article status: ${response.statusCode}");
+    // debugPrint("Article body: ${response.body}");
 
     if (response.statusCode == 200) {
       // 🔥 DIRECT RETURN — NO json.decode
@@ -1215,12 +1215,12 @@ class InStockService {
       "$baseUrl/BaleDepartment/po-numbers?partyName",
     ).replace(queryParameters: {"partyName": partyName});
 
-    debugPrint("PO API URL: $uri");
+    // debugPrint("PO API URL: $uri");
 
     final response = await http.get(uri, headers: await authHeaders());
     // _checkUnauthorized(response);
-    debugPrint("PO status: ${response.statusCode}");
-    debugPrint("PO body: ${response.body}");
+    // debugPrint("PO status: ${response.statusCode}");
+    // debugPrint("PO body: ${response.body}");
 
     if (response.statusCode == 200) {
       final body = response.body.trim();
@@ -1245,12 +1245,12 @@ class InStockService {
       "$baseUrl/BaleDepartment/barcode",
     ).replace(queryParameters: {"srno": srNo.toString()});
 
-    debugPrint("BARCODE API URL: $uri");
+    // debugPrint("BARCODE API URL: $uri");
 
     final response = await http.get(uri, headers: await authHeaders());
     // _checkUnauthorized(response);
-    debugPrint("Barcode status: ${response.statusCode}");
-    debugPrint("Barcode body: ${response.body}");
+    // debugPrint("Barcode status: ${response.statusCode}");
+    // debugPrint("Barcode body: ${response.body}");
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -1265,8 +1265,8 @@ class InStockService {
     // final uri = Uri.parse("$baseUrl/BaleDepartment/save-dispatch");
     final uri = Uri.parse("$baseUrl/BaleDepartment/save-dispatch-multiple");
 
-    debugPrint("Save Dispatch URL: $uri");
-    debugPrint("Payload: ${jsonEncode(body)}");
+    // debugPrint("Save Dispatch URL: $uri");
+    // debugPrint("Payload: ${jsonEncode(body)}");
 
     final response = await http.post(
       uri,
@@ -1363,7 +1363,7 @@ class InStockService {
       "barcode": barcode,
       // "plant": 'UNIT-SILVASSA',
       // "plant": 'UNIT-NARDANA',
-      "plant": AppSession.unit,
+      "Plant": plant,
 
       // "plant": 'UNIT-1',
       "location": location,
@@ -1382,6 +1382,8 @@ class InStockService {
       body: jsonEncode(payload),
     );
     // _checkUnauthorized(response);
+    debugPrint("webb url 👉 $url");
+
     debugPrint("CHECK BARCODE RESPONSE 👉 ${response.body}");
 
     return jsonDecode(response.body);
@@ -1397,7 +1399,7 @@ class InStockService {
 
       if (response.statusCode == 200) {
         print("STATUS: ${response.statusCode}");
-        print("BODY: ${response.body}");
+        print("Webbing Reports: ${response.body}");
         final jsonData = jsonDecode(response.body);
         return WebbingReportModel.fromJson(jsonData);
       } else {
@@ -1511,42 +1513,34 @@ class InStockService {
   }
 
   // LOOOM DEPARTMENt
-
-  static Future<List<LoomOrder>> fetchLoomOrders({
+  static Future<LoomOrderResponse> fetchLoomOrders({
     required String viewType,
     required String unit,
+    int pageNumber = 1,
+    int pageSize = 20,
   }) async {
-    final uri = Uri.parse(
-      '$baseUrl/LoomForward/get',
-    ).replace(queryParameters: {'viewType': viewType, 'unit': unit});
-
-    // 🔥 PRINT URL
-    print("👉 API URL: $uri");
+    final uri = Uri.parse('$baseUrl/LoomForward/get').replace(
+      queryParameters: {
+        'viewType': viewType,
+        'unit': unit,
+        'pageNumber': pageNumber.toString(),
+        'pageSize': pageSize.toString(),
+      },
+    );
 
     final response = await http.get(uri, headers: await authHeaders());
-
-    // 🔥 PRINT STATUS CODE
-    print("👉 Status Code: ${response.statusCode}");
-
-    // 🔥 PRINT RAW RESPONSE
-    print("👉 Raw Response: ${response.body}");
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
 
-      // 🔥 PRINT STATUS + COUNT
-      print("👉 API Status: ${jsonData['status']}");
-      print("👉 Total Count: ${jsonData['count']}");
-
       if (jsonData['status'] == 'success') {
         final List dataList = jsonData['data'] ?? [];
 
-        // 🔥 PRINT FIRST ITEM (for debugging)
-        if (dataList.isNotEmpty) {
-          print("👉 First Item: ${dataList}");
-        }
-
-        return dataList.map((e) => LoomOrder.fromJson(e)).toList();
+        return LoomOrderResponse(
+          orders: dataList.map((e) => LoomOrder.fromJson(e)).toList(),
+          totalCount: jsonData['count'] ?? 0,
+          status: '',
+        );
       } else {
         throw Exception("API returned failure");
       }
@@ -1554,7 +1548,6 @@ class InStockService {
       throw Exception("Failed to load Loom Orders");
     }
   }
-
   static Future<LoomDropdownData> fetchDropdowns({
     required String unit,
     required String fabricCode,
@@ -2197,7 +2190,7 @@ class InStockService {
     );
 
     /// 🔥 PRINT STATUS CODE
-    print("👉 Status Code: ${response.statusCode}");
+    print("👉 Cutting url: ${url}");
 
     /// 🔥 PRINT RAW RESPONSE
     print("👉 Response Body Cutting Report: ${response.body}");

@@ -59,7 +59,7 @@ class _BailingFormScreenState extends State<BailingFormScreen> {
 
       final response = await http.get(
         Uri.parse(
-          'http://190.92.175.47:80/JBL_DEMO/api/BaleDepartment/entry-report-details?bomNo=${widget.entry.bomNo}',
+          'http://190.92.175.47:80_DEMO/api/BaleDepartment/entry-report-details?bomNo=${widget.entry.bomNo}',
           // 'http://190.92.175.47:80/JblAPI/api/BaleDepartment/entry-report-details?bomNo=${widget.entry.bomNo}',
         ),
         headers: {

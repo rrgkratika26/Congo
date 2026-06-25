@@ -81,7 +81,7 @@ class _CommonReportAppBarState extends State<CommonReportAppBar> {
     if (fromDate == null || toDate == null) {
       return "Select Date Range";
     }
-    return "${DateFormat('dd MMM yyyy').format(fromDate!)} - ${DateFormat('dd MMM yyyy').format(toDate!)}";
+    return "${DateFormat('dd MM yyyy').format(fromDate!)} - ${DateFormat('dd MM yyyy').format(toDate!)}";
   }
 
   @override

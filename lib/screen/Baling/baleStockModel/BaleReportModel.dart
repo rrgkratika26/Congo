@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class BailingReportModel {
   final String barcode;
   final String srNo;
@@ -44,10 +46,21 @@ class BailingReportModel {
   }
 
   factory BailingReportModel.fromJson(Map<String, dynamic> json) {
+    String formattedDate = '';
+
+    try {
+      final dt = DateFormat("M/d/yyyy h:mm:ss a")
+          .parse(json['date']?.toString() ?? '');
+
+      formattedDate = DateFormat("dd-MMM-yyyy").format(dt);
+    } catch (_) {
+      formattedDate = json['date']?.toString() ?? '';
+    }
+
     return BailingReportModel(
       barcode: json['barcode']?.toString() ?? '',
       srNo: json['sR_NO']?.toString() ?? '',
-      date: json['date']?.toString() ?? '',
+      date: formattedDate,
       time: json['time']?.toString() ?? '',
       partyName: json['partY_NAME']?.toString() ?? '',
       bomNo: json['boM_NO']?.toString() ?? '',

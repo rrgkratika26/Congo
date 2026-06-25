@@ -106,7 +106,15 @@ class _LamOutScreenState extends State<LamOutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: C.bg,
-
+      appBar: AppBar(
+        title: const Text("Lam OUT Reports", style: TextStyle(color: C.bg)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: C.appBar1),
+        ),
+        leading: IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back)),
+        // C.primary,
+        iconTheme: IconThemeData(color: C.bg),
+      ),
       body: Column(
         children: [
           _searchBar(),
@@ -209,69 +217,48 @@ class _LamOutScreenState extends State<LamOutScreen> {
   Widget _searchBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
-      color: C.primary,
+      color: C.bg,
       child: Column(
         children: [
           Row(
             children: [
-              // 🔍 Search Field
               Expanded(
                 child: TextField(
                   controller: _searchCtrl,
                   onChanged: (v) => setState(() => _query = v),
-                  style: const TextStyle(color: Colors.white),
-                  // decoration: InputDecoration(
-                  //   hintText: 'Search...',
-                  //   hintStyle: const TextStyle(color: Colors.white38),
-                  //   prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                  //   suffixIcon: _query.isNotEmpty
-                  //       ? IconButton(
-                  //           icon: const Icon(
-                  //             Icons.close,
-                  //             color: Colors.white54,
-                  //           ),
-                  //           onPressed: () => setState(() {
-                  //             _query = '';
-                  //             _searchCtrl.clear();
-                  //           }),
-                  //         )
-                  //       : null,
-                  //   filled: true,
-                  //   fillColor: Colors.white12,
-                  //   border: OutlineInputBorder(
-                  //     borderRadius: BorderRadius.circular(10),
-                  //     borderSide: BorderSide.none,
-                  //   ),
-                  // ),
+                  style: const TextStyle(fontSize: 14, color: C.bg),
                   decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: C.primaryDark,
-                        strokeAlign: 2,
-                      ),
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
                     ),
-                    hintText: 'Search barcode, batch, party, supervisor…',
-                    hintStyle: const TextStyle(
-                      color: C.primaryDark,
-                      fontSize: 13,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: C.border),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    hintText: 'Search barcode, party, supervisor…',
+                    hintStyle: const TextStyle(color: C.brand700, fontSize: 13),
                     prefixIcon: const Icon(
                       Icons.search,
-                      color: C.primaryDark,
+                      color: C.brand700,
                       size: 20,
                     ),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
                       icon: const Icon(
                         Icons.close,
-                        color: Colors.white54,
+                        color: C.textHigh,
                         size: 18,
                       ),
-                      onPressed: () => setState(() {
-                        _query = '';
-                        _searchCtrl.clear();
-                      }),
+                      onPressed: () {
+                        setState(() {
+                          _query = '';
+                          _searchCtrl.clear();
+                        });
+                      },
                     )
                         : null,
                     filled: true,
@@ -285,15 +272,14 @@ class _LamOutScreenState extends State<LamOutScreen> {
                 ),
               ),
 
-              const SizedBox(width: 5),
+              const SizedBox(width: 8),
 
-              // 📅 Calendar Icon
               IconButton(
                 onPressed: _pickDateRange,
                 icon: const Icon(
                   Icons.calendar_today,
                   size: 22,
-                  color: Colors.white,
+                  color: C.primaryDark,
                 ),
               ),
             ],
@@ -378,11 +364,13 @@ class _LamOutScreenState extends State<LamOutScreen> {
               // ✅ ALL COLUMNS
               columns: [
                 DataColumn(label: _head('Sr')),
-                DataColumn(label: _head('Date')),
-                DataColumn(label: _head('Time')),
+                DataColumn(label: _head('Bom NO')),
+
                 DataColumn(label: _head('Barcode')),
                 DataColumn(label: _head('Batch')),
                 DataColumn(label: _head('Party')),
+                DataColumn(label: _head('Date')),
+                DataColumn(label: _head('Time')),
                 DataColumn(label: _head('Loom')),
                 DataColumn(label: _head('Fabric Code')),
                 DataColumn(label: _head('Width')),
@@ -419,11 +407,13 @@ class _LamOutScreenState extends State<LamOutScreen> {
                   ),
                   cells: [
                     DataCell(_cell('${r.id}', isBold: true)),
-                    DataCell(_cell(DateFormat('dd-MM-yy').format(r.date))),
-                    DataCell(_cell(r.time)),
+                    DataCell(_cell(r.bomNo, mono: true)),
+
                     DataCell(_cell(r.barcode, mono: true)),
                     DataCell(_cell(r.batchNo)),
                     DataCell(_cell(r.partyName, width: 120)),
+                    DataCell(_cell(DateFormat('dd-MM-yy').format(r.date))),
+                    DataCell(_cell(r.time)),
                     DataCell(_cell('${r.loomType}-${r.loomNo}')),
                     DataCell(_cell(r.fabricCode, width: 130)),
                     DataCell(_cell(r.fabricWidth)),

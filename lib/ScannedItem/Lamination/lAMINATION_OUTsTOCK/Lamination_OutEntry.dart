@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:IMS/ScannedItem/Lamination/lAMINATION_OUTsTOCK/modelClass/RollData.dart';
 import 'package:IMS/services/visa_apis/visa_api.dart';
 import 'package:flutter/material.dart';
 import 'package:IMS/ScannedItem/Lamination/lAMINATION_OUTsTOCK/modelClass/roll_wiseModle.dart';
 import 'package:IMS/Color/Colorclass.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import '../../../NARDANA/LaminationReports/LaminationOutNewEntryList.dart';
 import '../../../services/NardanaApis/NardanaApi.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
@@ -23,6 +27,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
   bool _isSaving = false;
   String? _errorMsg;
   LaminationOutModel? _model;
+  String? _bomNo;
 
   String? _selectedShift;
   String? _selectedSupervisor;
@@ -31,14 +36,15 @@ class _RollEntryFormState extends State<RollEntryForm> {
   String? _selectedMachineType;
   String? _selectedLaminationType;
   final _batchNoCtrl = TextEditingController();
-  final List<String> _laminationTypes = ["SL"];
+  final List<String> _laminationTypes = ["SL","LL"];
   final List<String> _machineTypes = ["LAMI-1", "LAMI-2"];
-
+  Timer? _debounce;
   bool _isCodeGenerated = false;
   bool _isSaved = false;
 
   // ── Controllers ────────────────────────────────────────────────
   final _machineCtrl = TextEditingController();
+  final _bomNoCtrl = TextEditingController();
   final _partyCtrl = TextEditingController();
   final _poCtrl = TextEditingController();
   final _articleCtrl = TextEditingController();
@@ -57,6 +63,8 @@ class _RollEntryFormState extends State<RollEntryForm> {
   final _avgMtrGmCtrl = TextEditingController();
   final _remarkCtrl = TextEditingController();
   final _colorCtrl = TextEditingController();
+
+
   final _meshCtrl = TextEditingController();
 
   final _fabricWidthCtrl = TextEditingController();
@@ -76,6 +84,8 @@ class _RollEntryFormState extends State<RollEntryForm> {
   final _planningCtrl = TextEditingController();
   final _modelNoCtrl = TextEditingController();
 
+
+
   @override
   void initState() {
     super.initState();
@@ -85,6 +95,17 @@ class _RollEntryFormState extends State<RollEntryForm> {
     _tareCtrl.addListener(_calculateWeights);
     _rollLengthCtrl.addListener(_calculateWeights);
     _fabricWidthCtrl.addListener(_calculateWeights);
+
+
+    // 🔥 FABRIC CODE AUTO UPDATE LISTENERS
+    _fabricWidthCtrl.addListener(_updateFabricCode);
+    _fabricGsmCtrl.addListener(_updateFabricCode);
+    _fabricBaffleCtrl.addListener(_updateFabricCode);
+    _fabricTypeCtrl.addListener(_updateFabricCode);
+    _laminationCtrl.addListener(_updateFabricCode);
+    _colorCtrl.addListener(_updateFabricCode);
+    _specialIdCtrl.addListener(_updateFabricCode);
+
   }
 
   @override
@@ -105,6 +126,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
       _avgCtrl,
       _remarkCtrl,
       _colorCtrl,
+      _bomNoCtrl,
       _meshCtrl,
       _fabricWidthCtrl,
       _fabricBaffleCtrl,
@@ -127,6 +149,50 @@ class _RollEntryFormState extends State<RollEntryForm> {
     super.dispose();
   }
 
+
+
+
+
+  void _updateFabricCode() {
+    _debounce?.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final width = _fabricWidthCtrl.text.trim();
+      final baffle = _fabricBaffleCtrl.text.trim();
+      final type = _fabricTypeCtrl.text.trim();
+      final gsm = _fabricGsmCtrl.text.trim();
+      final lamination = _selectedLaminationType ?? '';
+      final color = _colorCtrl.text.trim();
+      final cutType = _laminationCtrl.text.trim();
+      final specialId = _specialIdCtrl.text.trim();
+
+      final allFilled = [
+        width,
+        baffle,
+        type,
+        gsm,
+        lamination,
+        color,
+        cutType,
+        specialId
+      ].every((e) => e.isNotEmpty);
+
+      if (!allFilled) {
+        setState(() {
+          _generateCodeCtrl.text = "";
+          _isCodeGenerated = false;
+        });
+        return;
+      }
+
+      final code = "$width-$baffle-$type-$gsm-$lamination-$color-$cutType-$specialId";
+
+      setState(() {
+        _generateCodeCtrl.text = code;
+        _isCodeGenerated = true;
+      });
+    });
+  }
   // ── API ────────────────────────────────────────────────────────
 
   // Future<void> _generateBatchNo() async {
@@ -224,7 +290,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
     // debugPrint("PARTY NAME => ${r.partyName}");
     // debugPrint("OPName1 => $_selectedOperator");
     // debugPrint("partyname as bom no =>${_model?.bomNo}");
-
+// _bomNoCtrl = r.bomNo;
     _poCtrl.text = r.workOrderNo;
     // ✅ Article Number (purchsE_ORDER)
     _articleNoCtrl.text = r.purchsE_ORDER ?? '';
@@ -246,6 +312,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
     _gsmCtrl.text = r.gsm;
     _widthCtrl.text = r.fabricWidth;
     _colorCtrl.text = r.color;
+    _bomNoCtrl.text = widget.roll.bomNo;
 
     _rollLengthCtrl.text = r.rollLengthCalc;
     _rollWeightCtrl.text = r.rollWeightCalc;
@@ -357,6 +424,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
       "selectedSRNO": widget.roll.srNo.toString(),
       "selectedCode": widget.roll.srNo.toString(),
       "hold": "",
+      "boM_NO": _bomNoCtrl.text,
 
       "loomNo": _modelNoCtrl.text,
       "rollWeightCalc": _rollWeightCtrl.text,
@@ -434,6 +502,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
       if (success) {
         setState(() => _isSaved = true);
+        Get.offAll(() => LamRollPrintScreennaradan(title: "Lamination Rolls"));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(
@@ -667,7 +736,9 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
               _twoCol(
                 _field("Fabric Type", _articleCtrl),
-                _field("Fabric GSM", _gsmCtrl, type: TextInputType.number),
+                // _field("Fabric GSM", _gsmCtrl, type: TextInputType.number),
+                _field("Fabric GSM", _fabricGsmCtrl, type: TextInputType.number),
+
               ),
               const SizedBox(height: 10),
 
@@ -684,7 +755,11 @@ class _RollEntryFormState extends State<RollEntryForm> {
                   label: "Lamination Type",
                   value: _selectedLaminationType,
                   items: _laminationTypes,
-                  onChanged: (v) => setState(() => _selectedLaminationType = v),
+                  // onChanged: (v) => setState(() => _selectedLaminationType = v),
+                  onChanged: (v) {
+                    setState(() => _selectedLaminationType = v);
+                    _updateFabricCode(); // 🔥 important
+                  },
                 ),
               ),
             ]),
@@ -695,7 +770,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
               _twoCol(
                 _field(
                   "Fabric Width (cm)",
-                  _widthCtrl,
+                  _fabricWidthCtrl,
                   type: TextInputType.number,
                 ),
                 _field(
@@ -859,7 +934,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
               child: _infoTile("Party Name", _model?.rollData.machineno ?? "—"),
             ),
             const SizedBox(width: 10),
-            Expanded(child: _infoTile("Order No", _model?.bomNo ?? "—")),
+            Expanded(child: _infoTile("Order No", _model?.rollData.partyName ?? "—")),
           ],
         ),
 
@@ -869,8 +944,8 @@ class _RollEntryFormState extends State<RollEntryForm> {
           children: [
             Expanded(
               child: _infoTile(
-                "Color",
-                _colorCtrl.text.isNotEmpty ? _colorCtrl.text : "—",
+                "Bom No",
+                _bomNoCtrl.text.isNotEmpty ? _bomNoCtrl.text : "—",
               ),
             ),
             const SizedBox(width: 10),

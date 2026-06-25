@@ -602,9 +602,6 @@
 //   int get selectedRowCount => 0;
 // }
 
-
-
-
 import 'dart:async';
 import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/material.dart';
@@ -630,10 +627,11 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
 
   List<LoomOrder> _orders = [];
   List<LoomOrder> _filteredOrders = [];
-
+  int _totalCount = 0;
   bool _isLoading = false;
 
   String _unit = "";
+  int pagesize= 50;
 
   bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < 700;
@@ -642,7 +640,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
   void initState() {
     super.initState();
     _initializeData();
-    _loadOrders(viewType: 'all', unit: _unit);
+    _loadOrders(viewType: 'all', unit: _unit,pagesize: pagesize);
   }
 
   @override
@@ -655,18 +653,22 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
   Future<void> _loadOrders({
     required String viewType,
     required String unit,
+    required int pagesize,
   }) async {
     setState(() => _isLoading = true);
 
     try {
-      final orders = await InStockService.fetchLoomOrders(
+      final response = await InStockService.fetchLoomOrders(
         viewType: viewType,
         unit: unit,
+        pageNumber: 1,
+        pageSize: pagesize
       );
-
+      final today = DateTime.now();
       setState(() {
-        _orders = orders;
-        _filteredOrders = orders;
+        _orders = response.orders;
+        _filteredOrders = response.orders;
+        _totalCount = response.totalCount;
       });
     } catch (e) {
       ScaffoldMessenger.of(
@@ -676,14 +678,13 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
       setState(() => _isLoading = false);
     }
   }
+
   Future<void> _initializeData() async {
     _unit = await AppSession.getUnit() ?? "UNIT-1";
 
-    _loadOrders(
-      viewType: 'all',
-      unit: _unit,
-    );
+    _loadOrders(viewType: 'all', unit: _unit,pagesize: pagesize);
   }
+
   void _applyFilter(String filter) {
     setState(() {
       _selectedFilter = filter;
@@ -691,15 +692,15 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
 
     switch (filter) {
       case 'Process':
-        _loadOrders(viewType: 'process', unit: _unit);
+        _loadOrders(viewType: 'process', unit: _unit,pagesize: pagesize);
         break;
 
       case 'Finish':
-        _loadOrders(viewType: 'finish', unit: _unit);
+        _loadOrders(viewType: 'finish', unit: _unit,pagesize: pagesize);
         break;
 
       default:
-        _loadOrders(viewType: 'all', unit: _unit);
+        _loadOrders(viewType: 'all', unit: _unit,pagesize: pagesize);
     }
   }
 
@@ -714,6 +715,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
       setState(() {
         _filteredOrders = _orders.where((e) {
           return e.requiredFabricCode.toLowerCase().contains(q) ||
+              e.bom.contains(q)||
               e.customerName.toLowerCase().contains(q) ||
               e.orderNo.toLowerCase().contains(q) ||
               e.fabricCode.toLowerCase().contains(q) ||
@@ -788,7 +790,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Loom Production",
+                        "Loom Entry",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -817,11 +819,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _filterCard(
-                    title: "Process",
-                    icon: Icons.sync,
-
-                  ),
+                  child: _filterCard(title: "Process", icon: Icons.sync),
                 ),
 
                 const SizedBox(width: 10),
@@ -830,7 +828,6 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                   child: _filterCard(
                     title: "All",
                     icon: Icons.grid_view_rounded,
-
                   ),
                 ),
 
@@ -840,7 +837,6 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                   child: _filterCard(
                     title: "Finish",
                     icon: Icons.check_circle_rounded,
-
                   ),
                 ),
               ],
@@ -861,8 +857,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
       ),
       child: Column(
         children: [
-          Text(
-            "${_filteredOrders.length}",
+          Text("$_totalCount",
             style: const TextStyle(
               color: C.textHigh,
               fontSize: 16,
@@ -897,7 +892,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
         onChanged: (_) => _filterOrders(),
         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          hintText: "Search Order / Customer / Fabric",
+          hintText: "Search Bom No / Order / Customer / Fabric",
           hintStyle: TextStyle(color: Colors.grey.shade500),
           prefixIcon: const Icon(Icons.search_rounded, color: C.brand700),
           suffixIcon: _searchController.text.isNotEmpty
@@ -916,11 +911,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
     );
   }
 
-  Widget _filterCard({
-    required String title,
-    required IconData icon,
-
-  }) {
+  Widget _filterCard({required String title, required IconData icon}) {
     final isSelected = _selectedFilter == title;
 
     return InkWell(
@@ -941,11 +932,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? C.success : C.textMid,
-            ),
+            Icon(icon, size: 18, color: isSelected ? C.success : C.textMid),
 
             const SizedBox(width: 8),
 
@@ -979,7 +966,6 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
           final order = _filteredOrders[index];
 
           return Container(
-
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -994,44 +980,42 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
             ),
             child: Column(
               children: [
-
                 /// HEADER
                 Container(
                   padding: const EdgeInsets.symmetric(
-
                     horizontal: 14,
                     vertical: 12,
                   ),
                   decoration: const BoxDecoration(
-                    color: Colors.indigo,
+                    color: C.bg,
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(16),
                     ),
                   ),
                   child: Row(
                     children: [
-
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
-                            Text("Order NO -${order.loomOrderNo}",
+                            Text(
+                              "Order NO -${order.loomOrderNo}",
                               style: const TextStyle(
                                 fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: C.bg,
+                                fontWeight: FontWeight.bold,
+                                color: C.primaryDark,
                               ),
                             ),
 
                             const SizedBox(height: 2),
 
-                            Text("Party Name -${order.customerName}",
+                            Text(
+                              "Party Name -${order.customerName}",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 15,
-                                color: C.bg,
+                                color: C.primaryDark,
                               ),
                             ),
                           ],
@@ -1044,17 +1028,13 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: order.status
-                              ? C.bg
-                              : C.bg,
+                          color: order.status ? C.borderLight : C.border,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           order.status ? "ACTIVE" : "INACTIVE",
                           style: TextStyle(
-                            color: order.status
-                                ? C.success
-                                : C.danger,
+                            color: order.status ? C.success : C.danger,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -1073,64 +1053,50 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                       1: FlexColumnWidth(1.8),
                     },
                     border: TableBorder.symmetric(
-                      inside: BorderSide(
-                        color: C.borderLight,
-                      ),
+                      inside: BorderSide(color: C.borderLight),
                     ),
                     children: [
-                      _tableRow(
-                        "Bom No",
-                        order.bom.isEmpty
-                            ? "-"
-                            : order.bom,
-                      ),
+                      _tableRow("Bom No", order.bom.isEmpty ? "-" : order.bom),
                       _tableRow(
                         "Article No",
-                        order.articleNo.isEmpty
-                            ? "-"
-                            : order.articleNo,
+                        order.articleNo.isEmpty ? "-" : order.articleNo,
                       ),
                       _tableRow(
                         "PO No",
-                        order.poNumber.isEmpty
-                            ? "-"
-                            : order.poNumber,
+                        order.poNumber.isEmpty ? "-" : order.poNumber,
                       ),
 
+                      _tableRow("Fabric Code", order.fabricCode),
                       _tableRow(
-                        "Fabric Code",
-                        order.fabricCode,
+                        "Req Mtr",
+                        order.requiredQuantityMtr.toStringAsFixed(0),
                       ),
-
                       _tableRow(
                         "Req KG",
-                        order.requiredQuantityKg
-                            .toStringAsFixed(0),
+                        order.requiredQuantityKg.toStringAsFixed(0),
                       ),
 
                       _tableRow(
                         "Prod KG",
-                        order.productionKg
-                            .toStringAsFixed(0),
+                        order.productionKg.toStringAsFixed(0),
                       ),
+                      _tableRow(
+                        "Prod Mtr",
+                        order.productionMtr.toStringAsFixed(0),
 
+                      ),
                       _tableRow(
                         "Bal KG",
-                        order.balanceKg
-                            .toStringAsFixed(0),
-                        valueColor: order.balanceKg < 0
-                            ? C.danger
-                            : C.success,
+                        order.balanceKg.toStringAsFixed(0),
+                        valueColor: order.balanceKg < 0 ? C.danger : C.success,
                       ),
 
                       _tableRow(
                         "Bal Mtr",
-                        order.balanceMtr
-                            .toStringAsFixed(0),
-                        valueColor: order.balanceMtr < 0
-                            ? C.danger
-                            : C.success,
+                        order.balanceMtr.toStringAsFixed(0),
+                        valueColor: order.balanceMtr < 0 ? C.danger : C.success,
                       ),
+
                     ],
                   ),
                 ),
@@ -1147,15 +1113,14 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => LoomForm(
-                              production:
-                              convertToProduction(order),
+                              production: convertToProduction(order),
                             ),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        backgroundColor: Colors.indigo,
+                        backgroundColor: C.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1177,14 +1142,14 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
       ),
     );
   }
+
   TableRow _tableRow(
-      String title,
-      String value, {
-        Color valueColor = C.textHigh,
-      }) {
+    String title,
+    String value, {
+    Color valueColor = C.textHigh,
+  }) {
     return TableRow(
       children: [
-
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: Text(
@@ -1198,7 +1163,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
         ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           child: Text(
             value,
             style: TextStyle(
@@ -1212,7 +1177,6 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
     );
   }
 
-
   // ================= DESKTOP TABLE =================
   Widget _buildDesktopTable() {
     return Padding(
@@ -1223,30 +1187,20 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: C.borderLight),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(.04),
-              blurRadius: 8,
-            ),
+            BoxShadow(color: Colors.black.withOpacity(.04), blurRadius: 8),
           ],
         ),
         child: Column(
           children: [
-
             /// TABLE HEADER
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               decoration: const BoxDecoration(
                 color: C.brand700,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(18),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
               ),
               child: const Row(
                 children: [
-
                   Expanded(
                     flex: 2,
                     child: Text(
@@ -1359,18 +1313,11 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: C.borderLight,
-                        ),
-                      ),
-                      color: index.isEven
-                          ? Colors.white
-                          : C.pageBg,
+                      border: Border(bottom: BorderSide(color: C.borderLight)),
+                      color: index.isEven ? Colors.white : C.pageBg,
                     ),
                     child: Row(
                       children: [
-
                         /// ORDER
                         Expanded(
                           flex: 2,
@@ -1387,9 +1334,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            order.poNumber.isEmpty
-                                ? "-"
-                                : order.poNumber,
+                            order.poNumber.isEmpty ? "-" : order.poNumber,
                             style: const TextStyle(fontSize: 12),
                           ),
                         ),
@@ -1407,8 +1352,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                         /// REQ
                         Expanded(
                           child: Text(
-                            order.requiredQuantityKg
-                                .toStringAsFixed(0),
+                            order.requiredQuantityKg.toStringAsFixed(0),
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 12),
                           ),
@@ -1417,8 +1361,7 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                         /// PROD
                         Expanded(
                           child: Text(
-                            order.productionKg
-                                .toStringAsFixed(0),
+                            order.productionKg.toStringAsFixed(0),
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 12),
                           ),
@@ -1427,15 +1370,12 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                         /// BAL
                         Expanded(
                           child: Text(
-                            order.balanceKg
-                                .toStringAsFixed(0),
+                            order.balanceKg.toStringAsFixed(0),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: order.balanceKg < 0
-                                  ? C.danger
-                                  : C.success,
+                              color: order.balanceKg < 0 ? C.danger : C.success,
                             ),
                           ),
                         ),
@@ -1466,19 +1406,14 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                                 color: order.status
                                     ? C.success.withOpacity(.12)
                                     : C.danger.withOpacity(.12),
-                                borderRadius:
-                                BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                order.status
-                                    ? "ACTIVE"
-                                    : "INACTIVE",
+                                order.status ? "ACTIVE" : "INACTIVE",
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  color: order.status
-                                      ? C.success
-                                      : C.danger,
+                                  color: order.status ? C.success : C.danger,
                                 ),
                               ),
                             ),
@@ -1534,5 +1469,3 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
     );
   }
 }
-
-

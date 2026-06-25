@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_navigation/src/routes/transitions_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../AdminDashBoard/DepartmentDashboard.dart';
 import '../../Color/Colorclass.dart';
 import '../../ScannedItem/Cutting/CuttinIN/CuttingScreen.dart';
+import '../../routes/app_routes.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
 import '../../util/sharedpreference/shared_preference.dart';
 import 'ModelClass/PlanningModel.dart';
@@ -20,11 +23,20 @@ class OrderPlanningScreen2 extends StatefulWidget {
 
 class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
   final ScrollController horizontalCtrl = ScrollController();
-  String wastageValue = "";
+  final TextEditingController wastageController = TextEditingController(
+    text: "0",
+  );
+  String wastageValue = "0";
   final ScrollController listCtrl = ScrollController();
   String? unit;
   List<PlanningModel> planningList = [];
   List<String> departments = ["LOOM", "STORE", "TAPE", "WEBBING"];
+  Map<String, String> departmentWastage = {
+    "LOOM": "0",
+    "STORE": "0",
+    "TAPE": "0",
+    "WEBBING": "0",
+  };
   String startDate = "";
   String endDate = "";
   String selectedDepartment = "LOOM";
@@ -33,17 +45,65 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
 
   static const w1 = 100.0;
   static const w2 = 200.0;
-  static const w = 120.0;
+  static const w = 80.0;
 
-  double get totalWidth => w1 + w2 + (w * 12);
+  double get totalWidth => w1 + w2 + (w * 13);
+
+
 
   @override
   void initState() {
     super.initState();
+    wastageController.text = departmentWastage[selectedDepartment] ?? "0";
     _loadUnit();
     loadPlanning();
   }
 
+  @override
+  void dispose() {
+    wastageController.dispose();
+    super.dispose();
+  }
+  Future<void> _saveData() async {
+    if (_isSaving) return;
+
+    _isSaving = true;
+
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) =>
+        const Center(child: CircularProgressIndicator()),
+      );
+
+      await NaradanaApiService().savePlanning(
+        woNumber: widget.orderData.generatedInquiry,
+        quantity: widget.orderData.quantity,
+        poNum: widget.orderData.poNum,
+        articleNum: widget.orderData.articleNo,
+        items: planningList,
+        unit: unit ?? "",
+      );
+
+      Navigator.pop(context);
+
+      Get.offNamed(AppRoutes.orderComposition);
+
+      Get.snackbar(
+        "Success",
+        "Data Saved Successfully",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      _isSaving = false;
+    }
+  }
   // Future loadPlanning() async {
   //   try {
   //     setState(() {
@@ -141,106 +201,12 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: C.appBar2,
-        icon: const Icon(Icons.save, color: Colors.white),
-        label: const Text(
-          "Save",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        // onPressed: () async {
-        //   if (_isSaving) return; // Prevent multiple taps
-        //
-        //   _isSaving = true;
-        //   try {
-        //     showDialog(
-        //       context: context,
-        //       barrierDismissible: false,
-        //       builder: (_) => const Center(child: CircularProgressIndicator()),
-        //     );
-        //     if (!mounted) return;
-        //
-        //
-        //     await NaradanaApiService().savePlanning(
-        //       woNumber: widget.orderData.generatedInquiry,
-        //       quantity: widget.orderData.quantity,
-        //       poNum: widget.orderData.poNum,
-        //       articleNum: widget.orderData.articleNo,
-        //       items: planningList,
-        //       unit: unit ?? "",
-        //     );
-        //
-        //
-        //
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       const SnackBar(
-        //           backgroundColor: C.success,
-        //           content: Text("Data Saved Successfully")),
-        //     );
-        //     Navigator.pop(context);
-        //   } catch (e) {
-        //     if (mounted) {
-        //       Navigator.pop(context); // Close loader
-        //     }
-        //
-        //
-        //     ScaffoldMessenger.of(
-        //       context,
-        //     ).showSnackBar(SnackBar(content: Text(e.toString())));
-        //   }
-        // },
-          onPressed: () async {
-            if (_isSaving) return;
 
-            _isSaving = true;
-
-            try {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-
-              await NaradanaApiService().savePlanning(
-                woNumber: widget.orderData.generatedInquiry,
-                quantity: widget.orderData.quantity,
-                poNum: widget.orderData.poNum,
-                articleNum: widget.orderData.articleNo,
-                items: planningList,
-                unit: unit ?? "",
-              );
-
-              if (!mounted) return;
-
-              Navigator.pop(context); // Close loader
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  backgroundColor: C.success,
-                  content: Text("Data Saved Successfully"),
-                ),
-              );
-
-              Navigator.pop(context);
-            } catch (e) {
-              if (mounted) {
-                Navigator.pop(context); // Close loader
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.toString())),
-                );
-              }
-            } finally {
-              _isSaving = false;
-            }
-          }
-      ),
       backgroundColor: C.bg,
 
       appBar: AppBar(
         elevation: 0,
-backgroundColor: C.appBar1,
+        backgroundColor: C.appBar1,
         iconTheme: const IconThemeData(color: Colors.white),
 
         // flexibleSpace: Container(
@@ -248,9 +214,8 @@ backgroundColor: C.appBar1,
         //     gradient: LinearGradient(colors: [C.appBar2, C.appBar3]),
         //   ),
         // ),
-
         title: const Text(
-          "WO Inquiry",
+          "FIBC Planning",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -285,6 +250,27 @@ backgroundColor: C.appBar1,
                           ),
                         ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: C.appBar2,
+                      ),
+                      onPressed: _saveData,
+                      icon: const Icon(Icons.save,color: Colors.white),
+                      label: const Text(
+                        "Save",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -302,12 +288,12 @@ backgroundColor: C.appBar1,
           Row(
             children: [
               Expanded(
-                child: _infoCard("Start Date", startDate, Icons.calendar_today),
+                child: _infoCard("PO.Date", startDate, Icons.calendar_today),
               ),
 
               const SizedBox(width: 10),
 
-              Expanded(child: _infoCard("End Date", endDate, Icons.event)),
+              Expanded(child: _infoCard("Dispatch Date", endDate, Icons.event)),
             ],
           ),
           const SizedBox(height: 10),
@@ -315,7 +301,7 @@ backgroundColor: C.appBar1,
             children: [
               Expanded(
                 child: _infoCard(
-                  "Inquiry",
+                  "BOM No.",
                   widget.orderData.generatedInquiry,
                   Icons.badge,
                 ),
@@ -356,9 +342,13 @@ backgroundColor: C.appBar1,
               ),
             ],
           ),
-          _departmentSelector(),
-          const SizedBox(height: 10),
-          _wastageDropdown(),
+          Row(
+            children: [
+              Expanded(child: _departmentSelector()),
+              const SizedBox(width: 10),
+              Expanded(child: _wastageDropdown()),
+            ],
+          ),
         ],
       ),
     );
@@ -380,11 +370,15 @@ backgroundColor: C.appBar1,
                 _header(),
 
                 Expanded(
-                  child: ListView.builder(
-                    controller: listCtrl,
-                    itemCount: planningList.length,
-                    itemBuilder: (_, index) =>
-                        _row(planningList[index], index),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListView.builder(
+                      controller: listCtrl,
+
+                      itemCount: planningList.length,
+                      itemBuilder: (_, index) =>
+                          _row(planningList[index], index),
+                    ),
                   ),
                 ),
               ],
@@ -405,7 +399,7 @@ backgroundColor: C.appBar1,
         children: [
           head("COMPONENT", w1),
 
-          head("FABRIC", w2),
+          head("FABRIC Code", w2),
 
           head("GSM/GRM", w),
 
@@ -420,14 +414,18 @@ backgroundColor: C.appBar1,
           head("REQ KG", w),
 
           head("REQ PCS", w),
+          head("Department", w),
 
           head("WASTAGE", w),
 
-          head("ORD MTR", w),
-
-          head("ORD KG", w),
-
-          head("ORD REQ. PCS", w),
+          // head("ORD MTR", w),
+          //
+          // head("ORD KG", w),
+          //
+          // head("ORD REQ. PCS", w),
+          head("ORD Req. Mtr", w),
+          head("ORD Req. Kg", w),
+          head("ORD Req. Pcs", w),
         ],
       ),
     );
@@ -480,14 +478,18 @@ backgroundColor: C.appBar1,
           cell(item.reqKg, w),
 
           cell(item.reqPcs, w),
+          cell(item.department, w),
 
           cell(item.wastage, w),
 
-          cell(item.startDate, w),
-
-          cell(item.endDate, w),
-
-          cell(item.quantity, w),
+          // cell(item.startDate, w),
+          //
+          // cell(item.endDate, w),
+          //
+          // cell(item.quantity, w),
+          cell(calculateOReqMtr(item), w), // O Req Mtr
+          cell(calculateOReqKg(item), w), // O Req Kg
+          cell(calculateOReqPcs(item), w),
         ],
       ),
     );
@@ -502,7 +504,7 @@ backgroundColor: C.appBar1,
       padding: const EdgeInsets.symmetric(horizontal: 6),
 
       child: Text(
-        text.isEmpty ? "-" : text,
+        text.isEmpty ? "0" : text,
 
         overflow: TextOverflow.ellipsis,
 
@@ -563,12 +565,14 @@ backgroundColor: C.appBar1,
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: selectedDepartment,
+
                 isExpanded: true,
                 icon: const Icon(Icons.keyboard_arrow_down),
 
                 items: departments.map((dept) {
                   return DropdownMenuItem(
                     value: dept,
+
                     child: Text(dept, style: const TextStyle(fontSize: 14)),
                   );
                 }).toList(),
@@ -576,6 +580,10 @@ backgroundColor: C.appBar1,
                 onChanged: (value) {
                   setState(() {
                     selectedDepartment = value!;
+
+                    wastageValue = departmentWastage[selectedDepartment] ?? "0";
+
+                    wastageController.text = wastageValue;
                   });
                 },
               ),
@@ -596,6 +604,7 @@ backgroundColor: C.appBar1,
         border: Border.all(color: Colors.grey.shade300),
       ),
       child: TextField(
+        controller: wastageController,
         keyboardType: TextInputType.number,
         decoration: const InputDecoration(
           border: InputBorder.none,
@@ -608,9 +617,13 @@ backgroundColor: C.appBar1,
           setState(() {
             wastageValue = value;
 
-            // Apply to all rows
+            departmentWastage[selectedDepartment] = value;
+
             for (var item in planningList) {
-              item.wastage = value;
+              if (item.department.toUpperCase() ==
+                  selectedDepartment.toUpperCase()) {
+                item.wastage = value;
+              }
             }
           });
         },
@@ -619,11 +632,37 @@ backgroundColor: C.appBar1,
   }
 
   Future<void> _loadUnit() async {
-
     final savedUnit = await AppSession.getUnit();
 
     setState(() {
       unit = savedUnit ?? "";
     });
+  }
+
+  String calculateOReqMtr(PlanningModel item) {
+    final ordReqMtr = double.tryParse(item.reqMtr) ?? 0;
+    final wastage = double.tryParse(item.wastage) ?? 0;
+
+    final result = ordReqMtr + (ordReqMtr * wastage / 100);
+
+    return result.round().toString();
+  }
+
+  String calculateOReqKg(PlanningModel item) {
+    final ordReqKg = double.tryParse(item.reqKg) ?? 0;
+    final wastage = double.tryParse(item.wastage) ?? 0;
+
+    final result = ordReqKg + (ordReqKg * wastage / 100);
+
+    return result.round().toString();
+  }
+
+  String calculateOReqPcs(PlanningModel item) {
+    final ordReqPcs = int.tryParse(item.quantity) ?? 0;
+    final wastage = int.tryParse(item.wastage) ?? 0;
+
+    final result = ordReqPcs + wastage;
+
+    return result.toStringAsFixed(0);
   }
 }

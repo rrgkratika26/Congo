@@ -282,7 +282,7 @@ class _QRRMDScanScreenState extends State<QRRMDScanScreen> {
     // ✅ Same API jo manual entry mein use hoti hai
     final result = await _service.checkBarcodeIn(
       barcode: barcode,
-      roll_entry: 'R01',
+      roll_entry: 'RMD',
       storage: widget.location,
       operatorName: widget.operatorName,
       supervisor: widget.supervisor,

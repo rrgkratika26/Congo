@@ -1,6 +1,7 @@
 class LoomOrder {
   final int id;
   final String articleNo;
+
   final String bom;
   final String poNumber;
   final String orderNo;
@@ -140,20 +141,22 @@ class LoomDropdownData {
 
 class LoomOrderResponse {
   final String status;
-  final int count;
-  final List<LoomOrder> data;
+  final int totalCount;
+  final List<LoomOrder> orders;
+
+
 
   LoomOrderResponse({
     required this.status,
-    required this.count,
-    required this.data,
+    required this.totalCount,
+    required this.orders,
   });
 
   factory LoomOrderResponse.fromJson(Map<String, dynamic> json) {
     return LoomOrderResponse(
       status: json['status'] ?? '',
-      count: json['count'] ?? 0,
-      data: (json['data'] as List? ?? [])
+      totalCount: json['count'] ?? 0,
+      orders: (json['data'] as List? ?? [])
           .map((e) => LoomOrder.fromJson(e))
           .toList(),
     );

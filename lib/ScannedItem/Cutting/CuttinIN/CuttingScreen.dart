@@ -249,7 +249,7 @@ class _CuttingScreenState extends State<CuttingScreen> {
                               Text(
                                 tempStartDate != null
                                     ? DateFormat(
-                                        'dd MMM yyyy',
+                                        'dd-MM-yyyy',
                                       ).format(tempStartDate!)
                                     : 'Select Date',
                                 style: TextStyle(
@@ -331,7 +331,7 @@ class _CuttingScreenState extends State<CuttingScreen> {
                               Text(
                                 tempEndDate != null
                                     ? DateFormat(
-                                        'dd MMM yyyy',
+                                        'dd-MM-yyyy',
                                       ).format(tempEndDate!)
                                     : 'Select Date',
                                 style: TextStyle(

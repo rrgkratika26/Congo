@@ -45,38 +45,14 @@ class _RmdOutScreenState extends State<RmdOutScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        backgroundColor: C.appBar1,
-        elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.1),
-        // leading: Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: Image.asset('assets/images/logo-1.png', fit: BoxFit.contain),
-        // ),
-        title: Row(
-          children: [
-            Text(
-              _unitTitle.isNotEmpty ? _unitTitle : 'Unit Name',
-              style: TextStyle(
-                color: C.primaryDark,
-                fontSize: isTablet ? 20 : 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(width: 5),
-            Text(
-              'RMD ${widget.screenType}',
-              style: TextStyle(
-                color: C.bg,
-                fontSize: isTablet ? 20 : 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        appBar: AppBar(
+          title: const Text("RMD OUT Reports", style: TextStyle(color: C.bg)),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(color: C.appBar1),
+          ),
+          // C.primary,
+          iconTheme: IconThemeData(color: C.bg),
         ),
-        iconTheme: IconThemeData(color: C.bg),
-
-      ),
       body: Column(
         children: [
           // Tab Indicator

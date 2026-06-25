@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../Color/Colorclass.dart';
+import '../Login/LoginNardanaScreen.dart';
 import '../Login/ProfileSCreen.dart';
 import '../ScannedItem/Cutting/CuttinIN/CuttingScreen.dart';
 import '../routes/app_routes.dart';
@@ -151,7 +152,8 @@ class _AdminDashboard extends StatelessWidget {
   ];
 
   static const _allItems = [
-    _DeptItem(title: 'INQUIRY', icon: Icons.question_answer),
+    _DeptItem(title: 'MARKETING', icon: Icons.bar_chart),
+
     _DeptItem(title: 'PLANNING', icon: Icons.next_plan_rounded),
     _DeptItem(title: 'LOOM', icon: Icons.looks),
     _DeptItem(title: 'RMD', icon: Icons.inventory),
@@ -160,9 +162,9 @@ class _AdminDashboard extends StatelessWidget {
     _DeptItem(title: 'BAG', icon: Icons.shopping_bag),
     _DeptItem(title: 'BALING', icon: Icons.waves),
     _DeptItem(title: 'WEBBING', icon: Icons.web),
-    _DeptItem(title: 'LEDGER', icon: Icons.menu_book),
+    // _DeptItem(title: 'LEDGER', icon: Icons.menu_book),
     _DeptItem(title: 'TAPELINE', icon: Icons.dashboard),
-    _DeptItem(title: 'MARKETING', icon: Icons.bar_chart),
+    // _DeptItem(title: 'INQUIRY', icon: Icons.question_answer),
   ];
 
   @override
@@ -179,17 +181,75 @@ class _AdminDashboard extends StatelessWidget {
           children: [
             _Header(ctrl: ctrl, isMobile: isMobile),
             Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.all(isMobile ? 16 : 24),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossCount,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 14,
-                  childAspectRatio: 1,
-                ),
-                itemCount: items.length,
-                itemBuilder: (ctx, i) =>
-                    _DeptCard(item: items[i], ctrl: ctrl, isMobile: isMobile),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: GridView.builder(
+                      padding: EdgeInsets.all(isMobile ? 16 : 24),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossCount,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                        childAspectRatio: 1.15,
+                      ),
+                      itemCount: items.length,
+                      itemBuilder: (ctx, i) => _DeptCard(
+                        item: items[i],
+                        ctrl: ctrl,
+                        isMobile: isMobile,
+                      ),
+                    ),
+                  ),
+
+                  // Logout Button
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.logout, color: Colors.white),
+                        label: const Text(
+                          "Logout",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onPressed: () async {
+                          final confirm = await Get.dialog<bool>(
+                            AlertDialog(
+                              title: const Text("Logout"),
+                              content: const Text(
+                                "Are you sure you want to logout?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Get.back(result: false),
+                                  child: const Text("Cancel"),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => Get.back(result: true),
+                                  child: const Text("Logout"),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            ctrl.logout();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -242,9 +302,9 @@ class _DeptDashboard extends StatelessWidget {
                     child: IconButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        Get.to(() => NewAdminDashboard());
+                        Get.to(() => ProfileScreen());
                       },
-                      icon: Icon(Icons.home),
+                      icon: Icon(Icons.person),
                     ),
                   ),
                   SizedBox(width: isMobile ? 14 : 18),
@@ -529,10 +589,15 @@ class _ActionCard extends StatelessWidget {
       case MenuAction.OUT:
         return Icons.logout_rounded;
       case MenuAction.report:
+        return Icons.find_in_page_sharp;
+      case MenuAction.bailing_Report:
+        return Icons.find_in_page_sharp;
       case MenuAction.In_Report:
       case MenuAction.Stock_Report:
         return Icons.bar_chart_rounded;
       case MenuAction.stock:
+        return Icons.inventory_2_rounded;
+      case MenuAction.bail_Stock:
         return Icons.inventory_2_rounded;
       case MenuAction.entry:
         return Icons.edit_note_rounded;
@@ -550,7 +615,7 @@ class _ActionCard extends StatelessWidget {
         return Icons.next_plan_rounded;
       case MenuAction.Order_Composition:
         return Icons.reorder_rounded;
-      case MenuAction.To_Loom:
+      case MenuAction.combine_To_Loom:
         return Icons.arrow_forward_rounded;
       case MenuAction.Webbing_Ledger:
         return Icons.menu_book_rounded;
@@ -872,24 +937,26 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.orderPlanning);
       else if (action == MenuAction.Order_Composition)
         Get.toNamed(AppRoutes.orderComposition);
-      else if (action == MenuAction.To_Loom)
+      else if (action == MenuAction.combine_To_Loom)
         Get.toNamed(AppRoutes.toLoom);
       break;
     case 'LOOM':
       if (action == MenuAction.IN)
         Get.toNamed(AppRoutes.loomIn);
+      else if (action == MenuAction.saved_List)
+        Get.toNamed(AppRoutes.loomSaveList);
       else if (action == MenuAction.Out_Report)
         Get.toNamed(AppRoutes.loomReports);
-      else if (action == MenuAction.report)
-        Get.toNamed(AppRoutes.loomSaveList);
       break;
     case 'RMD':
       if (action == MenuAction.IN)
         Get.toNamed(AppRoutes.rmdIn);
       else if (action == MenuAction.OUT)
         Get.toNamed(AppRoutes.rmdOut);
-      else if (action == MenuAction.report)
-        Get.toNamed(AppRoutes.rmdNardanaReports);
+      else if (action == MenuAction.In_Report)
+        Get.toNamed(AppRoutes.rmdNardanaInReports);
+      else if (action == MenuAction.Out_Report)
+        Get.toNamed(AppRoutes.rmdNardanaOutReports);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.rmdNardanaStock);
       break;
@@ -898,8 +965,10 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.lamination);
       else if (action == MenuAction.OUT)
         Get.toNamed(AppRoutes.laminationOutStock);
-      else if (action == MenuAction.report)
-        Get.toNamed(AppRoutes.lamNaradanaReports);
+      else if (action == MenuAction.In_Report)
+        Get.toNamed(AppRoutes.lamNaradanaInReport);
+      else if (action == MenuAction.Out_Report)
+        Get.toNamed(AppRoutes.lamNaradanaOutReport);
       break;
     case 'CUTTING':
       if (action == MenuAction.IN)
@@ -908,8 +977,12 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.nardanaInReport);
       else if (action == MenuAction.OUT)
         Get.toNamed(AppRoutes.nardanaCutOutList);
-      else if (action == MenuAction.report)
-        Get.toNamed(AppRoutes.rollWisereport);
+      else if (action == MenuAction.rollWise)
+        Get.toNamed(AppRoutes.rollWiseReport);
+      else if (action == MenuAction.componentWise)
+        Get.toNamed(AppRoutes.componentWiseReport);
+      else if (action == MenuAction.cuttingWise)
+        Get.toNamed(AppRoutes.cuttingWiseReport);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.cutGroupStock);
       else if (action == MenuAction.Approval)
@@ -926,8 +999,10 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
     case 'BALING':
       if (action == MenuAction.entry)
         Get.toNamed(AppRoutes.baleEntry);
-      else if (action == MenuAction.report)
-        Get.toNamed(AppRoutes.baleReport);
+      else if (action == MenuAction.bail_Stock)
+        Get.toNamed(AppRoutes.baleStockReport);
+      else if (action == MenuAction.bailing_Report)
+        Get.toNamed(AppRoutes.balingReport);
       else if (action == MenuAction.dispatch)
         Get.toNamed(AppRoutes.baleDispatch);
       else if (action == MenuAction.stock)
@@ -940,13 +1015,20 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.webbingOut);
       else if (action == MenuAction.report)
         Get.toNamed(AppRoutes.webbNardanaReport);
+      else if (action == MenuAction.stock)
+        Get.toNamed(AppRoutes.webStockSlider);
       break;
     case 'LEDGER':
       if (action == MenuAction.Webbing_Ledger)
         Get.toNamed(AppRoutes.stockLedger);
       break;
     case 'TAPELINE':
-      if (action == MenuAction.IN) Get.toNamed(AppRoutes.tapelineIn);
+      if (action == MenuAction.IN)
+        Get.toNamed(AppRoutes.tapelineIn);
+      else if (action == MenuAction.recent_entries)
+        Get.toNamed(AppRoutes.tapelineRecentEntries);
+      else if (action == MenuAction.OUT)
+        Get.toNamed(AppRoutes.tapelineOut);
       break;
     case 'MARKETING':
       if (action == MenuAction.Inquirey_Report)

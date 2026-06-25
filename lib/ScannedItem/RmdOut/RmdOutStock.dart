@@ -35,7 +35,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
   //       "${now.year}";
   // }
   String getCurrentDate() {
-    return DateFormat('dd-MM-yyyy').format(DateTime.now());
+    return DateFormat('yyyy-MM-dd').format(DateTime.now());
   }
 
   // ---------------- STATIC ISSUE TO ----------------

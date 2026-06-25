@@ -132,6 +132,14 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+      appBar: AppBar(
+        title: const Text("Lam IN Reports", style: TextStyle(color: C.bg)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(color: C.appBar1),
+        ),
+        // C.primary,
+        iconTheme: IconThemeData(color: C.bg),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -162,7 +170,7 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
   Widget _topBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-      color: C.primary,
+      color: C.bg,
       child: Column(
         children: [
           Row(
@@ -171,37 +179,40 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
                 child: TextField(
                   controller: _searchCtrl,
                   onChanged: (v) => setState(() => _query = v),
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                  style: const TextStyle(fontSize: 14, color: C.bg),
                   decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: C.primaryDark,
-                        strokeAlign: 2,
-                      ),
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
                     ),
-                    hintText: 'Search barcode, batch, party, supervisor…',
-                    hintStyle: const TextStyle(
-                      color: C.primaryDark,
-                      fontSize: 13,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: C.border),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    hintText: 'Search barcode, party, supervisor…',
+                    hintStyle: const TextStyle(color: C.brand700, fontSize: 13),
                     prefixIcon: const Icon(
                       Icons.search,
-                      color: C.primaryDark,
+                      color: C.brand700,
                       size: 20,
                     ),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              color: Colors.white54,
-                              size: 18,
-                            ),
-                            onPressed: () => setState(() {
-                              _query = '';
-                              _searchCtrl.clear();
-                            }),
-                          )
+                      icon: const Icon(
+                        Icons.close,
+                        color: C.textHigh,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _query = '';
+                          _searchCtrl.clear();
+                        });
+                      },
+                    )
                         : null,
                     filled: true,
                     fillColor: Colors.white12,
@@ -213,13 +224,15 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
                   ),
                 ),
               ),
+
               const SizedBox(width: 8),
+
               IconButton(
                 onPressed: _pickDateRange,
                 icon: const Icon(
                   Icons.calendar_today,
                   size: 22,
-                  color: Colors.white,
+                  color: C.primaryDark,
                 ),
               ),
             ],
@@ -306,10 +319,12 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
               columns: [
                 DataColumn(label: _head('Sr')),
                 DataColumn(label: _head('RollCode')),
+                DataColumn(label: _head('Bom NO')),
+
+                DataColumn(label: _head('Barcode')),
 
                 DataColumn(label: _head('Date')),
                 DataColumn(label: _head('Time')),
-                DataColumn(label: _head('Barcode')),
                 DataColumn(label: _head('Batch No')),
                 DataColumn(label: _head('Party Name')),
                 DataColumn(label: _head('Loom Type')),
@@ -355,9 +370,11 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
                     DataCell(_cell(r.id, isBold: true)),
                     DataCell(_cell(r.rollCode, isBold: true)),
 
+                    DataCell(_cell(r.bomNo, isBold: true)),
+                    DataCell(_cell(r.barcode, mono: true)),
                     DataCell(_cell(DateFormat('dd-MM-yy').format(r.date))),
                     DataCell(_cell(r.time)),
-                    DataCell(_cell(r.barcode, mono: true)),
+
                     DataCell(_cell(r.batchNo)),
                     DataCell(_cell(r.partyName, width: 120)),
                     DataCell(_cell('${r.loomType}')),

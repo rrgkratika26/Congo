@@ -87,6 +87,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
     super.dispose();
   }
 
+
   void calculateValues() {
     double reqMtr = double.tryParse(widget.data.mtr.toString()) ?? 0;
 
@@ -94,19 +95,40 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
 
     double extraMtr = double.tryParse(extraMtrController.text) ?? 0;
 
-    double extraKg = reqMtr == 0 ? 0 : (reqKg * extraMtr) / reqMtr;
+    double calculatedExtraKg =
+    reqMtr == 0 ? 0 : (reqKg * extraMtr) / reqMtr;
 
-    /// Approx rounded value
-    int roundedExtraKg = extraKg.round();
+    int roundedExtraKg = calculatedExtraKg.round();
 
     extraKgController.text = roundedExtraKg.toString();
 
     setState(() {
       actualMtr = reqMtr + extraMtr;
 
-      actualKg = reqKg + extraKg;
+      // Rounded Extra KG add hoga
+      actualKg = reqKg + roundedExtraKg;
     });
   }
+  // void calculateValues() {
+  //   double reqMtr = double.tryParse(widget.data.mtr.toString()) ?? 0;
+  //
+  //   double reqKg = double.tryParse(widget.data.kg.toString()) ?? 0;
+  //
+  //   double extraMtr = double.tryParse(extraMtrController.text) ?? 0;
+  //
+  //   double extraKg = reqMtr == 0 ? 0 : (reqKg * extraMtr) / reqMtr;
+  //
+  //   /// Approx rounded value
+  //   int roundedExtraKg = extraKg.round();
+  //
+  //   extraKgController.text = roundedExtraKg.round().toString();
+  //
+  //   setState(() {
+  //     actualMtr = reqMtr + extraMtr;
+  //
+  //     actualKg = reqKg + extraKg;
+  //   });
+  // }
 
   void generateFabricCode() {
     generatedFabricCode =
@@ -220,9 +242,9 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
 
       "extrA_KG": extraKgController.text.isEmpty ? "0" : extraKgController.text,
 
-      "actuaL_REQUIRED_MTR": actualMtr.toStringAsFixed(2),
+      "actuaL_REQUIRED_MTR": actualMtr.round().toString(),
 
-      "actuaL_REQUIRED_KG": actualKg.toStringAsFixed(2),
+      "actuaL_REQUIRED_KG": actualKg.round().toString(),
 
       "customeR_NAME": partyData?.partyName ?? "",
 
@@ -232,7 +254,7 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
     };
 
     bool success = await NaradanaApiService().forwardPlanningToLoom(
-      unit: unit!,
+      unit: unit,
       body: body,
     );
 
@@ -757,7 +779,26 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
 
                                 DataCell(Text(item.component)),
 
-                                DataCell(Text(item.fabricCode)),
+                                // DataCell(Text(item.fabricCode)),
+                                DataCell(
+                                  InkWell(
+                                    onTap: () {
+                                      setFabricValuesFromApi(item.fabricCode);
+
+                                      setState(() {
+                                        generatedFabricCode = item.fabricCode;
+                                      });
+                                    },
+                                    child: Text(
+                                      item.fabricCode,
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
 
                                 DataCell(Text(item.mtr.toString())),
 
