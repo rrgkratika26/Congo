@@ -457,6 +457,8 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
         title: const Text('Manual Entry'),
         content: TextField(
           controller: barcodeController,
+          textCapitalization: TextCapitalization.characters,
+
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(labelText: 'Enter Barcode'),
         ),

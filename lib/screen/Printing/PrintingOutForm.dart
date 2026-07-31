@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:IMS/ScannedItem/Lamination/lAMINATION_OUTsTOCK/modelClass/RollData.dart';
+import 'package:IMS/screen/Printing/ModelClass/Saveprintingsave.dart';
+import 'package:IMS/services/Visa_SmallbagAPIS/VISA_SApis.dart';
+
 import 'package:IMS/services/visa_apis/visa_api.dart';
 import 'package:flutter/material.dart';
 import 'package:IMS/ScannedItem/Lamination/lAMINATION_OUTsTOCK/modelClass/roll_wiseModle.dart';
@@ -11,22 +14,31 @@ import '../../../NARDANA/LaminationReports/LaminationOutNewEntryList.dart';
 import '../../../services/NardanaApis/NardanaApi.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 import '../../ScannedItem/Lamination/lAMINATION_OUTsTOCK/laminationOut_model.dart';
+import '../../util/sharedpreference/shared_preference.dart';
+import 'ModelClass/Printmodel.dart';
+import 'PrintingOutSavedList.dart';
 
-class RollEntryForm extends StatefulWidget {
-  final Roll roll;
+class PrintRollEntryForm extends StatefulWidget {
+  final PrintingOutModel roll;
 
-  const RollEntryForm({super.key, required this.roll});
+  const PrintRollEntryForm({super.key, required this.roll});
 
   @override
-  State<RollEntryForm> createState() => _RollEntryFormState();
+  State<PrintRollEntryForm> createState() => _PrintRollEntryFormState();
 }
 
-class _RollEntryFormState extends State<RollEntryForm> {
+class _PrintRollEntryFormState extends State<PrintRollEntryForm> {
   bool _isLoading = true;
   bool _isSaving = false;
   String? _errorMsg;
   LaminationOutModel? _model;
   String? _bomNo;
+  String unitName = '';
+  List<dynamic> supervisors = [];
+  List<dynamic> operators = [];
+
+  String? selectedSupervisor;
+  String? selectedOperator;
 
   String? _selectedShift;
   String? _selectedSupervisor;
@@ -35,7 +47,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
   String? _selectedMachineType;
   String? _selectedLaminationType;
   final _batchNoCtrl = TextEditingController();
-  final List<String> _laminationTypes = ["SL", "LL"];
+  final List<String> _laminationTypes = ["SL", "LL", "L"];
   final List<String> _machineTypes = ["LAMI-1", "LAMI-2"];
   Timer? _debounce;
   bool _isCodeGenerated = false;
@@ -45,6 +57,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
   final _machineCtrl = TextEditingController();
   final _bomNoCtrl = TextEditingController();
   final _partyCtrl = TextEditingController();
+  final _orderNoCtrl = TextEditingController();
   final _poCtrl = TextEditingController();
   final _articleCtrl = TextEditingController();
   final _articleNoCtrl = TextEditingController();
@@ -85,14 +98,27 @@ class _RollEntryFormState extends State<RollEntryForm> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _grossCtrl.text = widget.roll.grossWeight.toString() ?? "";
+    _tareCtrl.text = widget.roll.tareWeight.toString() ?? "";
+    _articleNoCtrl.text = widget.roll.articleNo.toString() ?? "";
+    _rollLengthCtrl.text = widget.roll.rollLength.toString() ?? "";
+    _meshCtrl.text = widget.roll.mesh.toString() ?? "";
+    _partyCtrl.text = widget.roll.partyName.toString() ?? "";
+    _poCtrl.text = widget.roll.poNo.toString() ?? "";
+    _orderNoCtrl.text = widget.roll.orderNo.toString() ?? "";
+    _loomTypeCtrl.text = widget.roll.loomType ?? "";
+    // print("Roll Length API = ${data.rollData.requiredqtymtr}");
+    print("Controller = ${_rollLengthCtrl.text}");
+    _loadPlant();
+    _fillFabricDetails(widget.roll.fabricCode ?? "");
+
+    _loadDropdowns();
 
     _grossCtrl.addListener(_calculateWeights);
     _tareCtrl.addListener(_calculateWeights);
     _rollLengthCtrl.addListener(_calculateWeights);
     _fabricWidthCtrl.addListener(_calculateWeights);
-
-    // 🔥 FABRIC CODE AUTO UPDATE LISTENERS
+    _rollWeightCtrl.addListener(_calculateWeights);
     _fabricWidthCtrl.addListener(_updateFabricCode);
     _fabricGsmCtrl.addListener(_updateFabricCode);
     _fabricBaffleCtrl.addListener(_updateFabricCode);
@@ -100,6 +126,11 @@ class _RollEntryFormState extends State<RollEntryForm> {
     _laminationCtrl.addListener(_updateFabricCode);
     _colorCtrl.addListener(_updateFabricCode);
     _specialIdCtrl.addListener(_updateFabricCode);
+    // _loadPlant();
+    _fillFabricDetails(widget.roll.fabricCode ?? "");
+    // _fetchData();
+
+    _loadDropdowns();
   }
 
   @override
@@ -141,6 +172,27 @@ class _RollEntryFormState extends State<RollEntryForm> {
       c.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _loadDropdowns() async {
+    try {
+      final response = await VisaSmallBagApiService().getPrintingSpAndOpName();
+
+      print(response);
+      print(response["supervisors"]);
+      print(response["operators"]);
+      setState(() {
+        supervisors = response["supervisors"] ?? [];
+        operators = response["operators"] ?? [];
+
+        // selectedSupervisor = widget.roll.;
+        // selectedOperator = widget.roll.operatorName;
+
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _updateFabricCode() {
@@ -218,49 +270,45 @@ class _RollEntryFormState extends State<RollEntryForm> {
   //   }
   // }
 
-  Future<void> _fetchData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMsg = null;
-    });
+  Future<void> _loadPlant() async {
+    unitName = (await AppSession.getUnit())!;
 
-    try {
-      final LaminationOutModel data =
-          await NaradanaApiService.getLaminationOutstock(
-            widget.roll.id.toString(),
-          );
-
-      if (!mounted) return; // ✅ prevent crash if widget disposed
-
-      setState(() {
-        _model = data;
-        _isLoading = false;
-      });
-
-      _populateForm(data); // ✅ call AFTER state update
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _errorMsg = e.toString();
-        _isLoading = false;
-      });
-    }
+    setState(() {});
   }
+
   // Future<void> _fetchData() async {
   //   setState(() {
   //     _isLoading = true;
   //     _errorMsg = null;
   //   });
   //   try {
-  //     final id = int.parse(widget.roll.srNo.toString());
-  //     final data = await InStockService.getLaminationDetails(id);
+  //     final id = int.parse(widget.roll.id.toString());
+  //     // final data = await VisaSmallBagApiService.getLaminationDetails(id);
   //
   //     setState(() {
   //       _model = data;
   //       _isLoading = false;
   //     });
-  //     _populateForm(data);
+  //     setState(() {
+  //       _model = data;
+  //
+  //       _partyCtrl.text = data.rollData.partyName ?? "";
+  //       _poCtrl.text = data.rollData.purchsE_ORDER ?? "";
+  //       _articleCtrl.text = data.rollData.articleNo ?? "";
+  //       _fabricTypeCtrl.text = data.rollData.fabricBaffleType ?? "";
+  //       _machineCtrl.text = data.rollData.modelno ?? "";
+  //       _meshCtrl.text = data.rollData.mesh ?? "";
+  //       _fabricWidthCtrl.text = data.rollData.fabricWidth ?? "";
+  //       _fabricGsmCtrl.text = data.rollData.gsm ?? "";
+  //       _rollLengthCtrl.text = data.rollData.requiredqtymtr ?? "";
+  //       _bomNoCtrl.text = data.rollData.bomNo ?? "";
+  //       _grossCtrl.text = data.rollData.grossWeight ?? "";
+  //       _tareCtrl.text = data.rollData.tareWeight ?? "";
+  //       _calculateWeights();
+  //
+  //
+  //       _isLoading = false;
+  //     });
   //   } catch (e) {
   //     setState(() {
   //       _errorMsg = e.toString();
@@ -268,90 +316,6 @@ class _RollEntryFormState extends State<RollEntryForm> {
   //     });
   //   }
   // }
-
-  void _populateForm(LaminationOutModel model) {
-    final r = model.rollData;
-
-    // _machineCtrl.text = r.machine;
-    // _partyCtrl.text = r.machineno;
-    // _partyCtrl.text = r.machineno ?? '';
-
-    // debugPrint("PARTY CTRL => ${_partyCtrl.text}");
-    // debugPrint("MACHINE NO => ${r.machineno}");
-    // debugPrint("PARTY NAME => ${r.partyName}");
-    // debugPrint("OPName1 => $_selectedOperator");
-    // debugPrint("partyname as bom no =>${_model?.bomNo}");
-    // _bomNoCtrl = r.bomNo;
-    _poCtrl.text = r.workOrderNo;
-    // ✅ Article Number (purchsE_ORDER)
-    _articleNoCtrl.text = r.purchsE_ORDER ?? '';
-
-    // ✅ Required Qty KG
-    _reqQtyKgCtrl.text = r.requirednewt ?? '';
-    // _reqQtyMtrCtrl.text = r.requirednewt ?? '';
-
-    // ✅ Loom Type (modelno)
-    _loomTypeCtrl.text = r.modelno ?? '';
-
-    _netWeightCtrl.text = r.requirednewt;
-    // _qtyCtrl.text = r.quantity;
-    _modelNoCtrl.text = r.modelno;
-    _machineCtrl.text = r.machine;
-    _partyCtrl.text = r.partyName;
-
-    _articleCtrl.text = r.fabricTypeOrUse;
-    _gsmCtrl.text = r.gsm;
-    _widthCtrl.text = r.fabricWidth;
-    _colorCtrl.text = r.color;
-    _bomNoCtrl.text = widget.roll.bomNo;
-
-    _rollLengthCtrl.text = r.rollLengthCalc;
-    _rollWeightCtrl.text = r.rollWeightCalc;
-    _grossCtrl.text = r.grossWeightCalc;
-    _tareCtrl.text = r.tareWeightCalc;
-    _avgCtrl.text = r.avgWeight;
-    _avgMtrGmCtrl.text = r.avgWeightGm ?? '';
-
-    _fabricWidthCtrl.text = r.fabricWidth;
-    _fabricBaffleCtrl.text = r.fabricBaffleType;
-    _fabricTypeCtrl.text = r.fabricTypeOrUse;
-    _fabricGsmCtrl.text = r.gsm;
-
-    _laminationCtrl.text = r.sid;
-
-    // ✅ FIX: use dynamic access or a safe getter — adjust field name to match your model
-    _selectedLaminationType = _laminationTypes.contains(r.lamination)
-        ? r.lamination
-        : null;
-    _netWeightCtrl.text = r.requirednewt;
-    _qtyCtrl.text = r.requiredqtymtr;
-
-    _cutTypeCtrl.text = r.cutType;
-    _specialIdCtrl.text = r.specialId;
-    _generateCodeCtrl.text = r.generatedCode;
-
-    _meshCtrl.text = r.mesh!;
-
-    // ✅ Additional
-    // _netWeightCtrl.text = r.requirednewt ?? '';
-    // _qtyCtrl.text = r.requiredqtymtr?.toString() ?? '';
-    _stateCtrl.text = r.avgWeight ?? '';
-    // _weekCtrl.text = r.weekNo?.toString() ?? '';
-    // _planningCtrl.text = r.planningWeek?.toString() ?? '';
-    // ✅ FIX: use the correct field name from your RollData model
-    _modelNoCtrl.text =
-        r.modelno?.toString() ?? ''; // changed modelno → modelNo
-
-    _selectedSupervisor = model.supervisors.contains(r.supervisor)
-        ? r.supervisor
-        : (model.supervisors.isNotEmpty ? model.supervisors.first : null);
-    _selectedOpName = model.supervisors.contains(r.supervisor)
-        ? r.supervisor
-        : (model.supervisors.isNotEmpty ? model.supervisors.first : null);
-    // _selectedOperator = model.operators.contains(r.operator)
-    //     ? r.operator
-    //     : (model.operators.isNotEmpty ? model.operators.first : null);
-  }
 
   void _calculateWeights() {
     final gross = double.tryParse(_grossCtrl.text) ?? 0;
@@ -376,18 +340,18 @@ class _RollEntryFormState extends State<RollEntryForm> {
   void _generateFabricCode() {
     if (_fabricWidthCtrl.text.isEmpty ||
         _fabricBaffleCtrl.text.isEmpty ||
-        _fabricTypeCtrl.text.isEmpty ||
+
         _fabricGsmCtrl.text.isEmpty ||
         _laminationCtrl.text.isEmpty ||
         _colorCtrl.text.isEmpty ||
         _cutTypeCtrl.text.isEmpty ||
         _specialIdCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill all fields before generating code"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text("Please fill all fields before generating code"),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
       return;
     }
 
@@ -410,89 +374,61 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
     setState(() => _isSaving = true);
 
-    final payload = {
-      "id": widget.roll.id.toString(),
-      "selectedSRNO": widget.roll.srNo.toString(),
-      "selectedCode": widget.roll.srNo.toString(),
-      "hold": "",
-      "boM_NO": _bomNoCtrl.text,
-
-      "loomNo": _modelNoCtrl.text,
-      "rollWeightCalc": _rollWeightCtrl.text,
-      "rollLengthCalc": _rollLengthCtrl.text,
-      "operator": _selectedOperator ?? "",
-      "supervisor": _selectedSupervisor ?? "",
-      "oP1NAME": _selectedOpName ?? "",
-
-      "fabricTypeOrUse": _fabricTypeCtrl.text,
-
-      "fabricBaffleType": _fabricBaffleCtrl.text,
-      "color": _colorCtrl.text,
-      "fabricGSM": _fabricGsmCtrl.text,
-      "fabricWidth": _fabricWidthCtrl.text,
-      "laminationType": _selectedLaminationType ?? "",
-
-      "cutType": _laminationCtrl.text,
-
-      "specialId": _specialIdCtrl.text,
-      "generatedCode": _generateCodeCtrl.text,
-
-      // "partyName": (_model?.bomNo.isNotEmpty ?? false) ? _model!.bomNo : "—",
-      // "machineNo": _partyCtrl.text,
-      // "partyName": _model?.bomNo ,
-      "partyName": _partyCtrl.text,
-      // "machineNo":_partyCtrl.text,
-      // "partyName": _model?.bomNo ?? "",
-      "machineNo": _model?.rollData.machineno,
-
-      "requiredQtyKg": _reqQtyKgCtrl.text,
-      // "requiredQtyMtr": _reqQtyMtrCtrl.text,
-      "requiredQtyMtr":
-          double.tryParse(_reqQtyMtrCtrl.text) ??
-          double.tryParse(_model?.rollData.requiredqtymtr ?? "") ??
-          0.0,
-      "articleno": _articleNoCtrl.text,
-      "batchNo": _batchNoCtrl.text,
-      // "sHift": _selectedShift,
-      // "purchseOrder": _articleNoCtrl.text,
-      // "machine": _loomTypeCtrl.text,
-      // "machine": _machineTypes,
-      "machine": _selectedMachineType ?? "",
-      "mesh": _meshCtrl.text,
-
-      "workOrderNo": _poCtrl.text,
-      "tareWeightCalc": _tareCtrl.text,
-      "grossWeightCalc": _grossCtrl.text,
-      // "requiredQtyKg": _model?.rollData.requirednewt ?? "0",
-      // "requiredQtyMtr": _model?.rollData.requiredqtymtr ?? "0",
-      // "loomNo": "16",
-      "loomNoDisplay": _machineCtrl.text,
-      // "machine": _selectedMachineType ?? "",
-      "avgWeightGm": _avgCtrl.text,
-      "remark": _remarkCtrl.text,
-      "stateN": _avgMtrGmCtrl.text,
-
-      "purchseOrder": _model?.rollData.articleNo ?? "",
-
-      // "batchNo": _batchNoCtrl.text,
-      "shift": _selectedShift ?? "",
-    };
+    final payload = SaveprintingModel(
+      rollId: '0',
+      srNo: widget.roll.id,
+      barcode: widget.roll.rollCode.toString(),
+      machineType: _selectedMachineType ?? "",
+      generateCode: _generateCodeCtrl.text,
+      supervisorName: _selectedSupervisor ?? "",
+      operatorName: _selectedOperator ?? "",
+      // specialId: _specialIdCtrl.text,
+      fabricTypeUse: _fabricTypeCtrl.text,
+      fabricWidth: _fabricWidthCtrl.text,
+      color: _colorCtrl.text,
+      mesh: _meshCtrl.text,
+      loomType: _loomTypeCtrl.text ?? "",
+      laminationType: _selectedLaminationType ?? "",
+      fabricGsm: _fabricGsmCtrl.text,
+      cutType: _laminationCtrl.text,
+      sid: _specialIdCtrl.text,
+      fabricBaffleType: _fabricBaffleCtrl.text,
+      rollWeightKg: _rollWeightCtrl.text,
+      rollLengthMtr: _rollLengthCtrl.text,
+      grossWeight: _grossCtrl.text,
+      avgWeight: _avgCtrl.text,
+      tareWeight: _tareCtrl.text,
+      partyName: _partyCtrl.text,
+      poNumber: _poCtrl.text,
+      articleNumber: _articleNoCtrl.text,
+      loomNo: _machineCtrl.text,
+      avgweightmtrgm: _avgMtrGmCtrl.text,
+      opname: _selectedOpName ?? "",
+      bomno: widget.roll.bomNo,
+      batchNo: _batchNoCtrl.text,
+      shift: _selectedShift ?? "",
+      unit: unitName,
+    );
 
     debugPrint("══════════ SAVE PAYLOAD ══════════");
 
-    payload.forEach((key, value) {
+    final json = payload.toJson();
+
+    json.forEach((key, value) {
       debugPrint("$key : $value");
     });
 
     debugPrint("══════════════════════════════════");
 
     try {
-      final success = await VisaApiService.saveOutstock(payload);
+      final success = await VisaSmallBagApiService.savePrintOutstock(
+        payload.toJson(),
+      );
       setState(() => _isSaving = false);
 
       if (success) {
         setState(() => _isSaved = true);
-        Get.offAll(() => LamRollPrintScreennaradan(title: "Lamination Rolls"));
+        Get.offAll(() => PrintOutsavedList(title: "Printing Rolls"));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(
@@ -554,7 +490,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Lamination Out",
+          "Printing Out",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         // Text(
@@ -570,14 +506,14 @@ class _RollEntryFormState extends State<RollEntryForm> {
         // ),
       ],
     ),
-    actions: [
-      if (!_isLoading)
-        IconButton(
-          icon: const Icon(Icons.refresh_rounded, size: 20),
-          onPressed: _fetchData,
-          tooltip: "Refresh",
-        ),
-    ],
+    // actions: [
+    //   if (!_isLoading)
+    //     IconButton(
+    //       icon: const Icon(Icons.refresh_rounded, size: 20),
+    //       onPressed: _fetchData,
+    //       tooltip: "Refresh",
+    //     ),
+    // ],
     bottom: PreferredSize(
       preferredSize: const Size.fromHeight(3),
       child: Container(height: 3),
@@ -630,19 +566,19 @@ class _RollEntryFormState extends State<RollEntryForm> {
             style: TextStyle(fontSize: 12, color: C.primary),
           ),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _fetchData,
-            icon: const Icon(Icons.refresh_rounded, size: 16),
-            label: const Text("Try Again"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: C.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
+          // ElevatedButton.icon(
+          //   onPressed: _fetchData,
+          //   icon: const Icon(Icons.refresh_rounded, size: 16),
+          //   label: const Text("Try Again"),
+          //   style: ElevatedButton.styleFrom(
+          //     backgroundColor: C.primary,
+          //     foregroundColor: Colors.white,
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(10),
+          //     ),
+          //     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          //   ),
+          // ),
         ],
       ),
     ),
@@ -673,23 +609,29 @@ class _RollEntryFormState extends State<RollEntryForm> {
                 const SizedBox.shrink(),
               ]),
               _rowGroup(wide, [
-                _apiDropdown(
+                _dropdown(
                   label: "Supervisor",
+                  items: supervisors.cast<String>(),
                   value: _selectedSupervisor,
-                  items: _model?.supervisors ?? [],
-                  onChanged: (v) => setState(() => _selectedSupervisor = v),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSupervisor = value;
+                      selectedSupervisor = value;
+                    });
+                  },
                 ),
-                _apiDropdown(
+
+                _dropdown(
                   label: "Operator",
+                  items: operators.cast<String>(),
                   value: _selectedOperator,
-                  items: _model?.operators ?? [],
-                  onChanged: (v) => setState(() => _selectedOperator = v),
-                ),
-                _apiDropdown(
-                  label: "Op Name",
-                  value: _selectedOpName,
-                  items: _model?.supervisors ?? [],
-                  onChanged: (v) => setState(() => _selectedOpName = v),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedOperator = value;
+                      _selectedOpName = value;
+                      selectedOperator = value;
+                    });
+                  },
                 ),
               ]),
             ]),
@@ -718,7 +660,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
               _twoCol(
                 _field("Mesh", _meshCtrl),
-                _field("Order No", _partyCtrl),
+                _field("Order No", _orderNoCtrl),
 
                 // const SizedBox(),
               ),
@@ -727,11 +669,11 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
             // ── 4. Order Details ─────────────────────────────
             _section("Order Details", Icons.assignment_rounded, [
-              _twoCol(_field("Purchase Order No", _poCtrl), const SizedBox()),
+              _twoCol(_field("PO Number", _poCtrl), const SizedBox()),
               const SizedBox(height: 5),
 
               _twoCol(
-                _field("Fabric Type", _articleCtrl),
+                _field("Fabric Type", _fabricTypeCtrl),
                 // _field("Fabric GSM", _gsmCtrl, type: TextInputType.number),
                 _field(
                   "Fabric GSM",
@@ -929,15 +871,13 @@ class _RollEntryFormState extends State<RollEntryForm> {
       children: [
         Row(
           children: [
-            Expanded(
-              child: _infoTile("Party Name", _model?.rollData.machineno ?? "—"),
-            ),
+            Expanded(child: _infoTile("Party Name", _partyCtrl.text)),
             const SizedBox(width: 10),
             // ${widget.roll.srNo}
             Expanded(
               child: _infoTile(
                 "Sr No.",
-                _isLoading ? "${widget.roll.srNo}" : "${widget.roll.srNo}",
+                _isLoading ? "${widget.roll.id}" : "${widget.roll.id}",
               ),
             ),
             // Expanded(child: _infoTile("Order No", _model?.rollData.partyName ?? "—")),
@@ -951,15 +891,16 @@ class _RollEntryFormState extends State<RollEntryForm> {
             Expanded(
               child: _infoTile(
                 "Bom No",
-                _bomNoCtrl.text.isNotEmpty ? _bomNoCtrl.text : "—",
-                // _model?.rollData.partyName ?? "—",
+                // _bomNoCtrl.text.isNotEmpty ? _bomNoCtrl.text : "—",
+                _isLoading ? widget.roll.bomNo : widget.roll.bomNo,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _infoTile(
                 "Loom No",
-                _machineCtrl.text.isNotEmpty ? _machineCtrl.text : "—",
+                _isLoading ? "${widget.roll.loomNo}" : "${widget.roll.loomNo}",
+                // _machineCtrl.text.isNotEmpty ? _machineCtrl.text : "—",
               ),
             ),
           ],
@@ -967,23 +908,23 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
         const SizedBox(height: 10),
 
-        Row(
-          children: [
-            Expanded(
-              child: _infoTile(
-                "Req Net Wt",
-                _model?.rollData.requirednewt ?? "—",
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _infoTile(
-                "Req Qty Mtr",
-                _model?.rollData.requiredqtymtr ?? "—",
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   children: [
+        //     Expanded(
+        //       child: _infoTile(
+        //         "Req Net Wt",
+        //         _model?.rollData.requirednewt ?? "—",
+        //       ),
+        //     ),
+        //     const SizedBox(width: 10),
+        //     Expanded(
+        //       child: _infoTile(
+        //         "Req Qty Mtr",
+        //         _model?.rollData.requiredqtymtr ?? "—",
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     ),
   );
@@ -1375,8 +1316,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
             context,
             MaterialPageRoute(
               // For Naradana
-              builder: (_) =>
-                  const LamRollPrintScreennaradan(title: "Lamination Rolls"),
+              builder: (_) => const PrintOutsavedList(title: "Printing Rolls"),
 
               // For VISA
               // builder: (_) => const LamRollPrintScreen(title: "Lamination Rolls"),//visa
@@ -1388,7 +1328,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
   );
 
   String _generateBatchNumber() {
-    final party = _model?.rollData.machineno?.trim() ?? '';
+    final party = widget.roll.partyName.trim() ?? '';
     final shift = _selectedShift ?? '';
 
     final now = DateTime.now();
@@ -1402,6 +1342,34 @@ class _RollEntryFormState extends State<RollEntryForm> {
       partyCode = party.toUpperCase();
     }
 
-    return "$partyCode$date$month${shift}LA";
+    return "$partyCode$date$month${shift}PA";
   }
-} // ← end of _RollEntryFormState
+
+  void _fillFabricDetails(String fabricCode) {
+    if (fabricCode.isEmpty) return;
+
+    final parts = fabricCode.split('-');
+
+    if (parts.length < 8) return;
+
+    setState(() {
+      _fabricWidthCtrl.text = parts[0];
+      _fabricBaffleCtrl.text = parts[1];
+      _fabricTypeCtrl.text = parts[2];
+      _fabricGsmCtrl.text = parts[3];
+
+      final lamination = parts[4];
+
+      _selectedLaminationType = _laminationTypes.contains(lamination)
+          ? lamination
+          : null;
+
+      _colorCtrl.text = parts[5];
+      _laminationCtrl.text = parts[6];
+      _specialIdCtrl.text = parts[7];
+
+      _generateCodeCtrl.text = fabricCode;
+      _isCodeGenerated = true;
+    });
+  }
+} // ← end of _PrintRollEntryFormState

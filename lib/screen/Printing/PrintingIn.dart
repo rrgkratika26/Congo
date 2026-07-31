@@ -4,6 +4,7 @@ import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../Color/Colorclass.dart';
 import '../../QRScan/QrScanScreen.dart';
 import '../../screen/inStock/ReportScreen.dart';
@@ -39,7 +40,7 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
   final List<String> operators = [];
   List<String> supervisors = [];
   bool isLoadingSupervisors = false;
-
+  String unitName = '';
   final List<String> locations = [];
 
   // ================= VALIDATION =================
@@ -62,16 +63,34 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
     _loadData();
   }
 
-  Future<void> _loadData() async {
-    await controller.loadInitialData();
+  Future _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    unitName = prefs.getString('unit') ?? 'UNIT';
 
     try {
+      final api = VisaSmallBagApiService();
+
+      /// Locations
       controller.locations.clear();
-      controller.locations.addAll(
-        await VisaSmallBagApiService().getPrintingLocations(),
+      controller.locations.addAll(await api.getPrintingLocations());
+
+      /// Operators & Supervisors
+      final data = await api.getPrintingSpAndOpName();
+
+      controller.operators.clear();
+      controller.supervisors.clear();
+
+      controller.operators.addAll(List<String>.from(data["operators"] ?? []));
+
+      controller.supervisors.addAll(
+        List<String>.from(data["supervisors"] ?? []),
       );
+      setState(() {});
+
+      await _loadTotalScanned();
     } catch (e) {
-      debugPrint("Location Error: $e");
+      debugPrint(e.toString());
     }
 
     setState(() {});
@@ -104,13 +123,13 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
                   value: controller.selectedOperator,
                   items: controller.operators,
                   icon: Icons.person,
-                  isTablet: isTablet,
-                  isSmallScreen: isSmallScreen,
                   onChanged: (value) {
                     setState(() {
                       controller.selectedOperator = value;
                     });
                   },
+                  isTablet: isTablet,
+                  isSmallScreen: isSmallScreen,
                 ),
 
                 SizedBox(height: isTablet ? 12 : 10),
@@ -120,13 +139,13 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
                   value: controller.selectedSupervisor,
                   items: controller.supervisors,
                   icon: Icons.supervisor_account,
-                  isTablet: isTablet,
-                  isSmallScreen: isSmallScreen,
                   onChanged: (value) {
                     setState(() {
                       controller.selectedSupervisor = value;
                     });
                   },
+                  isTablet: isTablet,
+                  isSmallScreen: isSmallScreen,
                 ),
 
                 SizedBox(height: isTablet ? 12 : 10),
@@ -256,54 +275,43 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
   }
 
   Widget _buildScanningCard(bool isTablet, bool isSmallScreen) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PrintingInDetailScreen(date: '', plant: ''),
-          ),
-        );
-      },
-      child: Center(
+    return Center(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  PrintingInDetailScreen(date: getApiDate(), plant: unitName),
+            ),
+          );
+        },
         child: Container(
           decoration: _boxDecoration(borderRadius: 20),
           padding: const EdgeInsets.all(15),
-          child: FutureBuilder<int>(
-            // future: InStockService().getRMDScannedItemsCount(getApiDate()),
-            future: VisaSmallBagApiService().getPrintScannedItemsCount(),
-            builder: (context, snapshot) {
-              final count = snapshot.data ?? 0;
+          child: Column(
+            children: [
+              const Text(
+                "Total Items Scanned",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
 
-              return Column(
-                children: [
-                  const Text(
-                    'Total Items Scanned',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    // snapshot.connectionState == ConnectionState.waiting
-                    //     ? '...'
-                    //     :
-                    '$count',
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    getCurrentDate(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              );
-            },
+              const SizedBox(height: 10),
+
+              Text(
+                "$totalScanned",
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              Text(
+                getCurrentDate(),
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ],
           ),
         ),
       ),
@@ -362,8 +370,33 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
 
   // ================= ACTIONS =================
 
-  Future<void> _openScanner() async {
-    if (controller.isFormValid()) {
+  // Future<void> _openScanner() async {
+  //   if (controller.isFormValid()) {
+  //     _showValidationSnackBar();
+  //     return;
+  //   }
+  //
+  //   final result = await Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (_) => QRPrintingScanInScreen(
+  //         operatorName: controller.selectedOperator!,
+  //         supervisor: controller.selectedSupervisor!,
+  //         location: controller.selectedLocation!,
+  //         department: department,
+  //         plant: unitName,
+  //       ),
+  //     ),
+  //   );
+  //
+  //   if (result != null) {
+  //     setState(() {
+  //       totalScanned++;
+  //     });
+  //   }
+  // }
+  Future _openScanner() async {
+    if (!controller.isFormValid()) {
       _showValidationSnackBar();
       return;
     }
@@ -376,18 +409,32 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
           supervisor: controller.selectedSupervisor!,
           location: controller.selectedLocation!,
           department: department,
-          plant: AppGlobals.unit,
+          plant: unitName,
         ),
       ),
     );
 
+    print("Returned Result: $result");
+
     if (result != null) {
-      setState(() {
-        totalScanned++;
-      });
+      await Future.delayed(const Duration(seconds: 1));
+      await _loadTotalScanned();
     }
   }
+  Future<void> _loadTotalScanned() async {
+    try {
+      final data =
+      await VisaSmallBagApiService().getPrintingReport(getApiDate());
 
+      if (!mounted) return;
+
+      setState(() {
+        totalScanned = data.length;
+      });
+    } catch (e) {
+      debugPrint("Count Error: $e");
+    }
+  }
   void _showWithoutScanDialog(bool isSmallScreen) {
     final barcodeController = TextEditingController();
 
@@ -402,6 +449,7 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
         title: const Text('Manual Entry'),
         content: TextField(
           controller: barcodeController,
+          textCapitalization: TextCapitalization.characters,
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(labelText: 'Enter Barcode'),
         ),
@@ -413,19 +461,19 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
           ElevatedButton(
             child: const Text('Submit', style: TextStyle(color: Colors.green)),
             onPressed: () async {
-              final barcode = barcodeController.text.trim();
+              final barcode = barcodeController.text.trim().toUpperCase();
 
               if (barcode.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Please enter a valid barcode'),
-                    backgroundColor: Colors.redAccent,
+                    content: Text("Please enter barcode"),
+                    backgroundColor: Colors.red,
                   ),
                 );
                 return;
               }
 
-              Navigator.pop(context);
+              Navigator.pop(context); // Close dialog
 
               final result = await VisaSmallBagApiService().printingScanIn(
                 barcode: barcode,
@@ -433,42 +481,36 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
                 operator: controller.selectedOperator!,
                 supervisor: controller.selectedSupervisor!,
                 department: department,
-                plant: AppGlobals.unit,
+                plant: unitName,
               );
 
               if (result == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Server not responding'),
-                    backgroundColor: Colors.redAccent,
+                    content: Text("Server not responding"),
+                    backgroundColor: Colors.red,
                   ),
                 );
                 return;
               }
 
-              final status = (result['status'] ?? '').toString().toLowerCase();
-              final message = result['message'] ?? 'Unknown response';
+              final status = (result["status"] ?? "").toString().toLowerCase();
+              final message = result["message"] ?? "";
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(message),
-                  backgroundColor: status == 'ok'
-                      ? Colors.green
-                      : Colors.orange,
+                  backgroundColor: status == "ok" ? Colors.green : Colors.red,
                 ),
               );
 
-              if (status == 'ok') {
-                try {
-                  final apiCount = await VisaSmallBagApiService()
-                      .getPrintScannedItemsCount();
+              if (status == "ok") {
 
-                  setState(() {
-                    totalScanned = apiCount;
-                  });
-                } catch (e) {
-                  debugPrint('Refresh count error: $e');
-                }
+
+                if (!mounted) return;
+
+                await Future.delayed(const Duration(seconds: 1));
+                await _loadTotalScanned();
               }
             },
           ),

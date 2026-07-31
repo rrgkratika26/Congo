@@ -176,12 +176,13 @@ class NaradanaApiService {
       _logApi(method: "GET", url: uri, response: response);
       _checkUnauthorized(response);
 
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
 
         // ✅ Handle both response types
         final List data = decoded is List ? decoded : decoded['data'] ?? [];
-
+        print('Respone::::$data');
         return data.map((e) => RmdInReport.fromJson(e)).toList();
       } else {
         throw Exception(

@@ -6,7 +6,6 @@ import '../../services/NardanaApis/NardanaApi.dart';
 import '../../util/widget/CountRecords/CountRecords.dart';
 import 'RmdOutReportModel.dart';
 
-
 const _primary = Color(0xFF1565C0);
 
 class RmdOutReportScreen extends StatefulWidget {
@@ -28,23 +27,15 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
 
   int get totalPages => (_filtered.length / pageSize).ceil().clamp(1, 99999);
 
-
-// ====================== USE IN YOUR SCREEN ======================
+  // ====================== USE IN YOUR SCREEN ======================
 
   double get _totalNet =>
-      ReportTotalHelper.totalNetWeight(
-        _filtered,
-            (e) => e.netWeight,
-      );
+      ReportTotalHelper.totalNetWeight(_filtered, (e) => e.netWeight);
 
   double get _totalLength =>
-      ReportTotalHelper.totalRollLength(
-        _filtered,
-            (e) => e.rollLength,
-      );
+      ReportTotalHelper.totalRollLength(_filtered, (e) => e.rollLength);
 
-  int get _totalRecords =>
-      ReportTotalHelper.totalRecords(_filtered);
+  int get _totalRecords => ReportTotalHelper.totalRecords(_filtered);
 
   List<RmdOutReport> get _filtered {
     return _all.where((r) {
@@ -59,7 +50,6 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
           r.status.toLowerCase().contains(q);
     }).toList();
   }
-
 
   @override
   void initState() {
@@ -84,9 +74,9 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
     } catch (e) {
       debugPrint('UI ERROR: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load data')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to load data')));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -109,9 +99,6 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,20 +116,22 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
           children: [
             _topBar(),
             _loading
-                ? const Expanded(child: Center(child: CircularProgressIndicator(color: C.appBar3,)))
+                ? const Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(color: C.appBar3),
+                    ),
+                  )
                 : _filtered.isEmpty
                 ? Expanded(child: _emptyState())
                 : Expanded(
-              child: Column(
-                children: [
+                    child: Column(
+                      children: [
+                        Expanded(child: _table(_filtered)),
 
-
-                  Expanded(child: _table(_filtered)),
-
-                  _paginationBar()
-                ],
-              ),
-            ),
+                        _paginationBar(),
+                      ],
+                    ),
+                  ),
           ],
         ),
       ),
@@ -186,18 +175,18 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                     ),
                     suffixIcon: _query.isNotEmpty
                         ? IconButton(
-                      icon: const Icon(
-                        Icons.close,
-                        color: C.textHigh,
-                        size: 18,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _query = '';
-                          _searchCtrl.clear();
-                        });
-                      },
-                    )
+                            icon: const Icon(
+                              Icons.close,
+                              color: C.textHigh,
+                              size: 18,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _query = '';
+                                _searchCtrl.clear();
+                              });
+                            },
+                          )
                         : null,
                     filled: true,
                     fillColor: Colors.white12,
@@ -309,6 +298,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
       ),
     );
   }
+
   // ── Table ──────────────────────────────────────────────────────────────────
   Widget _table(List<RmdOutReport> data) {
     return SingleChildScrollView(
@@ -324,8 +314,8 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              columnSpacing: 8,              // 🔥 reduced
-              horizontalMargin: 8,           // 🔥 reduced
+              columnSpacing: 8, // 🔥 reduced
+              horizontalMargin: 8, // 🔥 reduced
               headingRowHeight: 36,
               dataRowMinHeight: 34,
               dataRowMaxHeight: 36,
@@ -338,15 +328,15 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                 _col('Sr'),
                 _col('RollCode'),
                 _col('Barcode'),
+
                 // _col('Batch No'),
                 // _col('Loom Type'),
                 // _col('Loom No'),
-
                 _col('Fabric code'),
                 _col('Fab Width'),
                 _col('Fab GSM'),
-                // _col('Clr'),
 
+                // _col('Clr'),
                 _col('Gross Wt(Kg)'),
                 _col('NetWt(Kg)'),
                 _col('TareWt'),
@@ -367,6 +357,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                 // _col('Dept'),
                 // _col('Issue To Dept.'),
                 _col('Status'),
+
                 // _col('In'),
                 // _col('Out'),
 
@@ -376,7 +367,6 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                 // _col('Sp.Id'),         // ✅ NEW
                 // _col('Fab Type/baffle'),            // ✅ NEW
                 // _col('Cut type'),           // ✅ NEW
-
                 _col('Date'),
                 _col('Time'),
               ],
@@ -389,7 +379,6 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                     i.isEven ? Colors.white : const Color(0xFFF9FBFF),
                   ),
                   cells: [
-
                     DataCell(_cell('${r.srNo}', bold: true)),
                     DataCell(_cell('${r.rollCode}', bold: true)),
                     DataCell(_cell(r.barcode, mono: true, w: 95)),
@@ -399,16 +388,18 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                     DataCell(_cell(r.fabricCode, w: 175)),
                     DataCell(_cell(r.fabricWidth, w: 45)),
                     DataCell(_cell(r.fabricGsm, w: 55)),
-                    // DataCell(_cell(r.color, w: 45)),
 
+                    // DataCell(_cell(r.color, w: 45)),
                     DataCell(_cell(r.grossWeight.toString(), w: 55)),
 
-                    DataCell(_cell(
-                      r.netWeight.toString(),
-                      color: Colors.green.shade700,
-                      bold: true,
-                      w: 55,
-                    )),
+                    DataCell(
+                      _cell(
+                        r.netWeight.toString(),
+                        color: Colors.green.shade700,
+                        bold: true,
+                        w: 55,
+                      ),
+                    ),
                     DataCell(_cell(r.tareWeight.toString(), w: 50)),
                     // DataCell(_cell(r.rollLength.toString(), w: 65)),
                     DataCell(_cell(r.avgWeight.toString(), w: 55)),
@@ -418,13 +409,13 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                     // DataCell(_cell(r.rmdSupervisor, w: 100)),   // ✅ NEW
                     DataCell(_cell(r.partyName, w: 110)),
                     DataCell(_cell(r.workOrderNo, w: 120)),
+
                     // DataCell(_cell('${r.contNo}', w: 70)),      // ✅ NEW
                     // DataCell(_cell(r.reqQtyKg.toString(), w: 80)),   // ✅ NEW
                     // DataCell(_cell(r.reqQtyMtr.toString(), w: 80)),  // ✅ NEW
 
                     // DataCell(_cell(r.department, w: 70)),
                     // DataCell(_cell(r.issueToDept, w: 70)),
-
                     DataCell(_statusBadge(r.status)),
 
                     // DataCell(_cell(r.entryIn, w: 40)),
@@ -437,8 +428,9 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                     // DataCell(_cell(r.fabricConstruction, w: 60)),  // ✅ NEW
                     // DataCell(_cell(r.cutType, w: 60)),             // ✅ NEW
                     // DataCell(_cell(r.specialId, w: 50)),           // ✅ NEW
-
-                    DataCell(_cell(DateFormat('dd-MM-yyyy').format(r.date), w: 65)),
+                    DataCell(
+                      _cell(DateFormat('dd-MM-yyyy').format(r.date), w: 65),
+                    ),
                     DataCell(_cell(r.time, w: 70)),
                   ],
                 );
@@ -449,6 +441,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
       ),
     );
   }
+
   DataColumn _col(String text) {
     return DataColumn(
       label: Center(
@@ -463,14 +456,15 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
       ),
     );
   }
+
   // ── Status Badge ───────────────────────────────────────────────────────────
   Widget _cell(
-      String text, {
-        double? w,
-        bool bold = false,
-        bool mono = false,
-        Color? color,
-      }) {
+    String text, {
+    double? w,
+    bool bold = false,
+    bool mono = false,
+    Color? color,
+  }) {
     return SizedBox(
       width: w,
       child: Text(
@@ -485,6 +479,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
       ),
     );
   }
+
   Widget _statusBadge(String status) {
     final s = status.toLowerCase();
     final Color bg;

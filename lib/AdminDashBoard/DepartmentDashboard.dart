@@ -232,6 +232,7 @@ class _AdminDashboard extends StatelessWidget {
     // _DeptItem(title: 'LOOM', icon: Icons.looks),
     _DeptItem(title: 'RMD', icon: Icons.inventory),
     _DeptItem(title: 'PRINTING', icon: Icons.print),
+    _DeptItem(title: 'SLITTING', icon: Icons.scale),
 
     _DeptItem(title: 'LAMINATION', icon: Icons.layers),
     _DeptItem(title: 'CUTTING', icon: Icons.cut),
@@ -1134,10 +1135,19 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.printingIn);
       else if (action == MenuAction.OUT)
         Get.toNamed(AppRoutes.printingOut);
-      else if (action == MenuAction.In_Report)
-        Get.toNamed(AppRoutes.lamNaradanaInReport);
-      else if (action == MenuAction.Out_Report)
-        Get.toNamed(AppRoutes.lamNaradanaOutReport);
+      // else if (action == MenuAction.In_Report)
+      //   Get.toNamed(AppRoutes.lamNaradanaInReport);
+      // else if (action == MenuAction.Out_Report)
+      //   Get.toNamed(AppRoutes.lamNaradanaOutReport);
+      break;
+    case 'SLITTING':
+      if (action == MenuAction.IN) Get.toNamed(AppRoutes.slittingIn);
+      // else if (action == MenuAction.OUT)
+      //   Get.toNamed(AppRoutes.printingOut);
+      // else if (action == MenuAction.In_Report)
+      //   Get.toNamed(AppRoutes.lamNaradanaInReport);
+      // else if (action == MenuAction.Out_Report)
+      //   Get.toNamed(AppRoutes.lamNaradanaOutReport);
       break;
 
     case 'BAG':

@@ -39,7 +39,14 @@ class _OutReportScreenState extends State<OutReportScreen> {
   }
 
   // ---------------- STATIC ISSUE TO ----------------
-  final List<String> issueToList = ['LAMINATION', 'CUTTING', 'FOLDING','PRINTING','OTHERS'];
+  // final List<String> issueToList = ['LAMINATION', 'CUTTING', 'FOLDING','PRINTING','SLITTING','OTHERS'];
+  final List<String> issueToList = [
+    'LAMINATION',
+    'CUTTING',
+    'PRINTING',
+    'SLITTING',
+    'OTHERS',
+  ];
 
   String? selectedIssueTo; // Local state for IssueTo
   String department = 'RMD';
@@ -270,7 +277,6 @@ class _OutReportScreenState extends State<OutReportScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-
                     '$count',
                     style: const TextStyle(
                       fontSize: 48,
@@ -434,7 +440,6 @@ class _OutReportScreenState extends State<OutReportScreen> {
   //   // }
   // }
 
-
   Future<void> _openRMDOutScanner() async {
     if (!_isFormValid()) {
       _showValidationSnackBar();
@@ -454,7 +459,6 @@ class _OutReportScreenState extends State<OutReportScreen> {
     );
 
     if (result != null && result is String) {
-
       // Remove spaces/new lines
       String barcode = result.trim();
 
@@ -490,16 +494,14 @@ class _OutReportScreenState extends State<OutReportScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(apiResult['message']),
-            backgroundColor:
-            apiResult['status'] == 'ok'
+            backgroundColor: apiResult['status'] == 'ok'
                 ? Colors.green
                 : Colors.orange,
           ),
         );
 
         if (apiResult['status'] == 'ok') {
-          final count =
-          await InStockService().getOutScannedItemsCount(
+          final count = await InStockService().getOutScannedItemsCount(
             getApiDate(),
           );
 
@@ -507,7 +509,6 @@ class _OutReportScreenState extends State<OutReportScreen> {
             totalScanned = count;
           });
         }
-
       } catch (e) {
         debugPrint("Error: $e");
       } finally {
@@ -515,10 +516,6 @@ class _OutReportScreenState extends State<OutReportScreen> {
       }
     }
   }
-
-
-
-
 
   void _showManualDialog(bool isSmallScreen) {
     final barcodeController = TextEditingController();
@@ -534,6 +531,8 @@ class _OutReportScreenState extends State<OutReportScreen> {
         title: const Text('Manual Entry'),
         content: TextField(
           controller: barcodeController,
+          textCapitalization: TextCapitalization.characters,
+
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(labelText: 'Enter Barcode'),
         ),

@@ -1,32 +1,34 @@
 import 'dart:convert';
 import 'package:IMS/services/DashboardApiServices.dart';
+import 'package:IMS/services/Visa_SmallbagAPIS/VISA_SApis.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Color/Colorclass.dart';
 import '../../../QRScan/QrScanScreen.dart';
 import '../../../screen/inStock/ReportScreen.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
-import '../CuttingController/CuttingController.dart';
-import 'CutDetailInScreen.dart';
-import 'CuttingQR.dart';
-import 'QRCuttingScan.dart' hide ScanType;
+import '../../ScannedItem/Cutting/CuttinIN/CutDetailInScreen.dart';
+import '../../ScannedItem/Cutting/CuttingController/CuttingController.dart';
+import 'SlittingInStockDetails.dart';
+import 'SlittingScanIn.dart';
 
-class CuttingInScreen extends StatefulWidget {
-  const CuttingInScreen({Key? key}) : super(key: key);
+class SlittingInScreen extends StatefulWidget {
+  const SlittingInScreen({Key? key}) : super(key: key);
 
   @override
-  State<CuttingInScreen> createState() => _CuttingInScreenState();
+  State<SlittingInScreen> createState() => _SlittingInScreenState();
 }
 
-class _CuttingInScreenState extends State<CuttingInScreen> {
+class _SlittingInScreenState extends State<SlittingInScreen> {
   final controller = CuttingController();
 
   /// 🔹 IMPORTANT
-  String department = 'CUTTING';
+  String department = 'SLITTING';
 
   int totalScanned = 0;
-
+  String unitName = '';
   String getApiDate() {
     final now = DateTime.now();
     return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
@@ -48,14 +50,20 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
 
   Future<void> _loadData() async {
     await controller.loadInitialData();
+    final prefs = await SharedPreferences.getInstance();
+
+    unitName = prefs.getString('unit') ?? 'UNIT';
     setState(() {});
   }
+
   Future<void> loadTodayCount() async {
     try {
-      final items = await DashboardService().getCuttingScannedItems(getApiDate());
+      final apiCount = await VisaSmallBagApiService().getSlittingItemsCount(
+        getApiDate(),
+      );
 
       setState(() {
-        totalScanned = items.length;
+        totalScanned = apiCount;
       });
     } catch (e) {
       debugPrint(e.toString());
@@ -92,7 +100,14 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
     final isSmallScreen = size.width < 360;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Colors.grey.shade100,
+      appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: C.primaryblue, // or Colors.blue
+        foregroundColor: Colors.white,
+        title: const Text('Slitting In', style: TextStyle(fontSize: 20)),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(
@@ -264,107 +279,6 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
     );
   }
 
-  // ================= SCANNING CARD =================
-
-  // Widget _buildScanningCard(bool isTablet, bool isDesktop) {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(isDesktop ? 24 : (isTablet ? 20 : 16)),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: const Color(0xFF42A5F5).withOpacity(0.1),
-  //           blurRadius: 20,
-  //           offset: const Offset(0, 8),
-  //         ),
-  //       ],
-  //     ),
-  //     padding: EdgeInsets.all(isDesktop ? 32 : (isTablet ? 28 : 24)),
-  //     child: Column(
-  //       children: [
-  //         // Icon
-  //         Container(
-  //           padding: EdgeInsets.all(isDesktop ? 16 : (isTablet ? 14 : 12)),
-  //           decoration: BoxDecoration(
-  //             gradient: const LinearGradient(
-  //               colors: [Color(0xFF42A5F5), Color(0xFF1E88E5)],
-  //             ),
-  //             shape: BoxShape.circle,
-  //             boxShadow: [
-  //               BoxShadow(
-  //                 color: const Color(0xFF42A5F5).withOpacity(0.3),
-  //                 blurRadius: 15,
-  //                 offset: const Offset(0, 8),
-  //               ),
-  //             ],
-  //           ),
-  //           child: Icon(
-  //             Icons.qr_code_2_rounded,
-  //             color: Colors.white,
-  //             size: isDesktop ? 40 : (isTablet ? 36 : 32),
-  //           ),
-  //         ),
-  //
-  //         SizedBox(height: isDesktop ? 20 : (isTablet ? 18 : 16)),
-  //
-  //         Text(
-  //           'Total Items Scanned',
-  //           style: TextStyle(
-  //             fontSize: isDesktop ? 18 : (isTablet ? 17 : 16),
-  //             fontWeight: FontWeight.w600,
-  //             color: Colors.grey[700],
-  //             letterSpacing: 0.3,
-  //           ),
-  //         ),
-  //
-  //         SizedBox(height: isDesktop ? 16 : (isTablet ? 14 : 12)),
-  //
-  //         Text(
-  //           '$totalScanned',
-  //           style: TextStyle(
-  //             fontSize: isDesktop ? 56 : (isTablet ? 52 : 48),
-  //             fontWeight: FontWeight.bold,
-  //             color: const Color(0xFF42A5F5),
-  //             height: 1,
-  //           ),
-  //         ),
-  //
-  //         SizedBox(height: isDesktop ? 12 : (isTablet ? 10 : 8)),
-  //
-  //         Container(
-  //           padding: EdgeInsets.symmetric(
-  //             horizontal: isDesktop ? 16 : (isTablet ? 14 : 12),
-  //             vertical: isDesktop ? 8 : (isTablet ? 7 : 6),
-  //           ),
-  //           decoration: BoxDecoration(
-  //             color: const Color(0xFF42A5F5).withOpacity(0.1),
-  //             borderRadius: BorderRadius.circular(20),
-  //           ),
-  //           child: Row(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               Icon(
-  //                 Icons.calendar_today_rounded,
-  //                 size: isDesktop ? 16 : 14,
-  //                 color: const Color(0xFF42A5F5),
-  //               ),
-  //               SizedBox(width: isTablet ? 8 : 6),
-  //               Text(
-  //                 getCurrentDate(),
-  //                 style: TextStyle(
-  //                   color: const Color(0xFF42A5F5),
-  //                   fontSize: isDesktop ? 14 : (isTablet ? 13 : 12),
-  //                   fontWeight: FontWeight.w600,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildScanningCard(bool isTablet, bool isDesktop) {
     return Center(
       child: InkWell(
@@ -372,7 +286,7 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => ReportCUTDetailScreen(date: getApiDate()),
+              builder: (_) => SlittingInStockDetail(date: getApiDate()),
             ),
           );
         },
@@ -671,19 +585,54 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
       return;
     }
 
-    await Navigator.push(
+    final barcode = await Navigator.push<String>(
       context,
       MaterialPageRoute(
-        builder: (_) => QRCuttingScanScreen(
+        builder: (_) => QrSlittingScanInScree(
           operatorName: controller.selectedOperator!,
           supervisor: controller.selectedSupervisor!,
           location: controller.selectedLocation!,
-          department: department,
-          scanType: ScanType.inStock,
+          roll: department,
+          plant: unitName,
         ),
       ),
     );
-    await loadTodayCount();
+
+    if (barcode == null || barcode.isEmpty) return;
+
+    final result = await VisaSmallBagApiService().slittingIn(
+      barcode: barcode.toUpperCase(),
+      operator: controller.selectedOperator!,
+      location: controller.selectedLocation!,
+      plant: unitName,
+      supervisor: controller.selectedSupervisor!,
+      roll: '',
+      party: '',
+    );
+
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Server not responding"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final status = result["status"];
+    final message = result["message"] ?? "";
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: status == "ok" ? Colors.green : Colors.orange,
+      ),
+    );
+
+    if (status == "ok") {
+      await loadTodayCount();
+    }
   }
 
   void _showWithoutScanDialog(bool isSmallScreen) {
@@ -713,7 +662,7 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
           ElevatedButton(
             child: const Text('Submit', style: TextStyle(color: Colors.green)),
             onPressed: () async {
-              final barcode = barcodeController.text.trim();
+              final barcode = barcodeController.text.trim().toUpperCase();
 
               if (barcode.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -728,16 +677,18 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
               Navigator.pop(context); // close dialog
 
               // 🔄 Call SAME API as QR scan
-              final result = await InStockService().cuttingBarcode(
-                barcode: barcode,
-                location: controller.selectedLocation!,
-                operatorName: controller.selectedOperator!,
-                supervisor: controller.selectedSupervisor!,
-                department: "CUTTING",
+              final result = await VisaSmallBagApiService()
+                  .getSlittingScannedItems(
+                    barcode: barcode,
 
-                cuttingRecParty: '',
-                workOrderCutting: '',
-              );
+                    operator: controller.selectedOperator!,
+                    location: controller.selectedLocation!,
+                    plant: unitName,
+                    supervisor: controller.selectedSupervisor!,
+                    roll: department,
+                    party: '',
+                    workorder: '',
+                  );
 
               if (result == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -757,24 +708,13 @@ class _CuttingInScreenState extends State<CuttingInScreen> {
                 SnackBar(
                   content: Text(message),
                   backgroundColor: status == 'ok'
-                      ? Colors.green
-                      : Colors.orange,
+                      ? Colors.orange
+                      : Colors.green,
                 ),
               );
 
-              // 🔁 Refresh count only on success
               if (status == 'ok') {
-                try {
-                  final apiCount = await DashboardService().getCutScannedItemsCount(
-                    getApiDate(),
-                  );
-
-                  setState(() {
-                    totalScanned = apiCount;
-                  });
-                } catch (e) {
-                  debugPrint('Refresh count error: $e');
-                }
+                await loadTodayCount();
               }
             },
           ),

@@ -1,4 +1,6 @@
 import 'package:IMS/ScannedItem/Lamination/lAMINATION_OUTsTOCK/modelClass/roll_wiseModle.dart';
+
+import 'package:IMS/services/Visa_SmallbagAPIS/VISA_SApis.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -9,7 +11,8 @@ import '../../../services/getSupervisors/getSupervisors.dart';
 import '../../../services/visa_apis/visa_api.dart';
 import '../../../util/sharedpreference/shared_preference.dart';
 import '../../ScannedItem/Lamination/lAMINATION_OUTsTOCK/Lamination_OutEntry.dart';
-
+import 'PrintingOutForm.dart';
+import 'ModelClass/Printmodel.dart';
 
 class PrintingRollList extends StatefulWidget {
   const PrintingRollList({super.key});
@@ -19,9 +22,8 @@ class PrintingRollList extends StatefulWidget {
 }
 
 class _PrintingRollListState extends State<PrintingRollList> {
-  List<Roll> _rolls = [];
-  List<Roll> _filtered = [];
-
+  List<PrintingOutModel> _rolls = [];
+  List<PrintingOutModel> _filtered = [];
   // ── Checkbox selection state ──────────────────────────────────────────────
   final Set<String> _selectedBarcodes = {};
   bool _selectAll = false;
@@ -46,10 +48,10 @@ class _PrintingRollListState extends State<PrintingRollList> {
       _selectAll = false;
     });
     try {
-      final data = await InStockService.getRollList(unit: '$unit');
+      final data = await VisaSmallBagApiService.getPrintingOutList();
       setState(() {
-        _rolls = data;
-        _filtered = data;
+        _rolls = data.cast<PrintingOutModel>();
+        _filtered = data.cast<PrintingOutModel>();
         _loading = false;
       });
     } catch (e) {
@@ -67,16 +69,16 @@ class _PrintingRollListState extends State<PrintingRollList> {
       _filtered = _rolls
           .where(
             (r) =>
-        r.barcode.toLowerCase().contains(q) ||
-            r.fabricCode.toLowerCase().contains(q) ||
-            r.rollCode.toLowerCase().contains(q),
-      )
+                r.barcode.toLowerCase().contains(q) ||
+                r.fabricCode.toLowerCase().contains(q) ||
+                r.rollCode.toLowerCase().contains(q),
+          )
           .toList();
 
       // Reset select-all state when filter changes
       _selectAll =
           _filtered.isNotEmpty &&
-              _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
+          _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
     });
   }
 
@@ -104,7 +106,7 @@ class _PrintingRollListState extends State<PrintingRollList> {
       }
       _selectAll =
           _filtered.isNotEmpty &&
-              _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
+          _filtered.every((r) => _selectedBarcodes.contains(r.barcode));
     });
   }
 
@@ -156,9 +158,12 @@ class _PrintingRollListState extends State<PrintingRollList> {
       appBar: AppBar(
         backgroundColor: C.primary,
         elevation: 0,
-
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: C.bg),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
-          'Roll List',
+          'Printing List',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -166,7 +171,7 @@ class _PrintingRollListState extends State<PrintingRollList> {
             letterSpacing: 0.3,
           ),
         ),
-        iconTheme: const IconThemeData(color: C.bgColor),
+        // iconTheme: const IconThemeData(color: C.bgColor),
         actions: [
           // 🔹 Total count
           Container(
@@ -240,33 +245,33 @@ class _PrintingRollListState extends State<PrintingRollList> {
       // ── Finish FAB ──────────────────────────────────────────────────────
       floatingActionButton: hasSelection
           ? FloatingActionButton.extended(
-        onPressed: _isFinishing ? null : _onFinish,
-        backgroundColor: hasSelection ? C.primary : Colors.grey,
-        icon: _isFinishing
-            ? const SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: Colors.white,
-          ),
-        )
-            : const Icon(
-          Icons.done_all_rounded,
-          color: Colors.white,
-          size: 20,
-        ),
-        label: Text(
-          _isFinishing
-              ? 'Finishing...'
-              : 'Finish (${_selectedBarcodes.length})',
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
-        ),
-      )
+              onPressed: _isFinishing ? null : _onFinish,
+              backgroundColor: hasSelection ? C.primary : Colors.grey,
+              icon: _isFinishing
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.done_all_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+              label: Text(
+                _isFinishing
+                    ? 'Finishing...'
+                    : 'Finish (${_selectedBarcodes.length})',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            )
           : null,
 
       body: Column(
@@ -297,15 +302,15 @@ class _PrintingRollListState extends State<PrintingRollList> {
                   ),
                   suffixIcon: _searchCtrl.text.isNotEmpty
                       ? IconButton(
-                    icon: Icon(
-                      Icons.clear_rounded,
-                      color: C.primary.withOpacity(0.7),
-                    ),
-                    onPressed: () {
-                      _searchCtrl.clear();
-                      _onSearch('');
-                    },
-                  )
+                          icon: Icon(
+                            Icons.clear_rounded,
+                            color: C.primary.withOpacity(0.7),
+                          ),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            _onSearch('');
+                          },
+                        )
                       : null,
                   filled: true,
                   fillColor: C.primary.withOpacity(0.15),
@@ -341,19 +346,19 @@ class _PrintingRollListState extends State<PrintingRollList> {
           Expanded(
             child: _loading
                 ? const Center(
-              child: CircularProgressIndicator(color: C.primary),
-            )
+                    child: CircularProgressIndicator(color: C.primary),
+                  )
                 : _error != null
                 ? _ErrorView(error: _error!, onRetry: loadRollList)
                 : _filtered.isEmpty
                 ? const _EmptyView()
                 : _RollTable(
-              rolls: _filtered,
-              selectedBarcodes: _selectedBarcodes,
-              selectAll: _selectAll,
-              onToggleSelectAll: _toggleSelectAll,
-              onToggleRow: _toggleRow,
-            ),
+                    rolls: _filtered,
+                    selectedBarcodes: _selectedBarcodes,
+                    selectAll: _selectAll,
+                    onToggleSelectAll: _toggleSelectAll,
+                    onToggleRow: _toggleRow,
+                  ),
           ),
         ],
       ),
@@ -464,7 +469,7 @@ class _EmptyView extends StatelessWidget {
 // ── Roll Table ───────────────────────────────────────────────────────────────
 
 class _RollTable extends StatelessWidget {
-  final List<Roll> rolls;
+  final List<PrintingOutModel> rolls;
   final Set<String> selectedBarcodes;
   final bool selectAll;
   final ValueChanged<bool?> onToggleSelectAll;
@@ -528,7 +533,12 @@ class _RollTable extends StatelessWidget {
 
   // ── ROW ──
 
-  Widget _row(Roll r, int index, bool selected, BuildContext context) {
+  Widget _row(
+    PrintingOutModel r,
+    int index,
+    bool selected,
+    BuildContext context,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -538,7 +548,9 @@ class _RollTable extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => RollEntryForm(roll: r)),
+            MaterialPageRoute(
+              builder: (context) => PrintRollEntryForm(roll: r),
+            ),
           );
         },
         child: AnimatedContainer(
@@ -592,52 +604,12 @@ class _RollTable extends StatelessWidget {
     );
   }
 
-  // Widget _row(Roll r, int index, bool selected, BuildContext context) {
-  //   return InkWell(
-  //     onTap: () {
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(builder: (context) => RollEntryForm(roll: r)),
-  //       );
-  //     },
-  //     child: Container(
-  //       color: selected
-  //           ? C.primary.withOpacity(0.1)
-  //           : index.isEven
-  //           ? Colors.white
-  //           : C.brand50,
-  //       padding: const EdgeInsets.symmetric(vertical: 4),
-  //       child: Row(
-  //         children: [
-  //           SizedBox(
-  //             width: 40,
-  //             child: Checkbox(
-  //               activeColor: C.success,
-  //               value: selected,
-  //               onChanged: (val) => onToggleRow(r.barcode, val),
-  //             ),
-  //           ),
-  //           _cell(r.srNo.toString(), 60),
-  //           _cell(r.barcode, 100),
-  //           _cell(r.fabricCode, 180),
-  //           _cell("${r.grossWeight}", 80),
-  //           _cell("${r.tareWeight}", 80),
-  //           _cell("${r.netWeight} kg", 90),
-  //           _cell("${r.rollLength} m", 100),
-  //           _cell("${r.avgWeight}", 100),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // ── CELL ──
   Widget _cell(
-      String text,
-      double width, {
-        Color color = C.textHigh,
-        FontWeight fontWeight = FontWeight.normal,
-      }) {
+    String text,
+    double width, {
+    Color color = C.textHigh,
+    FontWeight fontWeight = FontWeight.normal,
+  }) {
     return SizedBox(
       width: width,
       child: Padding(

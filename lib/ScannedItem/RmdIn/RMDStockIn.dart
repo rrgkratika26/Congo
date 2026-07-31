@@ -366,6 +366,8 @@ class _RMDStockInState extends State<RMDStockIn> {
         title: const Text('Manual Entry'),
         content: TextField(
           controller: barcodeController,
+          textCapitalization: TextCapitalization.characters,
+
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(labelText: 'Enter Barcode'),
         ),

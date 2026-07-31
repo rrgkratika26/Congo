@@ -461,6 +461,8 @@ class _WebbingInStockState extends State<WebbingInStock> {
         title: const Text("Enter Barcode"),
         content: TextField(
           controller: barcodeController,
+          textCapitalization: TextCapitalization.characters,
+
           decoration: const InputDecoration(hintText: "Enter barcode number"),
         ),
         actions: [

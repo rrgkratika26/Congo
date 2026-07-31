@@ -499,6 +499,8 @@ class _WebOutStockState extends State<WebOutStock> {
         title: const Text('Manual Entry'),
         content: TextField(
           controller: barcodeController,
+          textCapitalization: TextCapitalization.characters,
+
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(labelText: 'Enter Barcode'),
         ),

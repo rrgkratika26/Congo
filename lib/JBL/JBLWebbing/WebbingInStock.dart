@@ -378,6 +378,8 @@ class _JblWebbingStockInState extends State<JblWebbingStockIn> {
         title: const Text("Enter Barcode"),
         content: TextField(
           controller: barcodeController,
+          textCapitalization: TextCapitalization.characters,
+
           autofocus: true,
           decoration: const InputDecoration(hintText: "Enter barcode number"),
         ),

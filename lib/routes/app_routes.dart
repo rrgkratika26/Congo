@@ -297,6 +297,7 @@ import 'package:flutter/material.dart';
 import '../ScannedItem/Cutting/NardanaCutting/NaradanCutOutList.dart';
 import '../ScannedItem/Cutting/OutStock/OutSavedList.dart';
 import '../screen/Printing/PrintingIn.dart';
+import '../screen/Slitting/SlittingInStock.dart';
 
 // Import all your screens here
 
@@ -316,13 +317,14 @@ class AppRoutes {
   static const String rmdRollSavedList = '/rmdRollSavedList';
   static const String rmdtransfer = '/rmdTransfer';
   static const String rmdNardanaStock = '/rmdNardanaStock';
-  static const String rmdUpdateLocation ='/rmdUpdateLocation';
+  static const String rmdUpdateLocation = '/rmdUpdateLocation';
   static const String lamination = '/lamination';
   static const String cuttingIn = '/cuttingIn';
   static const String foldingIn = '/foldingIn';
   static const String tapelineIn = '/tapelineIn';
-static const String printingIn ='/printingIn';
-static const String printingOut ='/printingOut';
+  static const String printingIn = '/printingIn';
+  static const String printingOut = '/printingOut';
+  static const String slittingIn = '/slittingIn';
   static const String tapelineOut = '/tapelineOut';
   static const String tapelineRecentEntries = '/tapelineRecentEntries';
   static const String tapeInReport = '/tapeInReport';
@@ -422,7 +424,7 @@ static const String printingOut ='/printingOut';
     GetPage(name: rmdRollSavedList, page: () => const RmdRollSavedList()),
 
     GetPage(name: rmdNardanaStock, page: () => const RmdStockReportScreen()),
-GetPage(name: rmdUpdateLocation, page: () => const UpdateLocationScreen()),
+    GetPage(name: rmdUpdateLocation, page: () => const UpdateLocationScreen()),
     GetPage(name: lamination, page: () => const LaminationScreen()),
 
     GetPage(name: cuttingIn, page: () => const CuttingScreen()),
@@ -430,9 +432,7 @@ GetPage(name: rmdUpdateLocation, page: () => const UpdateLocationScreen()),
     // GetPage(name: foldingIn, page: () => const FoldingIn()),
     GetPage(name: printingIn, page: () => PrintingInStockScreen()),
     GetPage(name: printingOut, page: () => PrintingRollList()),
-
-
-
+    GetPage(name: slittingIn, page: () => SlittingInScreen()),
 
     GetPage(name: tapelineIn, page: () => TapeInEnrtyList()),
     GetPage(name: tapelineOut, page: () => const TapelineOutStockScreen()),
@@ -460,15 +460,9 @@ GetPage(name: rmdUpdateLocation, page: () => const UpdateLocationScreen()),
 
     GetPage(name: reCutIssue, page: () => const RecutPcsIssueScreen()),
 
-    GetPage(
-      name: webbingIn,
-      page: () => const WebbingInStock(),
-    ),
+    GetPage(name: webbingIn, page: () => const WebbingInStock()),
 
-    GetPage(
-      name: webbingOut,
-      page: () => const WebOutStock(),
-    ),
+    GetPage(name: webbingOut, page: () => const WebOutStock()),
     GetPage(
       name: AppRoutes.webSaveEntryScreen,
       page: () => const WebSaveEntriesScreen(),

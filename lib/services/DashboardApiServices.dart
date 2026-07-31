@@ -33,8 +33,6 @@ class DashboardService {
         "?unit=$unit&fromDate=$fromDate&toDate=$toDate",
       );
 
-
-
       final response = await http.get(
         url,
         headers: await InStockService.authHeaders(),
@@ -108,7 +106,6 @@ class DashboardService {
       // bomJson: result[9],
       // inquiryJson: result[10],
       loomJson: result[2],
-
     );
 
     // print("Inquiry Count = ${dashboard.inquiryCount}");
@@ -322,56 +319,15 @@ class DashboardService {
     final items = await getCuttingScannedItems(date);
     return items.length;
   }
-  // static Future<WebbingOutReportModel?> fetchWebbingScannedOutItems(
-  //     String date) async {
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse('${InStockService.baseUrl}/Webbing/WebbingOutScanned?date=$date'),
-  //       headers: await InStockService.authHeaders(),
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       final jsonData = jsonDecode(response.body);
-  //       return WebbingOutReportModel.fromJson(jsonData);
-  //     }
-  //
-  //     return null;
-  //   } catch (e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
-
-  // static Future<WebbingOutDetailsModel?> fetchWebbingScannedOutItems(
-  //   String date,
-  // ) async {
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse(
-  //         '${InStockService.baseUrl}/Webbing/WebbingOutScanned?date=$date',
-  //       ),
-  //       headers: await InStockService.authHeaders(),
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       final List<dynamic> jsonData = jsonDecode(response.body);
-  //
-  //       return WebbingOutDetailsModel.fromJson(jsonData);
-  //     }
-  //
-  //     return null;
-  //   } catch (e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
 
   static Future<WebbingOutDetailsModel?> fetchWebbingScannedOutItems(
-      String date) async {
+    String date,
+  ) async {
     try {
       final response = await http.get(
         Uri.parse(
-            '${InStockService.baseUrl}/Webbing/WebbingOutScanned?date=$date'),
+          '${InStockService.baseUrl}/Webbing/WebbingOutScanned?date=$date',
+        ),
         headers: await InStockService.authHeaders(),
       );
 
@@ -386,6 +342,7 @@ class DashboardService {
       return null;
     }
   }
+
   static Future<int> fetchWebbingScannedOutItemsCount(String date) async {
     try {
       final response = await http.get(
