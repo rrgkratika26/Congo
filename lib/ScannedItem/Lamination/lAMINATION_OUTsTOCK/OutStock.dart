@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../Color/Colorclass.dart';
+import '../../../NARDANA/LaminationReports/LaminationOutNewEntryList.dart';
 import '../../../Visa/Loom/PrintBarcode.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 import '../../../services/visa_apis/visa_api.dart';
@@ -169,24 +170,35 @@ class _RollListScreenState extends State<RollListScreen> {
         iconTheme: const IconThemeData(color: C.bgColor),
         actions: [
           // 🔹 Total count
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Text(
-                'Total: ${_rolls.length}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>   const LamRollPrintScreennaradan(title: "Lamination Rolls"),
+
+                  // For VISA
+                  // builder: (_) => const LamRollPrintScreen(title: "Lamination Rolls"),
                 ),
+
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: C.bg,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              "New Barcode",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
+
 
           // 🔹 Filtered count (only when searching)
           if (_searchCtrl.text.isNotEmpty)

@@ -739,6 +739,9 @@ class _SavedListScreenState extends State<SavedListScreen> {
   final _storage = GetStorage();
   List<BluetoothInfo> printers = [];
   bool isScanning = false;
+  int _currentPage = 1;
+  int _pageSize = 50;
+  int _totalRecords = 0; // API should return this
 
   Future<void> _checkPrinterConnection() async {
     bool? isConnected = await PrintBluetoothThermal.connectionStatus;
@@ -755,9 +758,15 @@ class _SavedListScreenState extends State<SavedListScreen> {
   @override
   void initState() {
     super.initState();
-    futureData = InStockService().fetchLoomList();
+    _loadData();
   }
-
+  Future<void> _loadData() async {
+    setState(() {
+      futureData = InStockService().fetchLoomList(
+        _currentPage, _pageSize,
+      );
+    });
+  }
   Future<void> scanPrinters() async {
     setState(() {
       isScanning = true;
@@ -890,143 +899,138 @@ class _SavedListScreenState extends State<SavedListScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: FutureBuilder<List<LoomListModel>>(
-          future: futureData,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: C.appBar3),
-              );
-            }
+      body: FutureBuilder<List<LoomListModel>>(
+        future: futureData,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: C.appBar3),
+            );
+          }
 
-            if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            }
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
 
-            final data = snapshot.data!;
+          final data = snapshot.data!;
 
-            if (data.isEmpty) {
-              return const Center(child: Text("No Data Found"));
-            }
+          if (data.isEmpty) {
+            return const Center(child: Text("No Data Found"));
+          }
 
-            return Padding(
-              padding: const EdgeInsets.all(12),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
+          return Padding(
+            padding: const EdgeInsets.all(12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SingleChildScrollView(
-                      child: DataTable(
-                        columnSpacing: 24,
-                        headingRowHeight: 50,
-                        dataRowHeight: 52,
+                    child: DataTable(
+                      columnSpacing: 24,
+                      headingRowHeight: 45,
+                      dataRowMinHeight: 45,
+                      headingRowColor: WidgetStateProperty.all(C.cardOrange),
 
-                        headingRowColor: MaterialStateProperty.all(C.border),
+                      columns: const [
+                        DataColumn(label: Text("ID")),
+                        DataColumn(label: Text("Barcode")),
+                        DataColumn(label: Text("Operator")),
+                        DataColumn(label: Text("Supervisor")),
+                        DataColumn(label: Text("Party Name")),
+                        DataColumn(label: Text("OrderNo.")),
+                        DataColumn(label: Text("Work Order")),
+                        DataColumn(label: Text("Req.Qty(Kg)")),
+                        DataColumn(label: Text("Req.Qty(Mtr)")),
+                        DataColumn(label: Text("Date")),
+                        DataColumn(label: Text("Time")),
+                        DataColumn(label: Text("Fab GSM")),
+                        DataColumn(label: Text("Color")),
+                        DataColumn(label: Text("Net Wt")),
+                        DataColumn(label: Text("Roll L.Mtr")),
+                        DataColumn(label: Text("Loom Type")),
+                        DataColumn(label: Text("Department")),
+                        DataColumn(label: Text(" Print Barcode")),
+                      ],
 
-                        columns: const [
-                          DataColumn(label: Text("ID")),
-                          DataColumn(label: Text("Barcode")),
-                          DataColumn(label: Text("Operator")),
-                          DataColumn(label: Text("Supervisor")),
-                          DataColumn(label: Text("Party Name")),
-                          DataColumn(label: Text("OrderNo.")),
-                          DataColumn(label: Text("Work Order")),
-                          DataColumn(label: Text("Req.Qty(Kg)")),
-                          DataColumn(label: Text("Req.Qty(Mtr)")),
-                          DataColumn(label: Text("Date")),
-                          DataColumn(label: Text("Time")),
-                          DataColumn(label: Text("Fab GSM")),
-                          DataColumn(label: Text("Color")),
-                          DataColumn(label: Text("Net Wt")),
-                          DataColumn(label: Text("Roll L.Mtr")),
-                          DataColumn(label: Text("Loom Type")),
-                          DataColumn(label: Text("Department")),
-                          DataColumn(label: Text(" Print Barcode")),
-                        ],
+                      rows: List.generate(data.length, (index) {
+                        final e = data[index];
 
-                        rows: List.generate(data.length, (index) {
-                          final e = data[index];
+                        return DataRow(
+                          color: MaterialStateProperty.all(
+                            index % 2 == 0 ? Colors.grey.shade50 : Colors.white,
+                          ),
+                          cells: [
+                            DataCell(Text(e.id.toString())),
+                            DataCell(Text(e.barcode)),
+                            DataCell(Text(e.operator)),
+                            DataCell(Text(e.supervisor)),
+                            DataCell(Text(e.machineNo)),
+                            DataCell(Text(e.partyName)),
 
-                          return DataRow(
-                            color: MaterialStateProperty.all(
-                              index % 2 == 0
-                                  ? Colors.grey.shade50
-                                  : Colors.white,
+                            /// ✅ NEW
+                            DataCell(Text(e.workOrderNo)),
+
+                            DataCell(Text(e.requiredNetWt.toString())),
+                            DataCell(Text(e.requiredQtyMtr.toString())),
+
+                            DataCell(
+                              Text(
+                                e.date != null
+                                    ? "${e.date!.day}-${e.date!.month}-${e.date!.year}"
+                                    : "-",
+                              ),
                             ),
-                            cells: [
-                              DataCell(Text(e.id.toString())),
-                              DataCell(Text(e.barcode)),
-                              DataCell(Text(e.operator)),
-                              DataCell(Text(e.supervisor)),
-                              DataCell(Text(e.machineNo)),
-                              DataCell(Text(e.partyName)),
 
-                              /// ✅ NEW
-                              DataCell(Text(e.workOrderNo)),
+                            DataCell(Text(e.time)),
+                            DataCell(Text(e.gsm)),
+                            DataCell(Text(e.color)),
+                            DataCell(Text(e.netWt.toString())),
+                            DataCell(Text(e.quantity.toString())),
 
-                              DataCell(Text(e.requiredNetWt.toString())),
-                              DataCell(Text(e.requiredQtyMtr.toString())),
+                            /// ✅ NEW
+                            DataCell(Text(e.modelNo)),
+                            DataCell(Text(e.department)),
 
-                              DataCell(
-                                Text(
-                                  e.date != null
-                                      ? "${e.date!.day}-${e.date!.month}-${e.date!.year}"
-                                      : "-",
+                            // DataCell(
+                            //   ElevatedButton(
+                            //     onPressed: () => _printBarcodeApi(e),
+                            //     child: const Text(
+                            //       "Print / Issue",
+                            //       style: TextStyle(color: C.success),
+                            //     ),
+                            //   ),
+                            // ),
+                            DataCell(
+                              ElevatedButton(
+                                onPressed: () => _showIssueOptions(e),
+                                child: const Text(
+                                  "Print / Issue",
+                                  style: TextStyle(color: C.success),
                                 ),
                               ),
-
-                              DataCell(Text(e.time)),
-                              DataCell(Text(e.gsm)),
-                              DataCell(Text(e.color)),
-                              DataCell(Text(e.netWt.toString())),
-                              DataCell(Text(e.quantity.toString())),
-
-                              /// ✅ NEW
-                              DataCell(Text(e.modelNo)),
-                              DataCell(Text(e.department)),
-
-                              // DataCell(
-                              //   ElevatedButton(
-                              //     onPressed: () => _printBarcodeApi(e),
-                              //     child: const Text(
-                              //       "Print / Issue",
-                              //       style: TextStyle(color: C.success),
-                              //     ),
-                              //   ),
-                              // ),
-                              DataCell(
-                                ElevatedButton(
-                                  onPressed: () => _showIssueOptions(e),
-                                  child: const Text(
-                                    "Print / Issue",
-                                    style: TextStyle(color: C.success),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
+                            ),
+                          ],
+                        );
+                      }),
                     ),
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

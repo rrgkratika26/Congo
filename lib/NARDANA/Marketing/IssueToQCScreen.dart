@@ -34,7 +34,7 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
 
     _listCtrl.addListener(() {
       if (_listCtrl.position.pixels >=
-          _listCtrl.position.maxScrollExtent - 200 &&
+              _listCtrl.position.maxScrollExtent - 200 &&
           !isLoadingMore &&
           hasMore) {
         loadMore();
@@ -120,27 +120,28 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
   }
 
   static const colCheck = 50.0;
-  static const colWo = 80.0;
-  static const colCustomer = 140.0;
-  static const colBagRef = 90.0;
+  static const colWo = 70.0;
+  static const colCustomer = 70.0;
+  static const colBagRef = 120.0;
   static const colBagType = 130.0;
   static const colInquiry = 130.0;
   static const colUnit = 70.0;
-  static const colPoDate = 100.0;
-  static const colDispatch = 100.0;
+  // static const colPoDate = 100.0;
+  // static const colDispatch = 100.0;
 
   // static const colStatus = 90.0;
 
   double get totalWidth =>
       colCheck +
-          colWo +
-          colCustomer +
-          colBagRef +
-          colBagType +
-          colInquiry +
-          colUnit +
-          colPoDate +
-          colDispatch + 10;
+      colWo +
+      colCustomer +
+      colBagRef +
+      colBagType +
+      colInquiry +
+      colUnit +
+      // colPoDate +
+      // colDispatch +
+      10;
 
   // colStatus;
 
@@ -152,6 +153,7 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
       appBar: AppBar(
         backgroundColor: C.appBar1,
         elevation: 0,
+
         // flexibleSpace: Container(
         //   decoration: const BoxDecoration(
         //     gradient: LinearGradient(
@@ -164,7 +166,6 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
         //     ),
         //   ),
         // ),
-
         iconTheme: const IconThemeData(color: Colors.white),
 
         title: Row(
@@ -181,16 +182,14 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
 
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(.15),
-
                 borderRadius: BorderRadius.circular(20),
               ),
 
               child: Text(
                 "Records : $totalRecords",
-                style: const TextStyle(color: Colors.white,fontSize: 11),
+                style: const TextStyle(color: Colors.white, fontSize: 11),
               ),
             ),
           ],
@@ -227,48 +226,48 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Scrollbar(
-              controller: _horizontalCtrl,
+                    controller: _horizontalCtrl,
 
-              thumbVisibility: true,
+                    thumbVisibility: true,
 
-              child: SingleChildScrollView(
-                controller: _horizontalCtrl,
+                    child: SingleChildScrollView(
+                      controller: _horizontalCtrl,
 
-                scrollDirection: Axis.horizontal,
+                      scrollDirection: Axis.horizontal,
 
-                child: SizedBox(
-                  width: totalWidth,
+                      child: SizedBox(
+                        width: totalWidth,
 
-                  child: Column(
-                    children: [
-                      _header(),
+                        child: Column(
+                          children: [
+                            _header(),
 
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _listCtrl,
+                            Expanded(
+                              child: ListView.builder(
+                                controller: _listCtrl,
 
-                          itemCount:
-                          filtered.length + (isLoadingMore ? 1 : 0),
+                                itemCount:
+                                    filtered.length + (isLoadingMore ? 1 : 0),
 
-                          itemBuilder: (_, index) {
-                            if (index == filtered.length) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(15),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
+                                itemBuilder: (_, index) {
+                                  if (index == filtered.length) {
+                                    return const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(15),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
 
-                            return _row(filtered[index]);
-                          },
+                                  return _row(filtered[index]);
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -279,9 +278,7 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
     return Container(
       decoration: BoxDecoration(
         color: C.bg,
-        border: Border.all(
-          color: Colors.grey.shade300,
-        ),
+        border: Border.all(color: Colors.grey.shade300),
       ),
       child: Row(
         children: [
@@ -306,10 +303,7 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         border: Border(
-          right: BorderSide(
-            color: Colors.grey.shade300,
-            width: .7,
-          ),
+          right: BorderSide(color: Colors.grey.shade300, width: .7),
         ),
       ),
       child: Text(
@@ -325,30 +319,17 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
   }
 
   Widget _row(Map<String, dynamic> item) {
-    bool checked =
-        item["active"].toString().toLowerCase() == "true";
+    bool checked = item["active"].toString().toLowerCase() == "true";
 
-    bool quality =
-        item["status"].toString().toUpperCase() == "QUALITY";
+    bool quality = item["status"].toString().toUpperCase() == "QUALITY";
 
     return Container(
       decoration: BoxDecoration(
-        color: quality
-            ? const Color(0xFFF0B9A3)
-            : Colors.white,
+        color: quality ? const Color(0xFFF0B9A3) : Colors.white,
         border: Border(
-          left: BorderSide(
-            color: Colors.grey.shade300,
-            width: .7,
-          ),
-          right: BorderSide(
-            color: Colors.grey.shade300,
-            width: .7,
-          ),
-          bottom: BorderSide(
-            color: Colors.grey.shade300,
-            width: .7,
-          ),
+          left: BorderSide(color: Colors.grey.shade300, width: .7),
+          right: BorderSide(color: Colors.grey.shade300, width: .7),
+          bottom: BorderSide(color: Colors.grey.shade300, width: .7),
         ),
       ),
       child: Row(
@@ -359,10 +340,7 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(
-                  color: Colors.grey.shade300,
-                  width: .7,
-                ),
+                right: BorderSide(color: Colors.grey.shade300, width: .7),
               ),
             ),
             child: Checkbox(
@@ -402,15 +380,10 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
       width: width,
       height: 48,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
         border: Border(
-          right: BorderSide(
-            color: Colors.grey.shade300,
-            width: .7,
-          ),
+          right: BorderSide(color: Colors.grey.shade300, width: .7),
         ),
       ),
       child: Text(
@@ -418,9 +391,7 @@ class _IssueToQualityScreenState extends State<IssueToQualityScreen> {
         textAlign: TextAlign.center,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 11,
-        ),
+        style: const TextStyle(fontSize: 11),
       ),
     );
   }

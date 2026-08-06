@@ -79,7 +79,7 @@ class _QRPrintingScanInScreenState extends State<QRPrintingScanInScreen> {
       operator: widget.operatorName,
       supervisor: widget.supervisor,
       department: widget.department,
-      plant: AppGlobals.unit,
+      plant: widget.plant,
     );
 
     if (!mounted) return;
@@ -89,26 +89,21 @@ class _QRPrintingScanInScreenState extends State<QRPrintingScanInScreen> {
       return;
     }
 
-    final status = (result["status"] ?? "").toString().toLowerCase();
-    final message = result["message"] ?? "Unknown response";
+    final success = result["success"] == true;
+    final message = result["message"]?.toString() ?? "";
 
-    if (status == "ok") {
-      _showSnackBar(message, isSuccess: true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
 
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      Navigator.pop(context, barcode);
-    } else if (status == "exists") {
-      _showSnackBar(message, isSuccess: false);
-
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      Navigator.pop(context, barcode);
+    if (success) {
+      Navigator.pop(context, true);
     } else {
       _showSnackBar(message, isSuccess: false);
-
       isScanned = false;
-
       controller?.resumeCamera();
     }
   }

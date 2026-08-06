@@ -51,11 +51,10 @@ class InStockController {
     return selectedOperator != null &&
         selectedSupervisor != null &&
         selectedLocation != null &&
-        selectedRollEntry != null &&
+
         selectedOperator!.isNotEmpty &&
         selectedSupervisor!.isNotEmpty &&
-        selectedLocation!.isNotEmpty &&
-        selectedRollEntry!.isNotEmpty;
+        selectedLocation!.isNotEmpty;
   }
   //
   // Future<void> loadWebInitialData() async {

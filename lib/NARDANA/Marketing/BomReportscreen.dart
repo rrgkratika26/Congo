@@ -218,16 +218,24 @@ class _BomReportScreenState extends State<BomReportScreen> {
               ),
               child: Text(
                 "${_formatDate(fromDate)} → ${_formatDate(toDate)}",
-                style: const TextStyle(color: Colors.white, fontSize: 11),
+                style: const TextStyle( color: C.bg,
+                  fontSize: 11,),
               ),
             ),
           ],
         ),
 
         actions: [
-          IconButton(
-            onPressed: _pickDateRange,
-            icon: const Icon(Icons.date_range_rounded, color: Colors.white),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: IconButton(
+              onPressed: _pickDateRange,
+              icon: const Icon(Icons.date_range_rounded, color: Colors.white),
+            ),
           ),
 
           const SizedBox(width: 10),

@@ -548,7 +548,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
     elevation: 0,
     centerTitle: false,
     leading: IconButton(
-      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
+      icon: const Icon(Icons.arrow_back, size: 22),
       onPressed: () => Navigator.maybePop(context),
     ),
     title: Column(

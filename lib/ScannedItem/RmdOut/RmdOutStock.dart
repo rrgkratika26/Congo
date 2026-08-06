@@ -79,6 +79,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
   void initState() {
     super.initState();
     _loadUnit();
+    loadTodayCount();
     _loadData();
   }
 
@@ -104,7 +105,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.all(isTablet ? 24 : (isSmallScreen ? 12 : 16)),
+        padding: EdgeInsets.all(isTablet ? 24 : (isSmallScreen ? 10 : 16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -264,36 +265,29 @@ class _OutReportScreenState extends State<OutReportScreen> {
         child: Container(
           decoration: _boxDecoration(borderRadius: 20),
           padding: const EdgeInsets.all(24),
-          child: FutureBuilder<int>(
-            future: InStockService().getOutScannedItemsCount(getApiDate()),
-            builder: (context, snapshot) {
-              final count = snapshot.data ?? 0;
-
-              return Column(
-                children: [
-                  const Text(
-                    'Total Items Out',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '$count',
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    getCurrentDate(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              );
-            },
+          child: Column(
+            children: [
+              const Text(
+                'Total Items Out',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '$totalScanned',
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                getCurrentDate(),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -501,19 +495,27 @@ class _OutReportScreenState extends State<OutReportScreen> {
         );
 
         if (apiResult['status'] == 'ok') {
-          final count = await InStockService().getOutScannedItemsCount(
-            getApiDate(),
-          );
-
-          setState(() {
-            totalScanned = count;
-          });
+          await loadTodayCount();
         }
       } catch (e) {
         debugPrint("Error: $e");
       } finally {
         loader.hide();
       }
+    }
+  }
+
+  Future<void> loadTodayCount() async {
+    try {
+      final count = await InStockService().getOutScannedItemsCount(
+        getApiDate(),
+      );
+
+      setState(() {
+        totalScanned = count;
+      });
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 

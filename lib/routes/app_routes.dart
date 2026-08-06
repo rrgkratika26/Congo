@@ -297,6 +297,8 @@ import 'package:flutter/material.dart';
 import '../ScannedItem/Cutting/NardanaCutting/NaradanCutOutList.dart';
 import '../ScannedItem/Cutting/OutStock/OutSavedList.dart';
 import '../screen/Printing/PrintingIn.dart';
+import '../screen/Printing/PrintingInReportScreen.dart';
+import '../screen/Printing/PrintingOutReport.dart';
 import '../screen/Slitting/SlittingInStock.dart';
 
 // Import all your screens here
@@ -323,7 +325,11 @@ class AppRoutes {
   static const String foldingIn = '/foldingIn';
   static const String tapelineIn = '/tapelineIn';
   static const String printingIn = '/printingIn';
+  static const String printingInReport = '/printingInReport';
+
+  static const String printingOutReport = '/printingOutReport';
   static const String printingOut = '/printingOut';
+
   static const String slittingIn = '/slittingIn';
   static const String tapelineOut = '/tapelineOut';
   static const String tapelineRecentEntries = '/tapelineRecentEntries';
@@ -416,7 +422,7 @@ class AppRoutes {
 
     GetPage(
       name: rmdOut,
-      page: () => const RmdOutScreen(screenType: 'OUT'),
+      page: () => const RmdOutScreen(),
     ),
 
     GetPage(name: rmdtransfer, page: () => const RmdTransferScreen()),
@@ -431,6 +437,10 @@ class AppRoutes {
 
     // GetPage(name: foldingIn, page: () => const FoldingIn()),
     GetPage(name: printingIn, page: () => PrintingInStockScreen()),
+    GetPage(name: printingOutReport, page: () => PrintingOutReportScreen()),
+
+    GetPage(name: printingInReport, page: () => const PrintingInReportScreen(),
+    ),
     GetPage(name: printingOut, page: () => PrintingRollList()),
     GetPage(name: slittingIn, page: () => SlittingInScreen()),
 

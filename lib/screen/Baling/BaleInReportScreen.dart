@@ -309,9 +309,6 @@
 //   }
 // }
 
-
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -335,9 +332,9 @@ class BaleInReportsScreen extends StatefulWidget {
 class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
   late InStockService _service;
   late Future<List<BailingReportModel>> reportFuture;
-  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 30));
-  DateTime _toDate = DateTime.now();
-  bool _showDateFilter = false;
+  // DateTime _fromDate = DateTime.now().subtract(const Duration(days: 30));
+  // DateTime _toDate = DateTime.now();
+  // bool _showDateFilter = false;
   List<BaleEntryModel> _allEntries = [];
   List<BaleEntryModel> _filteredEntries = [];
 
@@ -375,7 +372,7 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
 
     final filtered = _allEntries.where((entry) {
       final combinedData =
-      '''
+          '''
       ${entry.id}
       ${entry.customerName}
       ${entry.articleNo}
@@ -384,7 +381,7 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
       ${entry.quantity}
       ${entry.remaining}
     '''
-          .toLowerCase();
+              .toLowerCase();
 
       return combinedData.contains(search);
     }).toList();
@@ -413,22 +410,9 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Get.to(() => const BaleEntryManualForm());
-            },
-
-            child: Text(
-              "Entry",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: C.primaryDark,
-                fontSize: 15,
-              ),
-            ),
-          ),
-        ],
+        // actions: [
+        //  ,
+        // ],
         iconTheme: IconThemeData(color: C.bg),
       ),
       body: _isLoading
@@ -436,100 +420,75 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
           : _error != null
           ? Center(child: Text(_error!))
           : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 5,
-            ),
-            color: const Color(0xFF42A5F6).withOpacity(0.2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-              //
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.list_alt,
-                      size: 18,
-                      color: C.primaryDark,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Showing ${_filteredEntries.length} entries',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.calendar_today,
-                    size: 20,
-                    color: C.primaryDark,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 5,
                   ),
-                  onPressed: () async {
-                    final picked = await showDateRangePicker(
-                      context: context,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2035),
-                      initialDateRange: DateTimeRange(
-                        start: _fromDate,
-                        end: _toDate,
-                      ),
-                      builder: (context, child) {
-                        return Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: Color(0xFF2196F3),
-                              onPrimary: Colors.white,
-                              surface: Colors.white,
+                  color: const Color(0xFF42A5F6).withOpacity(0.2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                    //
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.list_alt,
+                            size: 18,
+                            color: C.primaryDark,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Showing ${_filteredEntries.length} entries',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          child: child!,
-                        );
-                      },
-                    );
+                        ],
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.to(() => const BaleEntryManualForm());
+                        },
 
-                    if (picked != null) {
-                      setState(() {
-                        _fromDate = picked.start;
-                        _toDate = picked.end;
-                      });
+                        child: Text(
+                          "Entry Form",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: C.primaryDark,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-                      _loadReports();
-                    }
-                  },
+                // 🔍 SEARCH BAR ADDED HERE
+                InlineSearchBar(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                ),
+
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemCount: _filteredEntries.length,
+                    itemBuilder: (context, index) {
+                      return _buildEntryCard(_filteredEntries[index]);
+                    },
+                  ),
                 ),
               ],
             ),
-          ),
-
-          // 🔍 SEARCH BAR ADDED HERE
-          InlineSearchBar(
-            controller: _searchController,
-            onChanged: _onSearchChanged,
-          ),
-
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              itemCount: _filteredEntries.length,
-              itemBuilder: (context, index) {
-                return _buildEntryCard(_filteredEntries[index]);
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -582,7 +541,7 @@ class _BaleInReportsScreenState extends State<BaleInReportsScreen> {
                     ),
                     const Icon(
                       Icons.chevron_right,
-                      color: Color(0xFFBDBDBD),
+                      color: C.primary,
                       size: 28,
                     ),
                   ],

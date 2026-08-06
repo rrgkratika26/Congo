@@ -156,7 +156,7 @@ class _QRRMDScanScreenState extends State<QRRMDScanScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.scanType == ScanType.inStock ? 'Scan In QR' : 'Scan Out QR',
+          widget.scanType == ScanType.inStock ? 'RMD In QR' : 'RMD Out QR',
         ),
         actions: [
           IconButton(

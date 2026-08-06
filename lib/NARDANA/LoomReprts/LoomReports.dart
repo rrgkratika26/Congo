@@ -168,10 +168,10 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
         actions: [
 
           /// SIMPLE TEXT COUNT
-          CountText(count: _filtered.length),
+          // CountText(count: _filtered.length),
 
           IconButton(
-            icon: const Icon(Icons.calendar_today, color: C.bg,size: 18,),
+            icon: const Icon(Icons.calendar_today, color: C.bg,size: 20,),
             onPressed: _pickDateRange,
           ),
 
@@ -414,7 +414,7 @@ class _LoomDataSource extends DataTableSource {
 
         DataCell(
           SizedBox(
-            width: 190,
+            width: 150,
             child: Text(
               r.fabricCode,
               overflow: TextOverflow.ellipsis,

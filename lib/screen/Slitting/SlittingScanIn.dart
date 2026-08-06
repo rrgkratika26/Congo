@@ -6,18 +6,24 @@ import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
 class QrSlittingScanInScree extends StatefulWidget {
   final String operatorName;
+  // final String barcode;
   final String supervisor;
   final String location;
   final String roll;
   final String plant;
+  final String party;
+  final String workorder;
 
   const QrSlittingScanInScree({
     super.key,
     required this.operatorName,
+    // required this.barcode,
     required this.supervisor,
     required this.location,
     required this.roll,
     required this.plant,
+    required this.party,
+    required this.workorder,
   });
 
   @override
@@ -29,7 +35,7 @@ class _QrSlittingScanInScreeState extends State<QrSlittingScanInScree> {
   QRViewController? controller;
 
   final VisaSmallBagApiService _service = VisaSmallBagApiService();
-
+  bool _isProcessing = false;
   bool isFlashOn = false;
   bool isScanned = false;
   Timer? timeoutTimer;
@@ -79,38 +85,25 @@ class _QrSlittingScanInScreeState extends State<QrSlittingScanInScree> {
       operator: widget.operatorName,
       supervisor: widget.supervisor,
       roll: widget.roll,
-      plant: AppGlobals.unit,
+      plant: widget.plant,
     );
 
     if (!mounted) return;
 
     if (result == null) {
-      _showError("Server not responding");
+      _showSnackBar("Server not responding", isSuccess: false);
       return;
     }
 
-    final status = (result["status"] ?? "").toString().toLowerCase();
-    final message = result["message"] ?? "Unknown response";
+    final bool success = result["success"] == true;
+    final String message = result["message"]?.toString() ?? "Unknown response";
 
-    if (status == "ok") {
-      _showSnackBar(message, isSuccess: true);
+    // Show only API response message
+    _showSnackBar(message, isSuccess: success);
 
-      await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 800));
 
-      Navigator.pop(context, barcode);
-    } else if (status == "exists") {
-      _showSnackBar(message, isSuccess: false);
-
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      Navigator.pop(context, barcode);
-    } else {
-      _showSnackBar(message, isSuccess: false);
-
-      isScanned = false;
-
-      controller?.resumeCamera();
-    }
+    Navigator.pop(context, success);
   }
 
   void _showSnackBar(String message, {bool isSuccess = true}) {
@@ -126,7 +119,7 @@ class _QrSlittingScanInScreeState extends State<QrSlittingScanInScree> {
             Expanded(child: Text(message)),
           ],
         ),
-        backgroundColor: isSuccess ? Colors.green.shade600 : Colors.redAccent,
+        backgroundColor: isSuccess ?Colors.green.shade600 :Colors.redAccent,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

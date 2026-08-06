@@ -204,7 +204,7 @@ class InStockService {
     required String operatorName,
     required String supervisor,
     required String department,
-    required String unit, // ✅ NEW PARAM
+    required String unit,
   }) async {
     final url = Uri.parse('$baseUrl/Folding/CheckBarcodeOut'); // ✅ FIXED
 
@@ -245,9 +245,9 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      // debugPrint("API URL: $url");
-      // debugPrint("GET OUT SCANNED ITEMS STATUS: ${response.statusCode}");
-      // debugPrint("GET OUT SCANNED ITEMS RESPONSE: ${response.body}");
+      debugPrint("API URL: $url");
+      debugPrint("GET OUT SCANNED ITEMS STATUS: ${response.statusCode}");
+      debugPrint("GET OUT SCANNED ITEMS RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -2170,8 +2170,10 @@ class InStockService {
     }
   }
 
-  Future<List<LoomListModel>> fetchLoomList() async {
-    final url = Uri.parse("${baseUrl}/LoomForward/GetLoomList");
+  Future<List<LoomListModel>> fetchLoomList(
+      int page,
+      int pageSize,) async {
+    final url = Uri.parse("${baseUrl}/LoomForward/GetLoomList?pageNumber=$page&pageSize=$pageSize");
 
     final res = await http.get(
       url,

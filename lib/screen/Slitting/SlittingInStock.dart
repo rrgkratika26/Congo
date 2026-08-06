@@ -579,13 +579,77 @@ class _SlittingInScreenState extends State<SlittingInScreen> {
   }
   // ================= ACTIONS =================
 
+  // Future<void> _openScanner() async {
+  //   if (!controller.isFormValid()) {
+  //     _showValidationSnackBar();
+  //     return;
+  //   }
+  //
+  //   final barcode = await Navigator.push<String>(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (_) => QrSlittingScanInScree(
+  //         // operatorName: controller.selectedOperator!,
+  //         // supervisor: controller.selectedSupervisor!,
+  //         // location: controller.selectedLocation!,
+  //         // roll: department,
+  //         // plant: unitName,
+  //         operatorName: controller.selectedOperator!,
+  //         supervisor: controller.selectedSupervisor!,
+  //         location: controller.selectedLocation!,
+  //         roll: department,
+  //         plant: unitName,
+  //         party: '',
+  //         workorder: '',
+  //       ),
+  //     ),
+  //   );
+  //
+  //   if (barcode == null || barcode.isEmpty) return;
+  //
+  //   final result = await VisaSmallBagApiService().slittingIn(
+  //     barcode: barcode.toUpperCase(),
+  //     operator: controller.selectedOperator!,
+  //     location: controller.selectedLocation!,
+  //     plant: unitName,
+  //     supervisor: controller.selectedSupervisor!,
+  //     roll: '',
+  //     party: '',
+  //   );
+  //
+  //   // if (result == null) {
+  //   //   ScaffoldMessenger.of(context).showSnackBar(
+  //   //     const SnackBar(
+  //   //       content: Text("Server not responding"),
+  //   //       backgroundColor: Colors.red,
+  //   //     ),
+  //   //   );
+  //   //   return;
+  //   // }
+  //   //
+  //   // final status = result["status"];
+  //   // final message = result["message"] ?? "";
+  //   //
+  //   // ScaffoldMessenger.of(context).showSnackBar(
+  //   //   SnackBar(
+  //   //     content: Text(message),
+  //   //     backgroundColor: status == "ok" ? Colors.green : Colors.orange,
+  //   //   ),
+  //   // );
+  //
+  //   // if (status == "ok") {
+  //   //   await loadTodayCount();
+  //   // }
+  // }
+
+
   Future<void> _openScanner() async {
     if (!controller.isFormValid()) {
       _showValidationSnackBar();
       return;
     }
 
-    final barcode = await Navigator.push<String>(
+    final success = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => QrSlittingScanInScree(
@@ -594,46 +658,19 @@ class _SlittingInScreenState extends State<SlittingInScreen> {
           location: controller.selectedLocation!,
           roll: department,
           plant: unitName,
+          party: '',
+          workorder: '',
         ),
       ),
     );
 
-    if (barcode == null || barcode.isEmpty) return;
-
-    final result = await VisaSmallBagApiService().slittingIn(
-      barcode: barcode.toUpperCase(),
-      operator: controller.selectedOperator!,
-      location: controller.selectedLocation!,
-      plant: unitName,
-      supervisor: controller.selectedSupervisor!,
-      roll: '',
-      party: '',
-    );
-
-    if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Server not responding"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final status = result["status"];
-    final message = result["message"] ?? "";
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: status == "ok" ? Colors.green : Colors.orange,
-      ),
-    );
-
-    if (status == "ok") {
+    if (success == true) {
       await loadTodayCount();
     }
+
+
   }
+
 
   void _showWithoutScanDialog(bool isSmallScreen) {
     final barcodeController = TextEditingController();

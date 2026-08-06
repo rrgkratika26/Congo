@@ -349,7 +349,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                 // _col('Issue dept'),        // ✅ NEW
                 _col('Party name'),
                 _col('PO No'),
-                // _col('Cont No'),        // ✅ NEW
+                _col('Department'),        // ✅ NEW
 
                 // _col('ReqQty Kg'),         // ✅ NEW
                 // _col('ReqQty Mtr'),        // ✅ NEW
@@ -381,7 +381,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                   cells: [
                     DataCell(_cell('${r.srNo}', bold: true)),
                     DataCell(_cell('${r.rollCode}', bold: true)),
-                    DataCell(_cell(r.barcode, mono: true, w: 95)),
+                    DataCell(_cell(r.barcode, mono: true, w: 70)),
                     // DataCell(_cell(r.batchNo, w: 90)),
                     // DataCell(_cell('${r.loomType}', w: 35)),
                     // DataCell(_cell('${r.loomNo}', w: 35)),
@@ -407,16 +407,16 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                     // DataCell(_cell(r.loomOperator, w: 90)),
                     DataCell(_cell(r.supervisorName, w: 100)),
                     // DataCell(_cell(r.rmdSupervisor, w: 100)),   // ✅ NEW
-                    DataCell(_cell(r.partyName, w: 110)),
-                    DataCell(_cell(r.workOrderNo, w: 120)),
+                    DataCell(_cell(r.partyName, w: 80)),
+                    DataCell(_cell(r.workOrderNo, w: 60)),
 
-                    // DataCell(_cell('${r.contNo}', w: 70)),      // ✅ NEW
+                    DataCell(_cell('${r.rmdSupervisor}', w: 80)),      // ✅ NEW
                     // DataCell(_cell(r.reqQtyKg.toString(), w: 80)),   // ✅ NEW
                     // DataCell(_cell(r.reqQtyMtr.toString(), w: 80)),  // ✅ NEW
 
                     // DataCell(_cell(r.department, w: 70)),
                     // DataCell(_cell(r.issueToDept, w: 70)),
-                    DataCell(_statusBadge(r.status)),
+                    DataCell(_statusBadge(r.status),),
 
                     // DataCell(_cell(r.entryIn, w: 40)),
                     // DataCell(_cell(r.entryOut, w: 45)),
@@ -429,7 +429,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
                     // DataCell(_cell(r.cutType, w: 60)),             // ✅ NEW
                     // DataCell(_cell(r.specialId, w: 50)),           // ✅ NEW
                     DataCell(
-                      _cell(DateFormat('dd-MM-yyyy').format(r.date), w: 65),
+                      _cell(DateFormat('dd-MM-yyyy').format(r.date), w: 70),
                     ),
                     DataCell(_cell(r.time, w: 70)),
                   ],
@@ -448,7 +448,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
         child: Text(
           text,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w700,
             color: _primary,
           ),
@@ -471,7 +471,7 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
         text,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
           fontFamily: mono ? 'monospace' : null,
           color: color ?? Colors.black87,

@@ -102,7 +102,6 @@ class SlittingInStockDetail extends StatelessWidget {
                           backgroundColor: isIn ? Colors.green : Colors.red,
                         ),
                       ),
-
                       DataCell(Text(item['laminatioN_SUPERVISOR1'] ?? '')),
                       DataCell(Text(item['laminatioN_OPERATOR1'] ?? '')),
                       DataCell(Text(item['laminatioN_LOCATION1'] ?? '')),

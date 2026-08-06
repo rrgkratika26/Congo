@@ -395,13 +395,13 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
   //     });
   //   }
   // }
-  Future _openScanner() async {
+  Future<void> _openScanner() async {
     if (!controller.isFormValid()) {
       _showValidationSnackBar();
       return;
     }
 
-    final result = await Navigator.push(
+    final success = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => QRPrintingScanInScreen(
@@ -414,17 +414,16 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
       ),
     );
 
-    print("Returned Result: $result");
-
-    if (result != null) {
-      await Future.delayed(const Duration(seconds: 1));
+    if (success == true) {
       await _loadTotalScanned();
     }
   }
+
   Future<void> _loadTotalScanned() async {
     try {
-      final data =
-      await VisaSmallBagApiService().getPrintingReport(getApiDate());
+      final data = await VisaSmallBagApiService().getPrintingReport(
+        getApiDate(),
+      );
 
       if (!mounted) return;
 
@@ -435,10 +434,11 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
       debugPrint("Count Error: $e");
     }
   }
+
   void _showWithoutScanDialog(bool isSmallScreen) {
     final barcodeController = TextEditingController();
 
-    if (controller.isFormValid()) {
+    if (!controller.isFormValid()) {
       _showValidationSnackBar();
       return;
     }
@@ -505,8 +505,6 @@ class _PrintingInStockScreenState extends State<PrintingInStockScreen> {
               );
 
               if (status == "ok") {
-
-
                 if (!mounted) return;
 
                 await Future.delayed(const Duration(seconds: 1));

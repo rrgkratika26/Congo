@@ -710,6 +710,8 @@ class _RmdRollSavedListState extends State<RmdRollSavedList> {
 
                     try {
                       await _issueWithoutPrint(item);
+                      Navigator.pop(context); // Close bottom sheet first
+
                     } finally {
                       if (mounted) {
                         setState(() => _isProcessing = false);

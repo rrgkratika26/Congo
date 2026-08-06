@@ -327,7 +327,7 @@ class _RMDStockInState extends State<RMDStockIn> {
   // ================= ACTIONS =================
 
   Future<void> _openScanner() async {
-    if (controller.isFormValid()) {
+    if (!controller.isFormValid()) {
       _showValidationSnackBar();
       return;
     }
@@ -355,7 +355,7 @@ class _RMDStockInState extends State<RMDStockIn> {
   void _showWithoutScanDialog(bool isSmallScreen) {
     final barcodeController = TextEditingController();
 
-    if (controller.isFormValid()) {
+    if (!controller.isFormValid()) {
       _showValidationSnackBar();
       return;
     }

@@ -114,7 +114,7 @@ class _WebbingInStockState extends State<WebbingInStock> {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBar(
-        backgroundColor: Colors.grey.shade200,
+        backgroundColor: C.primary,
         elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),

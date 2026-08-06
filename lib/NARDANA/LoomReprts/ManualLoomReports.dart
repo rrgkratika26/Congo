@@ -3,6 +3,7 @@ import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:IMS/util/sharedpreference/shared_preference.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Color/Colorclass.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
@@ -22,7 +23,8 @@ class _ManualPlanningReportsState extends State<ManualPlanningReports> {
   String _query = '';
   DateTime? _from;
   DateTime? _to;
-  String _unit = AppGlobals.unit;
+  String unitName = '';
+
   List<ManualPlanningModel> _allReports = [];
   bool _isLoading = false;
 
@@ -84,12 +86,14 @@ class _ManualPlanningReportsState extends State<ManualPlanningReports> {
 
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
 
+    unitName = prefs.getString('unit') ?? 'UNIT';
     try {
       final data = await InStockService().fetchManualPlanning(
-        from: _from,
+        from: DateTime.now().subtract(const Duration(days: 6)),
         to: _to,
-        unit: _unit,
+        unit: unitName,
       );
 
       setState(() {
@@ -157,7 +161,7 @@ class _ManualPlanningReportsState extends State<ManualPlanningReports> {
         // ],
         actions: [
           /// SIMPLE TEXT COUNT
-          CountText(count: _filtered.length),
+          // CountText(count: _filtered.length),
 
           IconButton(
             icon: const Icon(Icons.calendar_today, color: C.bg, size: 18),

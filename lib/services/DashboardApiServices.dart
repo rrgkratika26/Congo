@@ -79,38 +79,38 @@ class DashboardService {
 
     final result = await Future.wait([
       get("planning"), // 0
-      // get("cutting"), // 1
-      // get("cutpcs"), // 2
-      // get("totalbagproduction"), // 3
-      // get("bailing"), // 4
-      // get("tapeline"), //5
+      get("cutting"), // 1
+      get("cutpcs"), // 2
+      get("totalbagproduction"), // 3
+      get("bailing"), // 4
+      get("tapeline"), //5
 
-      // getMarketing("WO"), // 6
+      getMarketing("WO"), // 6
       getMarketing("RMD"), // 7
-      // getMarketing("LAMINATION"), // 8
-      // getMarketing("BOM"), // 9
-      // getMarketing("INQUIRY"), // 10
+      getMarketing("LAMINATION"), // 8
+      getMarketing("BOM"), // 9
+      getMarketing("INQUIRY"), // 10
       get("GetLoomData"), // 6
     ]);
 
     final dashboard = DashboardSummary.fromJson(
       planningJson: result[0],
-      // cuttingJson: result[1],
-      // cutPcsJson: result[2],
-      // bagJson: result[3],
-      // bailingJson: result[4],
-      // tapeJson: result[5],
-      // woJson: result[6],
-      rmdJson: result[1],
-      // laminationJson: result[8],
-      // bomJson: result[9],
-      // inquiryJson: result[10],
-      loomJson: result[2],
+      cuttingJson: result[1],
+      cutPcsJson: result[2],
+      bagJson: result[3],
+      bailingJson: result[4],
+      tapeJson: result[5],
+      woJson: result[6],
+      rmdJson: result[7],
+      laminationJson: result[8],
+      bomJson: result[9],
+      inquiryJson: result[10],
+      loomJson: result[11],
     );
 
-    // print("Inquiry Count = ${dashboard.inquiryCount}");
+    print("Inquiry Count = ${dashboard.inquiryCount}");
 
-    // print("Inquiry Count = ${dashboard.bomCount}");
+    print("Inquiry Count = ${dashboard.bomCount}");
 
     return dashboard;
   }

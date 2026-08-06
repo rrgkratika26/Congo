@@ -66,8 +66,8 @@ class _DeptItem {
 // ─────────────────────────────────────────────
 List<MenuAction> getActionsForMenu(String dept) {
   switch (dept.toUpperCase()) {
-    // case 'INQUIRY':
-    //   return [MenuAction.Inquirey_Report,MenuAction.Bom_Report,MenuAction.bomList,MenuAction.Issue_to_QC];
+    case 'INQUIRY':
+      return [MenuAction.Inquirey_Report,MenuAction.Bom_Report,MenuAction.bomList,MenuAction.Issue_to_QC];
     case 'PLANNING':
       return [
         MenuAction.Order_Planning,
@@ -118,15 +118,15 @@ List<MenuAction> getActionsForMenu(String dept) {
     case 'CUTTING':
       return [
         MenuAction.IN,
-        // MenuAction.OUT,
+        MenuAction.OUT,
         MenuAction.In_Report,
-        // MenuAction.rollWise,
-        // MenuAction.component_Wise,
-        // MenuAction.cutting_Wise,
+        MenuAction.rollWise,
+        MenuAction.component_Wise,
+        MenuAction.cutting_Wise,
 
-        // MenuAction.stock,
-        // MenuAction.Approval,
-        // MenuAction.Pcs_Issue,
+        MenuAction.stock,
+        MenuAction.Approval,
+        MenuAction.Pcs_Issue,
       ];
     case 'JBL CUTTING':
       return [MenuAction.IN];
@@ -164,13 +164,13 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.Out_Report,
         MenuAction.Stock_Report,
       ];
-    // case 'MARKETING':
-    //   return [
-    //     MenuAction.Inquirey_Report,
-    //     MenuAction.Bom_Report,
-    //     MenuAction.Issue_to_QC,
-    //     MenuAction.Bom_List_remain,
-    //   ];
+    case 'MARKETING':
+      return [
+        MenuAction.Inquirey_Report,
+        MenuAction.Bom_Report,
+        MenuAction.Issue_to_QC,
+        MenuAction.Bom_List_remain,
+      ];
     case 'JBL DISPATCH':
       return [MenuAction.entry];
     default:
@@ -227,20 +227,20 @@ class _AdminDashboard extends StatelessWidget {
   ];
 
   static const _allItems = [
-    // _DeptItem(title: 'MARKETING', icon: Icons.bar_chart),
-    // _DeptItem(title: 'PLANNING', icon: Icons.next_plan_rounded),
-    // _DeptItem(title: 'LOOM', icon: Icons.looks),
+    _DeptItem(title: 'MARKETING', icon: Icons.bar_chart),
+    _DeptItem(title: 'PLANNING', icon: Icons.next_plan_rounded),
+    _DeptItem(title: 'LOOM', icon: Icons.looks),
     _DeptItem(title: 'RMD', icon: Icons.inventory),
     _DeptItem(title: 'PRINTING', icon: Icons.print),
     _DeptItem(title: 'SLITTING', icon: Icons.scale),
 
     _DeptItem(title: 'LAMINATION', icon: Icons.layers),
     _DeptItem(title: 'CUTTING', icon: Icons.cut),
-    // _DeptItem(title: 'BAG', icon: Icons.shopping_bag),
-    // _DeptItem(title: 'BALING', icon: Icons.waves),
-    // _DeptItem(title: 'WEBBING', icon: Icons.web),
-    // _DeptItem(title: 'LEDGER', icon: Icons.menu_book),
-    // _DeptItem(title: 'TAPELINE', icon: Icons.dashboard),
+    _DeptItem(title: 'BAG', icon: Icons.shopping_bag),
+    _DeptItem(title: 'BALING', icon: Icons.waves),
+    _DeptItem(title: 'WEBBING', icon: Icons.web),
+    _DeptItem(title: 'LEDGER', icon: Icons.menu_book),
+    _DeptItem(title: 'TAPELINE', icon: Icons.dashboard),
     // _DeptItem(title: 'INQUIRY', icon: Icons.question_answer),
   ];
 
@@ -1049,17 +1049,17 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
   }
 
   switch (dept.toUpperCase()) {
-    // case 'MARKETING':
-    //   if (action == MenuAction.Inquirey_Report)
-    //     Get.toNamed(AppRoutes.InquiryMarketingReport);
-    //   if (action == MenuAction.Bom_Report) Get.toNamed(AppRoutes.bomReport);
-    //F
-    //   if (action == MenuAction.Bom_List_remain) {
-    //     Get.toNamed(AppRoutes.bomList);
-    //   }
-    //   if (action == MenuAction.Issue_to_QC) Get.toNamed(AppRoutes.Issue_to_QC);
-    //
-    //   break;
+    case 'MARKETING':
+      if (action == MenuAction.Inquirey_Report)
+        Get.toNamed(AppRoutes.InquiryMarketingReport);
+      if (action == MenuAction.Bom_Report) Get.toNamed(AppRoutes.bomReport);
+
+      if (action == MenuAction.Bom_List_remain) {
+        Get.toNamed(AppRoutes.bomList);
+      }
+      if (action == MenuAction.Issue_to_QC) Get.toNamed(AppRoutes.Issue_to_QC);
+
+      break;
     case 'PLANNING':
       if (action == MenuAction.Order_Planning)
         Get.toNamed(AppRoutes.orderPlanning);
@@ -1135,10 +1135,10 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.printingIn);
       else if (action == MenuAction.OUT)
         Get.toNamed(AppRoutes.printingOut);
-      // else if (action == MenuAction.In_Report)
-      //   Get.toNamed(AppRoutes.lamNaradanaInReport);
-      // else if (action == MenuAction.Out_Report)
-      //   Get.toNamed(AppRoutes.lamNaradanaOutReport);
+      else if (action == MenuAction.In_Report)
+        Get.toNamed(AppRoutes.printingInReport);
+      else if (action == MenuAction.Out_Report)
+        Get.toNamed(AppRoutes.printingOutReport);
       break;
     case 'SLITTING':
       if (action == MenuAction.IN) Get.toNamed(AppRoutes.slittingIn);

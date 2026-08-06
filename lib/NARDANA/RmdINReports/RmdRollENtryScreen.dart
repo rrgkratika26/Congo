@@ -331,7 +331,7 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
       fabricCodes = data.fabricCodes;
       locations = data.locations;
     });
-    }
+  }
 
   // Future<void> loadPoNumbers(String customerName) async {
   //   final data = await RmdService.getPoNumbers(customerName);
@@ -689,318 +689,317 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
                                 ),
                               ]),
                             ]),
-                            _sectionCard(
-                              title: "Order Details",
-                              icon: Icons.assignment_outlined,
-                              children: [
-                                responsiveRow([
-                                  // buildDropdown(
-                                  //   label: "PO Number",
-                                  //   icon: Icons.confirmation_number,
-                                  //   value: selectedPoNo,
-                                  //   items: poNumbers,
-                                  //   onChanged: (value) async {
-                                  //     setState(() {
-                                  //       selectedPoNo = value;
-                                  //     });
-                                  //
-                                  //     if (selectedParty != null && value != null) {
-                                  //       await loadArticleBom(selectedParty!, value);
-                                  //     }
-                                  //   },
-                                  // ),
-                                  buildEditableDropdown(
-                                    key: ValueKey(poNumbers.join(",")),
-                                    label: "PO Number",
-                                    items: List<String>.from(poNumbers),
-                                    controller: poController,
-                                    icon: Icons.confirmation_number,
+                          ],
+                        ),
+                        _sectionCard(
+                          title: "Order Details",
+                          icon: Icons.assignment_outlined,
+                          children: [
+                            responsiveRow([
+                              // buildDropdown(
+                              //   label: "PO Number",
+                              //   icon: Icons.confirmation_number,
+                              //   value: selectedPoNo,
+                              //   items: poNumbers,
+                              //   onChanged: (value) async {
+                              //     setState(() {
+                              //       selectedPoNo = value;
+                              //     });
+                              //
+                              //     if (selectedParty != null && value != null) {
+                              //       await loadArticleBom(selectedParty!, value);
+                              //     }
+                              //   },
+                              // ),
+                              buildEditableDropdown(
+                                key: ValueKey(poNumbers.join(",")),
+                                label: "PO Number",
+                                items: List<String>.from(poNumbers),
+                                controller: poController,
+                                icon: Icons.confirmation_number,
 
-                                    onSelected: (value) async {
-                                      selectedPoNo = value;
+                                onSelected: (value) async {
+                                  selectedPoNo = value;
 
-                                      await loadArticleBom(
-                                        partyController.text.trim(),
-                                        value,
-                                      );
-                                    },
-                                  ),
-
-                                  // buildDropdown(
-                                  //   label: "BOM Number",
-                                  //   icon: Icons.numbers,
-                                  //   value: selectedBom,
-                                  //   items: bomNumbers,
-                                  //   onChanged: (value) {
-                                  //     setState(() {
-                                  //       selectedBom = value;
-                                  //     });
-                                  //   },
-                                  // ),
-                                  buildEditableDropdown(
-                                    key: ValueKey(bomNumbers.join(",")),
-                                    label: "BOM Number",
-                                    items: List<String>.from(bomNumbers),
-                                    controller: bomController,
-                                    icon: Icons.numbers,
-
-                                    onSelected: (value) {
-                                      setState(() {
-                                        selectedBom = value;
-                                      });
-                                    },
-
-                                    onChanged: (value) {
-                                      selectedBom = value;
-                                    },
-                                  ),
-
-                                  // buildDropdown(
-                                  //   label: "Article Number",
-                                  //   icon: Icons.article,
-                                  //   value: selectedArticle,
-                                  //   items: articleNumbers,
-                                  //   onChanged: (value) {
-                                  //     setState(() {
-                                  //       selectedArticle = value;
-                                  //     });
-                                  //   },
-                                  // ),
-                                  buildEditableDropdown(
-                                    key: ValueKey(articleNumbers.join(",")),
-                                    label: "Article Number",
-                                    items: List<String>.from(articleNumbers),
-                                    controller: articleController,
-                                    icon: Icons.article,
-
-                                    onSelected: (value) {
-                                      setState(() {
-                                        selectedArticle = value;
-                                      });
-                                    },
-
-                                    onChanged: (value) {
-                                      selectedArticle = value;
-                                    },
-                                  ),
-                                ]),
-                              ],
-                            ),
-                            _sectionCard(
-                              title: "Fabric",
-                              icon: Icons.monitor_weight_outlined,
-                              children: [
-                                responsiveRow([
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildField(
-                                          "Fabric Width",
-                                          controller: fabricWidthCtrl,
-                                          icon: Icons.straighten,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Expanded(
-                                        child: _buildField(
-                                          "Fabric Baffle Type",
-                                          controller: baffleCtrl,
-                                          icon: Icons.grid_view,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildField(
-                                          "Fabric Type",
-                                          controller: fabricTypeCtrl,
-                                          icon: Icons.category,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-
-                                      Expanded(
-                                        child: _buildField(
-                                          "Fabric GSM",
-                                          controller: gsmCtrl,
-                                          icon: Icons.scale,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildField(
-                                          "Lamination Type",
-                                          controller: laminationCtrl,
-                                          icon: Icons.layers,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-
-                                      Expanded(
-                                        child: _buildField(
-                                          "Color",
-                                          controller: colorCtrl,
-                                          icon: Icons.palette,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildField(
-                                          "Cut Type",
-                                          controller: cutTypeCtrl,
-                                          icon: Icons.blur_on,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-
-                                      Expanded(
-                                        child: _buildField(
-                                          "Special ID",
-                                          controller: sidCtrl,
-                                          icon: Icons.tag,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ]),
-                                _sectionCard(
-                                  title: "Weight & Length",
-                                  icon: Icons.monitor_weight_outlined,
-                                  children: [
-                                    responsiveRow([
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: _buildField(
-                                              "Gross Weight",
-                                              controller: grossWeightCtrl,
-
-                                              suffix: "kg",
-                                            ),
-                                          ),
-                                          SizedBox(width: 10),
-                                          Expanded(
-                                            child: _buildField(
-                                              "Tare Weight",
-                                              controller: tareWeightCtrl,
-
-                                              suffix: "kg",
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: _buildField(
-                                              "Roll Length",
-                                              controller: rollLengthCtrl,
-
-                                              suffix: "m",
-                                            ),
-                                          ),
-                                          SizedBox(width: 10),
-                                          Expanded(
-                                            child: _buildField(
-                                              "Roll Weight",
-                                              controller: netWeightCtrl,
-
-                                              readOnly: true,
-                                              suffix: "kg",
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: _buildField(
-                                              "Avg Wt(Gm)",
-                                              controller: avgWeightMtrCtrl,
-
-                                              readOnly: true,
-                                              suffix: "g/m",
-                                            ),
-                                          ),
-                                          SizedBox(width: 10),
-                                          Expanded(
-                                            child: _buildField(
-                                              "Mesh",
-                                              controller: meshCtrl,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ]),
-                                  ],
-                                ),
-                                _sectionCard(
-                                  title: "Generated Codes",
-                                  icon: Icons.qr_code_2_rounded,
-                                  children: [
-                                    responsiveRow([
-                                      // _buildField(
-                                      //   "Batch No",
-                                      //   controller: _batchController,
-                                      //   icon: Icons.confirmation_number_outlined,
-                                      //   readOnly: true,
-                                      // ),
-                                      _buildField(
-                                        "Generated Code",
-                                        controller: _generatedCodeController,
-                                        icon: Icons.code_rounded,
-                                        readOnly: true,
-                                      ),
-                                    ]),
-                                  ],
-                                ),
-
-                                _sectionCard(
-                                  title: "Remark",
-                                  icon: Icons.notes_rounded,
-                                  children: [
-                                    _buildField(
-                                      "Remark",
-                                      controller: remarkCtrl,
-                                      icon: Icons.edit_note_rounded,
-                                      maxLines: 3,
-                                      fullWidth: true,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: _generateCodes,
-                                icon: const Icon(Icons.refresh_rounded),
-                                label: const Text("Generate Code"),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: C.primaryDark,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
+                                  await loadArticleBom(
+                                    partyController.text.trim(),
+                                    value,
+                                  );
+                                },
                               ),
+
+                              // buildDropdown(
+                              //   label: "BOM Number",
+                              //   icon: Icons.numbers,
+                              //   value: selectedBom,
+                              //   items: bomNumbers,
+                              //   onChanged: (value) {
+                              //     setState(() {
+                              //       selectedBom = value;
+                              //     });
+                              //   },
+                              // ),
+                              buildEditableDropdown(
+                                key: ValueKey(bomNumbers.join(",")),
+                                label: "BOM Number",
+                                items: List<String>.from(bomNumbers),
+                                controller: bomController,
+                                icon: Icons.numbers,
+
+                                onSelected: (value) {
+                                  setState(() {
+                                    selectedBom = value;
+                                  });
+                                },
+
+                                onChanged: (value) {
+                                  selectedBom = value;
+                                },
+                              ),
+
+                              // buildDropdown(
+                              //   label: "Article Number",
+                              //   icon: Icons.article,
+                              //   value: selectedArticle,
+                              //   items: articleNumbers,
+                              //   onChanged: (value) {
+                              //     setState(() {
+                              //       selectedArticle = value;
+                              //     });
+                              //   },
+                              // ),
+                              buildEditableDropdown(
+                                key: ValueKey(articleNumbers.join(",")),
+                                label: "Article Number",
+                                items: List<String>.from(articleNumbers),
+                                controller: articleController,
+                                icon: Icons.article,
+
+                                onSelected: (value) {
+                                  setState(() {
+                                    selectedArticle = value;
+                                  });
+                                },
+
+                                onChanged: (value) {
+                                  selectedArticle = value;
+                                },
+                              ),
+                            ]),
+                          ],
+                        ),
+                        _sectionCard(
+                          title: "Fabric",
+                          icon: Icons.monitor_weight_outlined,
+                          children: [
+                            responsiveRow([
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildField(
+                                      "Fabric Width",
+                                      controller: fabricWidthCtrl,
+                                      icon: Icons.straighten,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: _buildField(
+                                      "Fabric Baffle Type",
+                                      controller: baffleCtrl,
+                                      icon: Icons.grid_view,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildField(
+                                      "Fabric Type",
+                                      controller: fabricTypeCtrl,
+                                      icon: Icons.category,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+
+                                  Expanded(
+                                    child: _buildField(
+                                      "Fabric GSM",
+                                      controller: gsmCtrl,
+                                      icon: Icons.scale,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildField(
+                                      "Lamination Type",
+                                      controller: laminationCtrl,
+                                      icon: Icons.layers,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+
+                                  Expanded(
+                                    child: _buildField(
+                                      "Color",
+                                      controller: colorCtrl,
+                                      icon: Icons.palette,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildField(
+                                      "Cut Type",
+                                      controller: cutTypeCtrl,
+                                      icon: Icons.blur_on,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+
+                                  Expanded(
+                                    child: _buildField(
+                                      "Special ID",
+                                      controller: sidCtrl,
+                                      icon: Icons.tag,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ]),
+
+                          ],
+                        ),
+                        _sectionCard(
+                          title: "Weight & Length",
+                          icon: Icons.monitor_weight_outlined,
+                          children: [
+                            responsiveRow([
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildField(
+                                      "Gross Weight",
+                                      controller: grossWeightCtrl,
+
+                                      suffix: "kg",
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: _buildField(
+                                      "Tare Weight",
+                                      controller: tareWeightCtrl,
+
+                                      suffix: "kg",
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildField(
+                                      "Roll Length",
+                                      controller: rollLengthCtrl,
+
+                                      suffix: "m",
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: _buildField(
+                                      "Roll Weight",
+                                      controller: netWeightCtrl,
+
+                                      readOnly: true,
+                                      suffix: "kg",
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildField(
+                                      "Avg Wt(Gm)",
+                                      controller: avgWeightMtrCtrl,
+
+                                      readOnly: true,
+                                      suffix: "g/m",
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: _buildField(
+                                      "Mesh",
+                                      controller: meshCtrl,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ]),
+                          ],
+                        ),
+                        _sectionCard(
+                          title: "Generated Codes",
+                          icon: Icons.qr_code_2_rounded,
+                          children: [
+                            responsiveRow([
+                              // _buildField(
+                              //   "Batch No",
+                              //   controller: _batchController,
+                              //   icon: Icons.confirmation_number_outlined,
+                              //   readOnly: true,
+                              // ),
+                              _buildField(
+                                "Generated Code",
+                                controller: _generatedCodeController,
+                                icon: Icons.code_rounded,
+                                readOnly: true,
+                              ),
+                            ]),
+                          ],
+                        ),
+
+                        _sectionCard(
+                          title: "Remark",
+                          icon: Icons.notes_rounded,
+                          children: [
+                            _buildField(
+                              "Remark",
+                              controller: remarkCtrl,
+                              icon: Icons.edit_note_rounded,
+                              maxLines: 3,
+                              fullWidth: true,
                             ),
                           ],
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: _generateCodes,
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: const Text("Generate Code"),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: C.primaryDark,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -1148,7 +1147,7 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
                 ),
                 child: Icon(icon, size: 16, color: C.appBar1),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Text(
                 title,
                 style: TextStyle(
@@ -1263,8 +1262,8 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
         filled: true,
         fillColor: const Color(0xFFF6F7FB),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+          horizontal: 10,
+          vertical: 10,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -1328,7 +1327,8 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
               focusNode: focusNode,
               decoration: InputDecoration(
                 labelText: label,
-                prefixIcon: icon != null ? Icon(icon) : null,
+                isDense: true,
+                prefixIcon: icon != null ? Icon(icon,size: 16,) : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -1352,11 +1352,11 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
             return Align(
               alignment: Alignment.topLeft,
               child: Material(
-                elevation: 5,
+                elevation: 4,
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  width: 300,
-                  constraints: const BoxConstraints(maxHeight: 220),
+                  width: 150,
+                  constraints: const BoxConstraints(maxHeight: 180),
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
                     itemCount: options.length,
@@ -1365,6 +1365,12 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
 
                       return ListTile(
                         dense: true,
+                        minTileHeight: 32,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                        visualDensity: const VisualDensity(
+                          horizontal: 0,
+                          vertical: -4,
+                        ),
                         title: Text(option),
                         onTap: () => onSelected(option),
                       );
@@ -1390,7 +1396,7 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
           count = 2;
         }
 
-        const spacing = 12.0;
+        const spacing = 10.0;
         final width = (constraints.maxWidth - ((count - 1) * spacing)) / count;
 
         return Wrap(

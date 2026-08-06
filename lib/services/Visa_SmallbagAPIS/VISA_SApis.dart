@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../ScannedItem/Cutting/cutOutModelClass/ModelClassOutstock.dart';
@@ -13,6 +14,8 @@ import '../../Visa/Loom/modelClass/FIBCmodel.dart';
 import '../../Visa/Loom/modelClass/LoomMasterModel.dart';
 import '../../Visa/Loom/modelClass/LoomSavedListModel.dart';
 import '../../Visa/Loom/modelClass/LoomTypeModel.dart';
+import '../../screen/Printing/ModelClass/InReportModelClass.dart';
+import '../../screen/Printing/ModelClass/PrintOutReport.dart';
 import '../../screen/Printing/ModelClass/PrintOutsaveListModel.dart';
 import '../../screen/Printing/ModelClass/Printmodel.dart';
 
@@ -26,14 +29,14 @@ class VisaSmallBagApiService {
   // static const String baseUrlJBL ='http://190.92.175.47:80/api/api';
   // static const String baseUrlJBL ='http://190.92.175.47/Qualipack/api';
   // static const String baseUrlJBL ='http://190.92.175.47/CONGO_API/api';
-  // static const String baseUrlJBL = 'http://192.168.29.125:7165/api';
+  // static const String baseUrl = 'http://192.168.29.125:7165/api';
   static const String baseUrl = 'http://190.92.175.47/VISA_S/api';
 
   // static const String baseUrlJBL = 'http://190.92.175.47/ShriShakti/api';
 
   // static const String baseUrlJBL ='http://192.168.29.39:44349/api/api';
 
-  // static const String baseUrlJBL = 'http://190.92.175.47:80/Nardana/api';
+  // static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String baseUrlJBL = 'http://190.92.175.47:80/ASIA_API/api';
 
   Future<List<String>> getPrintingLocations() async {
@@ -100,7 +103,6 @@ class VisaSmallBagApiService {
     required String operator,
     required String location,
     required String plant,
-
     required String roll,
     String party = "",
     String workOrderNo = "",
@@ -110,8 +112,9 @@ class VisaSmallBagApiService {
 
     final body = {
       "barcode": barcode,
-      "roll": "SLITTING",
+      "roll": roll,
       "operator": operator,
+      "supervisor": supervisor,
       "location": location,
       "party": party,
       "workOrderNo": workOrderNo,
@@ -133,11 +136,8 @@ class VisaSmallBagApiService {
     debugPrint("Status : ${response.statusCode}");
     debugPrint("Response : ${response.body}");
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    }
-
-    return {"status": "error", "message": response.body};
+    // Parse response for both success and error
+    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
   Future<Map<String, dynamic>> getPrintingSpAndOpName() async {
@@ -254,7 +254,6 @@ class VisaSmallBagApiService {
     required String plant,
     required String party,
     required String workorder,
-
   }) async {
     final url = Uri.parse('$baseUrl/Slitting/SlittingIn');
 
@@ -266,7 +265,7 @@ class VisaSmallBagApiService {
       "roll": roll,
       "plant": plant,
       "party": "",
-      "workOrderNo": ''
+      "workOrderNo": '',
     };
 
     debugPrint("URL : $url");
@@ -292,8 +291,7 @@ class VisaSmallBagApiService {
   }
 
   Future<List<dynamic>> SlittingScannedItemsDetails(String date) async {
-    final url =
-        '${InStockService.baseUrl}/Slitting/ScannedItems?date=$date';
+    final url = '${InStockService.baseUrl}/Slitting/ScannedItems?date=$date';
 
     print("URL : $url");
 
@@ -314,11 +312,82 @@ class VisaSmallBagApiService {
     }
   }
 
-
   Future<int> getSlittingItemsCount(String date) async {
     final items = await SlittingScannedItemsDetails(date);
     return items.length;
   }
 
+  Future<List<PrintingOutReportItem>> fetchPrintingOutReport({
+    required DateTime fromDate,
+    required DateTime toDate,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    final uri = Uri.parse('$baseUrl/Printing/Printoutreport').replace(
+      queryParameters: {
+        'fromDate': DateFormat('yyyy-MM-dd').format(fromDate),
+        'toDate': DateFormat('yyyy-MM-dd').format(toDate),
+        'pageNumber': pageNumber.toString(),
+        'pageSize': pageSize.toString(),
+      },
+    );
 
+    final response = await http.get(
+      uri,
+      headers: await InStockService.authHeaders(),
+    );
+    print("Status Code : ${response.statusCode}");
+    print("Response : ${response.body}");
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      final model = PrintingOutReportModel.fromJson(jsonData);
+      return model.data;
+    } else {
+      throw Exception(
+        'Failed to load Printing Out Report: ${response.statusCode}\n${response.body}',
+      );
+    }
+  }
+
+  //   PrintINReport
+
+  Future<PrintingInReportModel> fetchPrintingInReport({
+    required String unit,
+    required DateTime fromDate,
+    required DateTime toDate,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) async {
+    final uri = Uri.parse(
+      '$baseUrl/Printing/PrintINReport',
+    ).replace(
+      queryParameters: {
+        'unit': unit,
+        'fromDate': DateFormat('yyyy-MM-dd').format(fromDate),
+        'toDate': DateFormat('yyyy-MM-dd').format(toDate),
+        'pageNumber': pageNumber.toString(),
+        'pageSize': pageSize.toString(),
+      },
+    );
+
+
+    final response = await http.get(
+      uri,
+      headers: await InStockService.authHeaders(),
+    );
+    print("Status Code : $uri}");
+
+    print("Status Code : ${response.statusCode}");
+    print("Printing In Report : ${response.body}");
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      final json = jsonDecode(response.body);
+
+      return PrintingInReportModel.fromJson(json);
+    } else {
+      throw Exception(
+        'Failed to load Printing Out Report: ${response.statusCode}\n${response.body}',
+      );
+    }
+  }
 }

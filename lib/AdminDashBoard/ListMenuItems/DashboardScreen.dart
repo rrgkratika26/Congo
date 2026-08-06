@@ -41,16 +41,7 @@ class _DashboardScreenExampleState extends State<DashboardScreenExample> {
               ),
             ),
 
-            // Chart — needs the same deptCounts your top bar loaded.
-            // Simplest wiring: lift deptCounts state up one level (e.g. via
-            // a GetX controller) instead of re-fetching here. Placeholder
-            // below assumes a `controller.deptCounts` Rx list.
-            //
-            // SliverToBoxAdapter(
-            //   child: Obx(() => DashboardChartCard(
-            //     deptCounts: controller.deptCounts,
-            //   )),
-            // ),
+
 
             SliverToBoxAdapter(child: const SizedBox(height: 12)),
 

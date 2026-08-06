@@ -317,30 +317,77 @@ class _PrintRollEntryFormState extends State<PrintRollEntryForm> {
   //   }
   // }
 
+  // void _calculateWeights() {
+  //   final gross = double.tryParse(_grossCtrl.text) ?? 0;
+  //   final tare = double.tryParse(_tareCtrl.text) ?? 0;
+  //   final rollLength = double.tryParse(_rollLengthCtrl.text) ?? 0;
+  //   final fabricWidth = double.tryParse(_fabricWidthCtrl.text) ?? 0;
+  //
+  //   final rollWeight = gross - tare;
+  //   _rollWeightCtrl.text = rollWeight.toStringAsFixed(2);
+  //
+  //   double avgWeightGm = 0;
+  //   if (rollLength > 0) avgWeightGm = (rollWeight / rollLength) * 1000;
+  //   _avgCtrl.text = avgWeightGm.toStringAsFixed(2);
+  //   print("_avgCtrl.text = ${_avgCtrl.text}");
+  //   double avgMtrGm = 0;
+  //   if (fabricWidth > 0) {
+  //     avgMtrGm = avgWeightGm / (fabricWidth / 100);
+  //   }
+  //   _avgMtrGmCtrl.text = avgMtrGm.toStringAsFixed(2);
+  //   print("_avgMtrGmCtrl.text = ${_avgMtrGmCtrl.text}");
+  // }
+
+
   void _calculateWeights() {
     final gross = double.tryParse(_grossCtrl.text) ?? 0;
     final tare = double.tryParse(_tareCtrl.text) ?? 0;
     final rollLength = double.tryParse(_rollLengthCtrl.text) ?? 0;
-    final fabricWidth = double.tryParse(_fabricWidthCtrl.text) ?? 0;
+
+    // Fabric width entered in CM
+    final fabricWidthCm = double.tryParse(_fabricWidthCtrl.text) ?? 0;
 
     final rollWeight = gross - tare;
     _rollWeightCtrl.text = rollWeight.toStringAsFixed(2);
 
+    // Avg Weight (gm)
     double avgWeightGm = 0;
-    if (rollLength > 0) avgWeightGm = (rollWeight / rollLength) * 1000;
+    if (rollLength > 0) {
+      avgWeightGm = (rollWeight / rollLength) * 1000;
+    }
     _avgCtrl.text = avgWeightGm.toStringAsFixed(2);
 
+    // Convert CM to Meter
+    final fabricWidthM = fabricWidthCm / 100;
+
+    // Check first letter of Fabric Baffle
+    final baffle = _fabricBaffleCtrl.text.trim().toUpperCase();
+
     double avgMtrGm = 0;
-    if (fabricWidth > 0) {
-      avgMtrGm = avgWeightGm / (fabricWidth / 100);
+
+    if (fabricWidthM > 0) {
+      if (baffle.startsWith("C")) {
+        // C type
+        avgMtrGm = avgWeightGm / (fabricWidthM * 2);
+      } else {
+        // Other types
+        avgMtrGm = avgWeightGm / fabricWidthM;
+      }
     }
+
     _avgMtrGmCtrl.text = avgMtrGm.toStringAsFixed(2);
+
+    print("Avg Weight (gm): ${_avgCtrl.text}");
+    print("Fabric Width(m): $fabricWidthM");
+    print("Fabric Baffle: $baffle");
+    print("Avg Weight (Mtr/Gm): ${_avgMtrGmCtrl.text}");
   }
+
+
 
   void _generateFabricCode() {
     if (_fabricWidthCtrl.text.isEmpty ||
         _fabricBaffleCtrl.text.isEmpty ||
-
         _fabricGsmCtrl.text.isEmpty ||
         _laminationCtrl.text.isEmpty ||
         _colorCtrl.text.isEmpty ||
@@ -394,6 +441,7 @@ class _PrintRollEntryFormState extends State<PrintRollEntryForm> {
       sid: _specialIdCtrl.text,
       fabricBaffleType: _fabricBaffleCtrl.text,
       rollWeightKg: _rollWeightCtrl.text,
+
       rollLengthMtr: _rollLengthCtrl.text,
       grossWeight: _grossCtrl.text,
       avgWeight: _avgCtrl.text,

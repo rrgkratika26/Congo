@@ -13,7 +13,7 @@ class OutReportDetailsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: C.bg),
-        title: const Text('RMD OUT Report',style: TextStyle(color: C.bg),),
+        title: const Text('RMD OUT STOCK',style: TextStyle(color: C.bg),),
         centerTitle: true,
         backgroundColor: C.appBar1,
       ),
@@ -68,9 +68,9 @@ class OutReportDetailsScreen extends StatelessWidget {
                               color: Colors.orange,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Text(
-                              'OUT',
-                              style: TextStyle(
+                            child: Text(
+                              item['ROLL CODE']?.toString() ?? '-',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),

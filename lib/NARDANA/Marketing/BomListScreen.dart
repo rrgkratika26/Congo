@@ -169,10 +169,10 @@ class _BomListScreenState extends State<BomListScreen> {
     });
   }
 
-  static const double colWo = 120;
+  static const double colWo = 80;
   static const double colCustomer = 220;
-  static const double colBagRef = 250;
-  static const double colBagType = 160;
+  static const double colBagRef = 150;
+  static const double colBagType = 100;
   static const double colInquiry = 150;
   static const double colUser = 150;
   static const double colStatus = 130;
@@ -212,7 +212,6 @@ class _BomListScreenState extends State<BomListScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
           children: [
-
             const Text(
               "BOM List",
               style: TextStyle(
@@ -223,22 +222,15 @@ class _BomListScreenState extends State<BomListScreen> {
             ),
 
             // const SizedBox(width: 55),
-
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 "Total Records : $totalRecords",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 11),
               ),
             ),
           ],
@@ -247,14 +239,11 @@ class _BomListScreenState extends State<BomListScreen> {
 
       body: Column(
         children: [
-
           _buildFilters(),
 
           const SizedBox(height: 10),
 
-          Expanded(
-            child: _buildTable(),
-          ),
+          Expanded(child: _buildTable()),
         ],
       ),
     );
@@ -270,10 +259,7 @@ class _BomListScreenState extends State<BomListScreen> {
           color: const Color(0xFFF4F7FC),
           borderRadius: BorderRadius.circular(14),
 
-          border: Border.all(
-            color: C.primary.withOpacity(.25),
-            width: 1.3,
-          ),
+          border: Border.all(color: C.primary.withOpacity(.25), width: 1.3),
 
           boxShadow: [
             BoxShadow(
@@ -288,17 +274,12 @@ class _BomListScreenState extends State<BomListScreen> {
           controller: _searchController,
           onChanged: (_) => _filterData(),
 
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
 
           decoration: InputDecoration(
             hintText: "Search Customer / Inquiry / Bag",
 
-            hintStyle: TextStyle(
-              color: Colors.grey.shade500,
-            ),
+            hintStyle: TextStyle(color: Colors.grey.shade500),
 
             prefixIcon: Container(
               margin: const EdgeInsets.all(8),
@@ -308,10 +289,7 @@ class _BomListScreenState extends State<BomListScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
 
-              child: const Icon(
-                Icons.search,
-                color: C.primary,
-              ),
+              child: const Icon(Icons.search, color: C.primary),
             ),
 
             border: InputBorder.none,
@@ -377,7 +355,7 @@ class _BomListScreenState extends State<BomListScreen> {
   Widget _tableHeader() {
     return Container(
       decoration: const BoxDecoration(
-        color: C.bg,
+        color: C.brand200,
 
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
@@ -387,10 +365,9 @@ class _BomListScreenState extends State<BomListScreen> {
 
       child: Row(
         children: [
-
           _headerCell("WO", colWo),
 
-          _headerCell("CUSTOMER", colCustomer),
+          _headerCell("PARTY NAME", colCustomer),
 
           _headerCell("BAG REF", colBagRef),
 
@@ -416,18 +393,12 @@ class _BomListScreenState extends State<BomListScreen> {
     );
   }
 
-  Widget _headerCell(
-      String title,
-      double width,
-      ) {
+  Widget _headerCell(String title, double width) {
     return Container(
       width: width,
       alignment: Alignment.center,
 
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 15,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
 
       child: Text(
         title,
@@ -442,36 +413,29 @@ class _BomListScreenState extends State<BomListScreen> {
     );
   }
 
-  Widget _tableRow(
-      Map<String,dynamic> item
-      ) {
-
-    bool isProduction =
-    item["status"]
-        .toString()
-        .toUpperCase()
-        .contains("PRODUCTION");
+  Widget _tableRow(Map<String, dynamic> item) {
+    bool isProduction = item["status"].toString().toUpperCase().contains(
+      "PRODUCTION",
+    );
 
     return Container(
-
       color: filteredReports.indexOf(item).isEven
           ? Colors.white
           : const Color(0xFFF8FAFD),
 
       child: Row(
         children: [
+          _cell(item["wO_NO"] ?? "", colWo),
 
-          _cell(item["wO_NO"] ?? "",colWo),
+          _cell(item["cusT_ID"] ?? "", colCustomer),
 
-          _cell(item["cusT_ID"] ?? "",colCustomer),
+          _cell(item["baG_REF"] ?? "", colBagRef),
 
-          _cell(item["baG_REF"] ?? "",colBagRef),
+          _cell(item["baG_TYPE"] ?? "", colBagType),
 
-          _cell(item["baG_TYPE"] ?? "",colBagType),
+          _cell(item["inquirY_NO"] ?? "", colInquiry),
 
-          _cell(item["inquirY_NO"] ?? "",colInquiry),
-
-          _cell(item["useR_ID"] ?? "",colUser),
+          _cell(item["useR_ID"] ?? "", colUser),
 
           // Status Chip
           Container(
@@ -482,26 +446,20 @@ class _BomListScreenState extends State<BomListScreen> {
 
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(
-                    color: Colors.grey.shade300),
-                bottom: BorderSide(
-                    color: Colors.grey.shade300),
+                right: BorderSide(color: Colors.grey.shade300),
+                bottom: BorderSide(color: Colors.grey.shade300),
               ),
             ),
 
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
 
               decoration: BoxDecoration(
                 color: isProduction
                     ? Colors.green.shade100
                     : Colors.orange.shade100,
 
-                borderRadius:
-                BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20),
               ),
 
               child: Text(
@@ -520,56 +478,37 @@ class _BomListScreenState extends State<BomListScreen> {
           ),
 
           _cell(
-              item["issuE_DATE"]
-                  ?.toString()
-                  .split("T")[0] ??
-                  "",
-              colIssueDate),
+            item["issuE_DATE"]?.toString().split("T")[0] ?? "",
+            colIssueDate,
+          ),
 
-          _cell(item["conT_NO"] ?? "",colCont),
+          _cell(item["conT_NO"] ?? "", colCont),
 
-          _cell(item["unit"] ?? "",colUnit),
+          _cell(item["unit"] ?? "", colUnit),
 
-          _cell(
-              item["pO_DATE"]
-                  ?.toString()
-                  .split("T")[0] ??
-                  "",
-              colPo),
+          _cell(item["pO_DATE"]?.toString().split("T")[0] ?? "", colPo),
 
           _cell(
-              item["requesT_DISPATCH_DATE"]
-                  ?.toString()
-                  .split("T")[0] ??
-                  "",
-              colDispatch),
+            item["requesT_DISPATCH_DATE"]?.toString().split("T")[0] ?? "",
+            colDispatch,
+          ),
         ],
       ),
     );
   }
 
-  Widget _cell(
-      String text,
-      double width,
-      ) {
+  Widget _cell(String text, double width) {
     return Container(
       width: width,
 
       alignment: Alignment.center,
 
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 14,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
 
       decoration: BoxDecoration(
         border: Border(
-          right: BorderSide(
-            color: Colors.grey.shade300,
-          ),
-          bottom: BorderSide(
-            color: Colors.grey.shade300,
-          ),
+          right: BorderSide(color: Colors.grey),
+          bottom: BorderSide(color: Colors.grey),
         ),
       ),
 
@@ -578,10 +517,7 @@ class _BomListScreenState extends State<BomListScreen> {
 
         textAlign: TextAlign.center,
 
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
       ),
     );
   }

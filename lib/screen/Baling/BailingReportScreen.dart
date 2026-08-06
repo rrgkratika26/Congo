@@ -557,7 +557,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
       color: C.primary,
       child: Row(
         children: [
-          _headerCell("", _colCheck),
+          _headerCell("Select", _colCheck),
 
           _headerCell('BARCODE', _colBarcode),
           _headerCell('SR No', _colSrNo),

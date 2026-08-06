@@ -4,7 +4,6 @@ import 'package:IMS/services/Visa_SmallbagAPIS/VISA_SApis.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import '../../../Color/Colorclass.dart';
 import '../../../Visa/Loom/PrintBarcode.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
@@ -13,6 +12,7 @@ import '../../../util/sharedpreference/shared_preference.dart';
 import '../../ScannedItem/Lamination/lAMINATION_OUTsTOCK/Lamination_OutEntry.dart';
 import 'PrintingOutForm.dart';
 import 'ModelClass/Printmodel.dart';
+import 'PrintingOutSavedList.dart';
 
 class PrintingRollList extends StatefulWidget {
   const PrintingRollList({super.key});
@@ -159,7 +159,7 @@ class _PrintingRollListState extends State<PrintingRollList> {
         backgroundColor: C.primary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: C.bg),
+          icon: const Icon(Icons.arrow_back, color: C.bg),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -174,22 +174,29 @@ class _PrintingRollListState extends State<PrintingRollList> {
         // iconTheme: const IconThemeData(color: C.bgColor),
         actions: [
           // 🔹 Total count
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Text(
-                'Total: ${_rolls.length}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PrintOutsavedList(title: "Printing Rolls"),
+
+                  // For VISA
+                  // builder: (_) => const LamRollPrintScreen(title: "Lamination Rolls"),
                 ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: C.bg,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
+            ),
+            child: const Text(
+              "New Barcode",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
 

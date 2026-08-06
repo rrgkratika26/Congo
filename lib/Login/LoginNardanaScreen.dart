@@ -1657,7 +1657,7 @@ class _LoginPageState extends State<LoginPage>
                               _buildPasswordField(),
                               const SizedBox(height: 14),
                               _buildUnitDropdown(),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 55),
                               _buildDivider(),
                               const SizedBox(height: 10),
                               _buildLoginButton(),
@@ -2003,7 +2003,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Widget _fieldLabel(String text) => Text(
-    text.toUpperCase(),
+    text,
     style: TextStyle(
       fontSize: 11,
       fontWeight: FontWeight.w600,
@@ -2077,7 +2077,7 @@ class _LoginPageState extends State<LoginPage>
               ),
             ),
             SizedBox(
-              height: 35,
+              height: 45,
               child: Image.asset(
                 'assets/images/RRG_logo.png',
                 fit: BoxFit.contain,
