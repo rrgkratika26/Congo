@@ -63,7 +63,9 @@ class _RecentEntriesScreenState extends State<RecentEntriesScreen> {
         iconTheme: IconThemeData(color: C.bg),
         leading: IconButton(
           onPressed: () {
-            Get.off(() => const NewAdminDashboard());
+            Get.back;
+
+            // Get.off(() => const NewAdminDashboard());
           },
           icon: const Icon(Icons.arrow_back, color: C.bg),
         ),
@@ -100,9 +102,9 @@ class _RecentEntriesScreenState extends State<RecentEntriesScreen> {
                           DataColumn(label: Text("ID")),
                           DataColumn(label: Text("Supervisor")),
                           DataColumn(label: Text("Operator")),
-                          DataColumn(label: Text("Party")),
-                          DataColumn(label: Text("PO No")),
-                          DataColumn(label: Text("Article No")),
+                          DataColumn(label: Text("Party Name ")),
+                          // DataColumn(label: Text("PO No")),
+                          // DataColumn(label: Text("Article No")),
                           DataColumn(label: Text("Date")),
                           DataColumn(label: Text("Time")),
                           DataColumn(label: Text("Recipe")),
@@ -133,8 +135,8 @@ class _RecentEntriesScreenState extends State<RecentEntriesScreen> {
                               DataCell(Text(item['supervisor'] ?? '')),
                               DataCell(Text(item['oparator'] ?? '')),
                               DataCell(Text(item['party'] ?? '')),
-                              DataCell(Text(item['contno'] ?? '')),
-                              DataCell(Text(item['workorder'] ?? '')),
+                              // DataCell(Text(item['contno'] ?? '')),
+                              // DataCell(Text(item['workorder'] ?? '')),
                               DataCell(
                                 Text(
                                   (item['date'] ?? '')

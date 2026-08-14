@@ -20,6 +20,7 @@ class RmdService {
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
   }
+
   /// MASTER DATA
   static Future<RmdMasterModel?> getMasterData({required String unit}) async {
     final url = Uri.parse(
@@ -40,9 +41,7 @@ class RmdService {
       print("========================================");
 
       if (response.statusCode == 200) {
-        return RmdMasterModel.fromJson(
-          jsonDecode(response.body),
-        );
+        return RmdMasterModel.fromJson(jsonDecode(response.body));
       }
       return null;
     } catch (e) {
@@ -65,7 +64,6 @@ class RmdService {
       final response = await http.get(
         url,
         headers: await RmdService.authHeaders(),
-
       );
 
       print("STATUS : ${response.statusCode}");
@@ -73,16 +71,12 @@ class RmdService {
       print("========================================");
 
       if (response.statusCode == 200) {
-        return PoNumberModel.fromJson(
-          jsonDecode(response.body),
-        );
+        return PoNumberModel.fromJson(jsonDecode(response.body));
       }
       return null;
     } catch (e) {
       print("PO API ERROR : $e");
     }
-
-
   }
 
   /// ARTICLE + BOM
@@ -90,11 +84,10 @@ class RmdService {
     required String customerName,
     required String poNumber,
   }) async {
-
     final url = Uri.parse(
       "${InStockService.baseUrl}/Rmd/Rmd/GetArticleAndBom"
-          "?customerName=${Uri.encodeComponent(customerName)}"
-          "&poNumber=${Uri.encodeComponent(poNumber)}",
+      "?customerName=${Uri.encodeComponent(customerName)}"
+      "&poNumber=${Uri.encodeComponent(poNumber)}",
     );
 
     try {
@@ -104,7 +97,6 @@ class RmdService {
       final response = await http.get(
         url,
         headers: await RmdService.authHeaders(),
-
       );
 
       print("STATUS : ${response.statusCode}");
@@ -112,10 +104,7 @@ class RmdService {
       print("========================================");
 
       if (response.statusCode == 200) {
-        return ArticleBomModel.fromJson(
-          jsonDecode(response.body),
-        );
-
+        return ArticleBomModel.fromJson(jsonDecode(response.body));
       }
     } catch (e) {
       print("ARTICLE API ERROR : $e");
@@ -123,7 +112,6 @@ class RmdService {
 
     return null;
   }
-
 
   static Future<bool> saveRollEntry({
     required Map<String, dynamic> body,
@@ -139,9 +127,7 @@ class RmdService {
       debugPrint("SAVE Roll EntryRESPONSE : ${response.body}");
 
       if (response.statusCode == 200) {
-        return response.body
-            .toLowerCase()
-            .contains("data saved successfully");
+        return response.body.toLowerCase().contains("data saved successfully");
       }
 
       return false;
@@ -150,11 +136,14 @@ class RmdService {
       return false;
     }
   }
+
   static Future<List<RmdRollEntrySavedListModel>> fetchSavedRollEntry({
     required String fromDate,
     required String toDate,
   }) async {
-    final url = Uri.parse("${InStockService.baseUrl}/Rmd/SavedRollEntryList?fromDate=$fromDate&toDate=$toDate");
+    final url = Uri.parse(
+      "${InStockService.baseUrl}/Rmd/SavedRollEntryList?fromDate=$fromDate&toDate=$toDate",
+    );
 
     final response = await http.get(
       url,
@@ -167,14 +156,11 @@ class RmdService {
       print("REQUEST => ${response.body}");
       final List data = jsonDecode(response.body);
 
-      return data
-          .map((e) => RmdRollEntrySavedListModel.fromJson(e))
-          .toList();
+      return data.map((e) => RmdRollEntrySavedListModel.fromJson(e)).toList();
     } else {
       throw Exception("Failed to load Saved Roll Entry");
     }
   }
-
 
   Future<Map<String, dynamic>> printBarcode({
     required int id,
@@ -210,6 +196,4 @@ class RmdService {
       throw Exception("Print API Failed : ${response.body}");
     }
   }
-
-
 }

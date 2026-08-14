@@ -503,14 +503,14 @@ class _BomListScreenState extends State<BomListScreen> {
 
       alignment: Alignment.center,
 
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      // padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
 
-      decoration: BoxDecoration(
-        border: Border(
-          right: BorderSide(color: Colors.grey),
-          bottom: BorderSide(color: Colors.grey),
-        ),
-      ),
+      // decoration: BoxDecoration(
+      //   border: Border(
+      //     right: BorderSide(color: Colors.grey),
+      //     bottom: BorderSide(color: Colors.grey),
+      //   ),
+      // ),
 
       child: Text(
         text.isEmpty ? "-" : text,

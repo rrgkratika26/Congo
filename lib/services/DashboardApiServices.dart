@@ -27,7 +27,7 @@ class DashboardService {
     required String fromDate,
     required String toDate,
   }) async {
-    Future<Map<String, dynamic>> get(String api) async {
+    Future<Map<String, dynamic>> get(String unit,String api) async {
       final url = Uri.parse(
         "${InStockService.baseUrl}/Dashboard/$api"
         "?unit=$unit&fromDate=$fromDate&toDate=$toDate",
@@ -50,7 +50,7 @@ class DashboardService {
       throw Exception(response.body);
     }
 
-    Future<Map<String, dynamic>> getMarketing(String type) async {
+    Future<Map<String, dynamic>> getMarketing(String unit,String type) async {
       final url = Uri.parse(
         "${InStockService.baseUrl}/Dashboard/MarketingCount"
         "?unit=$unit&type=$type&fromDate=$fromDate&toDate=$toDate",
@@ -78,19 +78,19 @@ class DashboardService {
     }
 
     final result = await Future.wait([
-      get("planning"), // 0
-      get("cutting"), // 1
-      get("cutpcs"), // 2
-      get("totalbagproduction"), // 3
-      get("bailing"), // 4
-      get("tapeline"), //5
+      get(unit,"planning"), // 0
+      get(unit,"cutting"), // 1
+      get(unit,"cutpcs"), // 2
+      get(unit,"totalbagproduction"), // 3
+      get(unit,"bailing"), // 4
+      get(unit,"tapeline"), //5
 
-      getMarketing("WO"), // 6
-      getMarketing("RMD"), // 7
-      getMarketing("LAMINATION"), // 8
-      getMarketing("BOM"), // 9
-      getMarketing("INQUIRY"), // 10
-      get("GetLoomData"), // 6
+      getMarketing(unit,"WO"), // 6
+      getMarketing(unit,"RMD"), // 7
+      getMarketing(unit,"LAMINATION"), // 8
+      getMarketing(unit,"BOM"), // 9
+      getMarketing(unit,"INQUIRY"), // 10
+      get(unit,"GetLoomData"), // 6
     ]);
 
     final dashboard = DashboardSummary.fromJson(

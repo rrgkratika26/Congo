@@ -34,7 +34,7 @@ class _RmdOutScreenState extends State<RmdOutScreen> {
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text(
-          "RMD OUT${_unitTitle.isNotEmpty ? " - $_unitTitle" : ""}",
+          "RMD OUT",
           style: const TextStyle(color: C.bg),
         ),
         backgroundColor: C.appBar1,

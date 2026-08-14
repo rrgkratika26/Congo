@@ -78,6 +78,12 @@ class _UpdateLocationScreenState extends State<UpdateLocationScreen> {
         padding: EdgeInsets.all(isTablet ? 24 : 16),
         child: Column(
           children: [
+            Text(
+              "Note: Only RMD In Stock barcodes will be updated",
+              style: TextStyle(color: C.danger),
+            ),
+            const SizedBox(height: 15),
+
             /// LOCATION DROPDOWN
             Container(
               decoration: BoxDecoration(

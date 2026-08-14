@@ -51,15 +51,12 @@ class _CuttingStockScreenState extends State<CuttingStockScreen> {
     fetchData();
   }
 
-  ////////////////////////////////////////////////////////////////
-  /// MAIN DATA
-  ////////////////////////////////////////////////////////////////
 
   Future<void> fetchData() async {
     try {
       final result = await NaradanaApiService.getCuttingFabricSummary(
         page: 1,
-        pageSize: 500,
+        pageSize: 50,
       );
 
       allData = result;
@@ -96,9 +93,6 @@ class _CuttingStockScreenState extends State<CuttingStockScreen> {
     setState(() {});
   }
 
-  ////////////////////////////////////////////////////////////////
-  /// UI
-  ////////////////////////////////////////////////////////////////
 
   @override
   Widget build(BuildContext context) {

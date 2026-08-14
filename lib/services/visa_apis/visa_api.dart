@@ -21,8 +21,8 @@ class VisaApiService {
   // static const String baseUrlJBL ='http://190.92.175.47:80/api/api';
   // static const String baseUrlJBL ='http://190.92.175.47/Qualipack/api';
   // static const String baseUrlJBL ='http://190.92.175.47/CONGO_API/api';
-  // static const String baseUrlJBL = 'http://192.168.29.125:7165/api';
-  static const String baseUrlJBL = 'http://190.92.175.47/VISA_S/api';
+  static const String baseUrlJBL = 'http://192.168.29.125:7165/api';
+  // static const String baseUrlJBL = 'http://190.92.175.47/VISA_S/api';
 
 
   // static const String baseUrlJBL = 'http://190.92.175.47/ShriShakti/api';

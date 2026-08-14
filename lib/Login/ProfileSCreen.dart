@@ -1,4 +1,5 @@
 import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
+import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -202,7 +203,7 @@ class ProfileScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await LogoutService.logout();
+              await InStockService.logout();
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginPage()),

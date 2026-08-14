@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 
+import '../AdminDashBoard/AsiaDashBoard/DashboardTab.dart';
+import '../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../JBL/JBLWebbing/ReportsScreen/StockScreen.dart';
 import '../JBL/JBL_BagProduction/ReportModel/ReortScreen.dart';
 import '../JBL/JBL_Loom/FiBCLoomList_1screen.dart';
@@ -500,8 +502,9 @@ class AppRoutes {
     GetPage(name: baleDispatch, page: () => DispatchScreen()),
 
     GetPage(name: login, page: () => LoginPage()),
-    GetPage(name: dashboard, page: () => NewAdminDashboard()),
+    // GetPage(name: dashboard, page: () => NewAdminDashboard()),
 
+    GetPage(name: AppRoutes.dashboard, page: () => const DeptDashboard()),
     GetPage(name: inStock, page: () => RMDStockIn()),
 
     GetPage(

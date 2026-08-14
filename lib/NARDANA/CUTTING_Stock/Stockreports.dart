@@ -56,7 +56,7 @@ class _CuttingStockScreenState extends State<CuttingStockScreen> {
     try {
       final result = await NaradanaApiService.getCuttingFabricSummary(
         page: 1,
-        pageSize: 500000,
+        pageSize: 50,
       );
 
       allData = result;

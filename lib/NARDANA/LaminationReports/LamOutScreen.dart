@@ -159,7 +159,7 @@ class _LamOutScreenState extends State<LamOutScreen> {
   Widget _head(String text) => Text(
     text,
     style: const TextStyle(
-      fontSize: 11,
+      fontSize: 14,
       fontWeight: FontWeight.w700,
       color: Color(0xFF1565C0),
     ),
@@ -178,7 +178,7 @@ class _LamOutScreenState extends State<LamOutScreen> {
         text.isEmpty ? '-' : text,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
           fontFamily: mono ? 'monospace' : null,
           color: color ?? Colors.black87,
@@ -348,7 +348,7 @@ class _LamOutScreenState extends State<LamOutScreen> {
   // TABLE
   Widget _table(List<LamNardanaOutModel> data) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(10),
+
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -360,19 +360,17 @@ class _LamOutScreenState extends State<LamOutScreen> {
               columnSpacing: 14,
               horizontalMargin: 12,
               headingRowHeight: 42,
-              dataRowHeight: 38,
-              headingRowColor: MaterialStateProperty.all(
+              dataRowMinHeight: 38,
+              headingRowColor: WidgetStateProperty.all(
                 const Color(0xFFEAF2FF),
               ),
 
-              // ✅ ALL COLUMNS
               columns: [
                 DataColumn(label: _head('Sr')),
-                DataColumn(label: _head('Bom NO')),
-
+                DataColumn(label: _head('Bom No')),
                 DataColumn(label: _head('Barcode')),
                 DataColumn(label: _head('Batch')),
-                DataColumn(label: _head('Party')),
+                DataColumn(label: _head('Party Name')),
                 DataColumn(label: _head('Date')),
                 DataColumn(label: _head('Time')),
                 DataColumn(label: _head('Loom')),
@@ -401,12 +399,11 @@ class _LamOutScreenState extends State<LamOutScreen> {
                 DataColumn(label: _head('Status')),
               ],
 
-              // ✅ ROW DATA
               rows: List.generate(data.length, (i) {
                 final r = data[i];
 
                 return DataRow(
-                  color: MaterialStateProperty.all(
+                  color: WidgetStateProperty.all(
                     i.isEven ? Colors.white : const Color(0xFFF8FAFF),
                   ),
                   cells: [

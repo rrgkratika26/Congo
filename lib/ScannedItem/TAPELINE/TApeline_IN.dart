@@ -1,5 +1,7 @@
 import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 import '../../AdminDashBoard/DashBoard.dart';
 import '../../AdminDashBoard/DepartmentDashboard.dart';
@@ -218,7 +220,7 @@ class _TapeLineEntryScreenState extends State<TapeLineEntryScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
-            Navigator.pop(context);
+           Get.back;
           },
         ),
         title: Row(

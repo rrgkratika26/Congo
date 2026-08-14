@@ -1291,6 +1291,7 @@
 import 'dart:math' show cos, sin, pi;
 
 import 'package:IMS/AdminDashBoard/DepartmentDashboard.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1302,13 +1303,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Color/Colorclass.dart';
 import '../routes/app_routes.dart';
+import '../services/CurrentUnitservice.dart';
 import '../services/getSupervisors/getSupervisors.dart';
 import '../util/sharedpreference/shared_preference.dart';
 import 'LoginModel.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  REDIRECT HELPER
-// ─────────────────────────────────────────────────────────────────────────────
 void navigateByRedirect(LoginModel model) {
   final redirect = model.redirect.trim().toLowerCase();
   final department = model.department.trim().toUpperCase();
@@ -1368,6 +1367,15 @@ class _LoginPageState extends State<LoginPage>
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  // String? _selectedUnit;
+
+  List<String> _units = [];
+  bool _isLoadingUnits = true;
+
+  // bool _checkingLogin = true;
+  // bool _isLoading = false;
+  // bool _obscurePassword = true;
+
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
@@ -1394,6 +1402,34 @@ class _LoginPageState extends State<LoginPage>
 
     _checkLoginStatus();
   }
+
+
+  //   for dynamic dropdown
+
+  // void initState() {
+  //   super.initState();
+  //
+  //   _animController = AnimationController(
+  //     vsync: this,
+  //     duration: const Duration(milliseconds: 700),
+  //   );
+  //
+  //   _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+  //
+  //   _slideAnim = Tween<Offset>(
+  //     begin: const Offset(0, 0.06),
+  //     end: Offset.zero,
+  //   ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+  //
+  //   _usernameFocus.addListener(() => setState(() {}));
+  //   _passwordFocus.addListener(() => setState(() {}));
+  //
+  //   // Load unit from API
+  //   _loadCurrentUnit();
+  //
+  //   // Existing login check
+  //   _checkLoginStatus();
+  // }
 
   @override
   void dispose() {
@@ -1825,7 +1861,7 @@ class _LoginPageState extends State<LoginPage>
               Icon(
                 Icons.lock_outline_rounded,
                 size: 19,
-                color: focused ? C.primaryblue : C.textHigh,
+                color: focused ? C.primaryDark : C.textHigh,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1912,8 +1948,10 @@ class _LoginPageState extends State<LoginPage>
               // ── Update this list for your deployed units ───────────────
               // items: ['UNIT-CONGO'].map((String value) {
               //   items: ['UNIT-NARDANA'].map((String value) {
-              // items: ['UNIT-SILVASSA'].map((String value) {
-              items: ['FIBC'].map((String value) {
+
+
+              items: ['UNIT-SILVASSA'].map((String value) {
+              // items: ['FIBC'].map((String value) {
                 //   items: ['DINESH-POLYFAB', 'JBL'].map((String value) {
                 // items: ['UNIT-1'].map((String value) {
                 //   items: ['INNOWEAVE'].map((String value) {
@@ -1976,6 +2014,145 @@ class _LoginPageState extends State<LoginPage>
       ],
     );
   }
+
+  // Widget _buildUnitDropdown() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       _fieldLabel('Unit'),
+  //       const SizedBox(height: 7),
+  //
+  //       Container(
+  //         height: 52,
+  //         decoration: BoxDecoration(
+  //           borderRadius: BorderRadius.circular(14),
+  //           color: Colors.white.withOpacity(0.07),
+  //           border: Border.all(color: Colors.white.withOpacity(0.12)),
+  //         ),
+  //         child: DropdownButtonHideUnderline(
+  //           child: _isLoadingUnits
+  //               ? const Center(
+  //                   child: SizedBox(
+  //                     width: 20,
+  //                     height: 20,
+  //                     child: CircularProgressIndicator(
+  //                       strokeWidth: 2,
+  //                       color: Colors.white,
+  //                     ),
+  //                   ),
+  //                 )
+  //               : DropdownButton<String>(
+  //                   value: _units.contains(_selectedUnit)
+  //                       ? _selectedUnit
+  //                       : null,
+  //
+  //                   isExpanded: true,
+  //
+  //                   dropdownColor: const Color(0xFF0D2152),
+  //
+  //                   borderRadius: BorderRadius.circular(12),
+  //
+  //                   icon: Padding(
+  //                     padding: const EdgeInsets.only(right: 14),
+  //                     child: Icon(
+  //                       Icons.keyboard_arrow_down_rounded,
+  //                       color: C.bg,
+  //                       size: 22,
+  //                     ),
+  //                   ),
+  //
+  //                   hint: Padding(
+  //                     padding: const EdgeInsets.only(left: 14),
+  //                     child: Row(
+  //                       children: [
+  //                         Icon(
+  //                           Icons.business_outlined,
+  //                           size: 19,
+  //                           color: C.textHigh,
+  //                         ),
+  //                         const SizedBox(width: 10),
+  //                         Text(
+  //                           'Select unit',
+  //                           style: TextStyle(color: C.textHigh, fontSize: 15),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //
+  //                   // 🔥 DYNAMIC UNITS FROM API
+  //                   items: _units.map((String value) {
+  //                     return DropdownMenuItem<String>(
+  //                       value: value,
+  //                       child: Padding(
+  //                         padding: const EdgeInsets.only(left: 14),
+  //                         child: Row(
+  //                           children: [
+  //                             Icon(
+  //                               Icons.business_outlined,
+  //                               size: 19,
+  //                               color: Colors.white.withOpacity(0.7),
+  //                             ),
+  //
+  //                             const SizedBox(width: 10),
+  //
+  //                             Expanded(
+  //                               child: Text(
+  //                                 value,
+  //                                 overflow: TextOverflow.ellipsis,
+  //                                 style: const TextStyle(
+  //                                   color: Colors.white,
+  //                                   fontSize: 15,
+  //                                   fontWeight: FontWeight.w500,
+  //                                 ),
+  //                               ),
+  //                             ),
+  //
+  //                             const SizedBox(width: 8),
+  //
+  //                             Container(
+  //                               padding: const EdgeInsets.symmetric(
+  //                                 horizontal: 8,
+  //                                 vertical: 3,
+  //                               ),
+  //                               decoration: BoxDecoration(
+  //                                 color: Colors.blue.withOpacity(0.25),
+  //                                 borderRadius: BorderRadius.circular(6),
+  //                                 border: Border.all(
+  //                                   color: const Color(
+  //                                     0xFF93C5FD,
+  //                                   ).withOpacity(0.4),
+  //                                 ),
+  //                               ),
+  //                               child: const Text(
+  //                                 'Active',
+  //                                 style: TextStyle(
+  //                                   color: Color(0xFF93C5FD),
+  //                                   fontSize: 11,
+  //                                   fontWeight: FontWeight.w500,
+  //                                 ),
+  //                               ),
+  //                             ),
+  //
+  //                             const SizedBox(width: 4),
+  //                           ],
+  //                         ),
+  //                       ),
+  //                     );
+  //                   }).toList(),
+  //
+  //                   onChanged: _units.isEmpty
+  //                       ? null
+  //                       : (String? value) {
+  //                           setState(() {
+  //                             _selectedUnit = value;
+  //                           });
+  //                         },
+  //                 ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildDeptHint() {
     return Center(
@@ -2095,5 +2272,47 @@ class _LoginPageState extends State<LoginPage>
         ),
       ],
     );
+  }
+
+  Future<void> _loadCurrentUnit() async {
+    try {
+      setState(() {
+        _isLoadingUnits = true;
+      });
+
+      final unit = await CurrentUnitService.getCurrentUnit();
+
+      if (!mounted) return;
+
+      if (unit != null && unit.isNotEmpty) {
+        setState(() {
+          _units = [unit];
+          _selectedUnit = unit;
+          _isLoadingUnits = false;
+        });
+
+        debugPrint('CURRENT UNIT LOADED: $unit');
+      } else {
+        setState(() {
+          _units = [];
+          _selectedUnit = null;
+          _isLoadingUnits = false;
+        });
+
+        _showSnackBar('Unable to load current unit', isError: true);
+      }
+    } catch (e) {
+      debugPrint('LOAD UNIT ERROR: $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        _units = [];
+        _selectedUnit = null;
+        _isLoadingUnits = false;
+      });
+
+      _showSnackBar('Unable to load unit from server', isError: true);
+    }
   }
 }

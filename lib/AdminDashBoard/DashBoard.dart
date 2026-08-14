@@ -638,8 +638,7 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
           _dateFilterBar(isMobile),
           const SizedBox(height: 16),
           isLoading ? _loadingGrid(isMobile) : _metricsGrid(isMobile),
-          const SizedBox(height: 18),
-          isLoading ? _loadingChart(isMobile) : _barChartSection(isMobile),
+
           const SizedBox(height: 12),
         ],
       ),
