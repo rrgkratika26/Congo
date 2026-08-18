@@ -23,12 +23,12 @@ class _RollWiseReportScreenState
 
   List<RollWiseReportModel> reportList = [];
   bool isLoading = false;
-
   int currentPage = 1;
-  int pageSize = 3000;
+  int pageSize = 100;
   bool hasNextPage = true;
 
-  /// ================= INIT =================
+  bool isLoadingMore = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,12 +39,21 @@ class _RollWiseReportScreenState
       start: now.subtract(const Duration(days: 6)),
       end: now,
     );
+
     fetchReport();
   }
 
   /// ================= FETCH =================
-  Future<void> fetchReport() async {
-    setState(() => isLoading = true);
+  Future<void> fetchReport({bool showLoader = true}) async {
+    if (isLoadingMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+
+      if (showLoader) {
+        isLoading = true;
+      }
+    });
 
     try {
       final data = await InStockService().getRollWiseReport(
@@ -54,15 +63,27 @@ class _RollWiseReportScreenState
         pageSize: pageSize,
       );
 
+      if (!mounted) return;
+
       setState(() {
         reportList = data;
-        hasNextPage = data.length == pageSize;
+        hasNextPage = data.length >= pageSize;
+        isLoading = false;
+        isLoadingMore = false;
       });
     } catch (e) {
-      _showSnack(e.toString(), Colors.red);
-    }
+      if (!mounted) return;
 
-    setState(() => isLoading = false);
+      setState(() {
+        isLoading = false;
+        isLoadingMore = false;
+      });
+
+      _showSnack(
+        e.toString(),
+        Colors.red,
+      );
+    }
   }
   /// ================= DATE PICKER =================
   Future<void> _pickDateRange() async {
@@ -143,74 +164,179 @@ class _RollWiseReportScreenState
   }
 
   /// ================= TABLE =================
+  /// ================= TABLE =================
   Widget _buildTable() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            /// HEADER
-            Container(
-              color: Colors.grey.shade200,
-              child: Row(
-                children: const [
-                  _HeaderCell("SrNo", 70),
-                  _HeaderCell("Article", 100),
-                  _HeaderCell("BOM", 70),
-                  _HeaderCell("Customer", 100),
-                  _HeaderCell("PO No", 90),
-                  _HeaderCell("Width", 80),
-                  _HeaderCell("GSM", 80),
-                  _HeaderCell("Roll No", 100),
-                  _HeaderCell("Party", 150),
-                  _HeaderCell("MTR", 100),
-                  _HeaderCell("Roll Size", 100),
-                  _HeaderCell("Gross", 100),
-                  _HeaderCell("Tare", 100),
-                  _HeaderCell("Net", 100),
-                  _HeaderCell("Used Net", 120),
-                  _HeaderCell("Wastage", 100),
-                  _HeaderCell("Balance", 100),
-                  _HeaderCell("Cut PCS", 100),
-                  _HeaderCell("Remark", 100),
-                  _HeaderCell("Date", 120),
-                ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double tableWidth =
+        constraints.maxWidth < 1900 ? 1900 : constraints.maxWidth;
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: tableWidth,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Table(
+                    columnWidths: const {
+                      0: FixedColumnWidth(60),
+                      1: FixedColumnWidth(110),
+                      2: FixedColumnWidth(80),
+                      3: FixedColumnWidth(140),
+                      4: FixedColumnWidth(100),
+                      5: FixedColumnWidth(80),
+                      6: FixedColumnWidth(80),
+                      7: FixedColumnWidth(110),
+                      8: FixedColumnWidth(150),
+                      9: FixedColumnWidth(100),
+                      10: FixedColumnWidth(100),
+                      11: FixedColumnWidth(100),
+                      12: FixedColumnWidth(100),
+                      13: FixedColumnWidth(100),
+                      14: FixedColumnWidth(110),
+                      15: FixedColumnWidth(100),
+                      16: FixedColumnWidth(100),
+                      17: FixedColumnWidth(90),
+                      18: FixedColumnWidth(150),
+                      19: FixedColumnWidth(110),
+                    },
+                    border: TableBorder(
+                      horizontalInside: BorderSide(
+                        color: Colors.grey.shade300,
+                        width: 0.8,
+                      ),
+                      verticalInside: BorderSide(
+                        color: Colors.grey.shade300,
+                        width: 0.8,
+                      ),
+                    ),
+                    children: [
+                      /// ================= HEADER =================
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: C.headerBlue,
+                        ),
+                        children: const [
+                          _HeaderCell("SrNo"),
+                          _HeaderCell("Article"),
+                          _HeaderCell("BOM"),
+                          _HeaderCell("Customer"),
+                          _HeaderCell("PO No"),
+                          _HeaderCell("Width"),
+                          _HeaderCell("GSM"),
+                          _HeaderCell("Roll No"),
+                          _HeaderCell("Party"),
+                          _HeaderCell("MTR"),
+                          _HeaderCell("Roll Size"),
+                          _HeaderCell("Gross"),
+                          _HeaderCell("Tare"),
+                          _HeaderCell("Net"),
+                          _HeaderCell("Used Net"),
+                          _HeaderCell("Wastage"),
+                          _HeaderCell("Balance"),
+                          _HeaderCell("Cut PCS"),
+                          _HeaderCell("Remark"),
+                          _HeaderCell("Date"),
+                        ],
+                      ),
+
+                      /// ================= DATA =================
+                      ...reportList.map(
+                            (e) => TableRow(
+                          decoration: BoxDecoration(
+                            color: reportList.indexOf(e).isEven
+                                ? Colors.white
+                                : Colors.grey.shade50,
+                          ),
+                          children: [
+                            _DataCell(e.srno),
+                            _DataCell(e.articleNo),
+                            _DataCell(e.bom),
+                            _DataCell(e.customerName),
+                            _DataCell(e.pono),
+                            _DataCell(e.fabricWidth),
+                            _DataCell(e.fabricGsm),
+                            _DataCell(e.rollNo),
+                            _DataCell(e.partyName),
+
+                            _DataCell(
+                              e.rollMtr,
+                              formatter: (value) =>
+                                  value.toStringAsFixed(0),
+                            ),
+
+                            _DataCell(e.rollSize),
+
+                            _DataCell(
+                              e.grossWt,
+                              formatter: (value) =>
+                                  value.toStringAsFixed(2),
+                            ),
+
+                            _DataCell(
+                              e.tareWt,
+                              formatter: (value) =>
+                                  value.toStringAsFixed(2),
+                            ),
+
+                            _DataCell(
+                              e.netWt,
+                              formatter: (value) =>
+                                  value.toStringAsFixed(2),
+                            ),
+
+                            _DataCell(
+                              e.usedNetWt,
+                              formatter: (value) =>
+                                  value.toStringAsFixed(2),
+                            ),
+
+                            _DataCell(
+                              e.usedWastage,
+                              formatter: (value) =>
+                                  value.toStringAsFixed(2),
+                            ),
+
+                            _DataCell(
+                              e.balance,
+                              formatter: (value) =>
+                                  value.toStringAsFixed(2),
+                            ),
+
+                            _DataCell(e.cutPcs),
+
+                            _DataCell(e.remark),
+
+                            _DataCell(
+                              e.cutDate,
+                              formatter: (value) {
+                                try {
+                                  return DateFormat('dd-MM-yyyy')
+                                      .format(value);
+                                } catch (_) {
+                                  return '---';
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-
-            /// DATA
-            ...reportList.map((e) {
-              return Row(
-                children: [
-                  _DataCell(e.srno.toString(),70),
-                  _DataCell(e.articleNo, 100),
-                  _DataCell(e.bom, 70),
-                  _DataCell(e.customerName, 100),
-                  _DataCell(e.pono, 90),
-                  _DataCell(e.fabricWidth, 80),
-                  _DataCell(e.fabricGsm, 80),
-                  _DataCell(e.rollNo, 100),
-                  _DataCell(e.partyName, 150),
-                  _DataCell(e.rollMtr.toStringAsFixed(0), 100),
-                  _DataCell(e.rollSize, 100),
-                  _DataCell(e.grossWt.toStringAsFixed(2), 100),
-                  _DataCell(e.tareWt.toStringAsFixed(2), 100),
-                  _DataCell(e.netWt.toStringAsFixed(2), 100),
-                  _DataCell(e.usedNetWt.toStringAsFixed(2), 120),
-                  _DataCell(e.usedWastage.toStringAsFixed(2), 100),
-                  _DataCell(e.balance.toStringAsFixed(2), 100),
-                  _DataCell(e.cutPcs.toString(), 100),
-                  _DataCell(e.remark, 100),
-                  _DataCell(
-                    DateFormat('dd-MM-yyyy').format(e.cutDate),
-                    120,
-                  ),
-                ],
-              );
-            }),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
   /// ================= SUMMARY =================
@@ -289,35 +415,94 @@ class _RollWiseReportScreenState
 
 /// ================= CELLS =================
 class _DataCell extends StatelessWidget {
-  final String text;
-  final double width;
+  final dynamic value;
+  final String Function(dynamic value)? formatter;
 
-  const _DataCell(this.text, this.width);
+  const _DataCell(
+      this.value, {
+        this.formatter,
+      });
+
+  bool get isNullValue {
+    if (value == null) return true;
+
+    if (value is String) {
+      final text = value.trim();
+
+      if (text.isEmpty || text.toLowerCase() == 'null') {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bool isNull = isNullValue;
+
+    String text = '---';
+
+    if (!isNull) {
+      try {
+        text = formatter != null
+            ? formatter!(value)
+            : value.toString();
+      } catch (_) {
+        text = '---';
+      }
+    }
+
     return Container(
-      width: width,
-      padding: const EdgeInsets.all(8),
-      child: Text(text, overflow: TextOverflow.ellipsis),
+      constraints: const BoxConstraints(
+        minHeight: 48,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 10,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight:
+          isNull ? FontWeight.w600 : FontWeight.normal,
+          color: isNull ? Colors.red : Colors.black87,
+        ),
+      ),
     );
   }
 }
-
 class _HeaderCell extends StatelessWidget {
   final String text;
-  final double width;
 
-  const _HeaderCell(this.text, this.width);
+  const _HeaderCell(this.text);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: width,
-      padding: const EdgeInsets.all(8),
+      constraints: const BoxConstraints(
+        minHeight: 50,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 10,
+      ),
+      alignment: Alignment.center,
       child: Text(
         text,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: C.bg,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

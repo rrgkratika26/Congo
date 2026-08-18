@@ -296,7 +296,7 @@ class _CutPieceIssuedScreenNardanaState
                     onSelectChanged: (_) {
                       setState(() => selectedIndex = pageItems.indexOf(item));
 
-                      // ✅ Saari details pass ho rahi hain popup mein
+
                       AddRecutPcsPopupNardana.show(
                         context,
                         iid:          item.iid,

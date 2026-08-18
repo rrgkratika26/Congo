@@ -34,21 +34,21 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class InStockService {
-  // static const String baseUrl = 'http://192.168.29.125:7165/api';
+  // static const String baseUrl = 'http://192.168.29.123:7165/api';
   // static const String baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String baseUrl = 'http://190.92.175.47/Qualipack/api';
   // http://190.92.175.47/CONGO_API/
-  // static const String baseUrl = 'http://190.92.175.47/CONGO_API/api';
+  static const String baseUrl = 'http://190.92.175.47/CONGO_API/api';
 
   // static const String baseUrl = 'http://190.92.175.47:80/api/api';
   // static const String baseUrl = 'http://190.92.175.47/ShriShakti/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String baseUrl = 'http://190.92.175.47:80/Visa/api';
-  static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  // static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String baseUrl ='http://190.92.175.47:80/API/api';
-  // static const String baseUrl = 'http://190.92.175.47:80/Nardana';
+
   // static const String baseUrl = 'http://fibcsoftware.in:4430/Visa/api';
   // static const String baseUrl = 'http://190.92.175.47:80/Innoweave/api';
 

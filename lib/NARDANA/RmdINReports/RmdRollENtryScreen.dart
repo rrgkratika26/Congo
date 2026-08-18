@@ -461,6 +461,14 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
       "operator": operatorController.text.trim(),
       // "location": locationController.text.trim(),
       "purchaseOrder": poController.text.trim(),
+
+      // "articleNo": articleController.text.trim().isEmpty
+      //     ? ""
+      //     : articleController.text.trim(),
+      //
+      // "bomNo": bomController.text.trim().isEmpty
+      //     ? ""
+      //     : bomController.text.trim(),
       "articleNo": articleController.text.trim(),
       "bomNo": bomController.text.trim(),
       "fabricCode": fabricController.text.trim(),
@@ -476,24 +484,24 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
     });
     debugPrint(" Save Body:$body");
 
-    if (selectedParty == null ||
-        selectedFabric == null ||
-        selectedSupervisor == null ||
-        selectedProductionType == null) {
-      setState(() {
-        isLoading = false; // Reset loading
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill all mandatory fields."),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 3),
-        ),
-      );
+    // if (selectedParty == null ||
+    //     selectedFabric == null ||
+    //     selectedSupervisor == null ||
+    //     selectedProductionType == null) {
+    //   setState(() {
+    //     isLoading = false; // Reset loading
+    //   });
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text("Please fill all mandatory fields."),
+    //       backgroundColor: Colors.red,
+    //       behavior: SnackBarBehavior.floating,
+    //       duration: Duration(seconds: 3),
+    //     ),
+    //   );
 
-      return; // Stay on the same screen
-    }
+      // return; // Stay on the same screen
+    // }
     debugPrint(" Save Body:$body");
     final success = await RmdService.saveRollEntry(body: body);
 

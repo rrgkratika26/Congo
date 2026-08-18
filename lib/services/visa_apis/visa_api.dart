@@ -20,8 +20,8 @@ class VisaApiService {
   // static const String baseUrlJBL = 'http://190.92.175.47:80/Innoweave/api';
   // static const String baseUrlJBL ='http://190.92.175.47:80/api/api';
   // static const String baseUrlJBL ='http://190.92.175.47/Qualipack/api';
-  // static const String baseUrlJBL ='http://190.92.175.47/CONGO_API/api';
-  static const String baseUrlJBL = 'http://192.168.29.125:7165/api';
+  static const String baseUrlJBL ='http://190.92.175.47/CONGO_API/api';
+  // static const String baseUrlJBL = 'http://192.168.29.123:7165/api';
   // static const String baseUrlJBL = 'http://190.92.175.47/VISA_S/api';
 
 
@@ -406,6 +406,7 @@ class VisaApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print("Get Bom and component $uri");
         print('$data');
         // Extract boprint mNumbers and components as List<String>
         final List<String> bomNumbers = (data['bomNumbers'] as List)

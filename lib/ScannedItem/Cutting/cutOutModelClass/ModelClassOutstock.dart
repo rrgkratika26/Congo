@@ -34,6 +34,7 @@ class CuttingOutstock {
   final String activein;
   final String laminationLocation;
   final String machineno;
+  final String articleNo;
 
   CuttingOutstock({
     required this.cuttingActive,
@@ -70,7 +71,7 @@ class CuttingOutstock {
     required this.rmStatus,
     required this.activein,
     required this.laminationLocation,
-    required this.machineno,
+    required this.machineno, required this.articleNo,
   });
 
   factory CuttingOutstock.fromJson(Map<String, dynamic> json) {
@@ -110,6 +111,7 @@ class CuttingOutstock {
       activein: json['activein'] ?? '',
       laminationLocation: json['laminatioN_LOCATION1'] ?? '',
       machineno: json['machineno'] ?? '',
+      articleNo: json['articlE_NO'] ?? ''
     );
   }
 
@@ -150,6 +152,7 @@ class CuttingOutstock {
       'activein': activein,
       'laminatioN_LOCATION1': laminationLocation,
       'machineno': machineno,
+      'articlE_NO': articleNo
     };
   }
 }

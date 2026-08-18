@@ -313,7 +313,7 @@ class _DeptDashboard extends StatelessWidget {
     final crossCount = isMobile ? 2 : (mq.size.width < 1000 ? 3 : 4);
 
     return Scaffold(
-      backgroundColor: C.bg,
+      // backgroundColor: C.bg,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1054,6 +1054,8 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
       else if (action == MenuAction.bailing_Report)
         Get.toNamed(AppRoutes.balingReport);
       else if (action == MenuAction.dispatch)
+        Get.toNamed(AppRoutes.dispatchEntry);
+      else if (action == MenuAction.dispatch_report)
         Get.toNamed(AppRoutes.baleDispatch);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.baleStockgroup);

@@ -97,6 +97,14 @@ class _RecentEntriesScreenState extends State<RecentEntriesScreen> {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
+                        dataRowColor: WidgetStateProperty.resolveWith<Color?>((
+                            Set<WidgetState> states,
+                            ) {
+                          if (states.contains(WidgetState.selected)) {
+                            return Colors.blue.withOpacity(0.2);
+                          }
+                          return null;
+                        }),
                         columnSpacing: 16,
                         columns: const [
                           DataColumn(label: Text("ID")),

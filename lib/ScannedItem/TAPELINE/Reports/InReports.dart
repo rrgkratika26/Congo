@@ -27,7 +27,23 @@ class _TapeInReportsState extends State<TapeInReports> {
   static const int pageSize = 10;
 
   int get totalPages => (_filtered.length / pageSize).ceil().clamp(1, 99999);
+  List<TapelineInReportModel> get _pagedData {
+    if (_filtered.isEmpty) {
+      return [];
+    }
 
+    final start = (currentPage - 1) * pageSize;
+
+    if (start >= _filtered.length) {
+      return [];
+    }
+
+    final end = (start + pageSize > _filtered.length)
+        ? _filtered.length
+        : start + pageSize;
+
+    return _filtered.sublist(start, end);
+  }
   List<TapelineInReportModel> get _filtered {
     return _allReports.where((r) {
       final q = _query.toLowerCase();
@@ -92,8 +108,12 @@ class _TapeInReportsState extends State<TapeInReports> {
     }
   }
 
-  Future<void> _fetchData() async {
-    setState(() => _isLoading = true);
+  Future<void> _fetchData({bool showLoader = true}) async {
+    if (showLoader && mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       final data = await InStockService().fetchTapelineInReport(
@@ -101,18 +121,28 @@ class _TapeInReportsState extends State<TapeInReports> {
         to: _to,
       );
 
+      if (!mounted) return;
+
       setState(() {
         _allReports = data;
+        currentPage = 1;
       });
     } catch (e) {
-      debugPrint('UI ERROR: $e');
+      debugPrint('Tapeline In API ERROR: $e');
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to load data')));
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load data'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
+      if (mounted && showLoader) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -140,23 +170,37 @@ class _TapeInReportsState extends State<TapeInReports> {
         children: [
           _topBar(),
 
-          _isLoading
-              ? const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(color: C.appBar3),
-                  ),
-                )
-              : _filtered.isEmpty
-              ? Expanded(child: _emptyState())
-              : Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: _table(_filtered)),
+          // Small loading indicator.
+          // Existing data remains visible while API loads.
+          if (_isLoading)
+            const LinearProgressIndicator(
+              minHeight: 2,
+              color: C.appBar3,
+            ),
 
-                      _paginationBar(),
-                    ],
-                  ),
+          Expanded(
+            child: _filtered.isEmpty
+                ? _isLoading
+                ? const Center(
+              child: Text(
+                'Loading reports...',
+                style: TextStyle(
+                  color: C.textMid,
+                  fontSize: 13,
                 ),
+              ),
+            )
+                : _emptyState()
+                : Column(
+              children: [
+                Expanded(
+                  child: _table(_pagedData),
+                ),
+
+                _paginationBar(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -166,7 +210,7 @@ class _TapeInReportsState extends State<TapeInReports> {
 
   Widget _topBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 2),
       color: C.bg,
 
       child: Column(
@@ -230,7 +274,7 @@ class _TapeInReportsState extends State<TapeInReports> {
                 icon: const Icon(
                   Icons.calendar_today,
                   size: 22,
-                  color: C.primaryDark,
+                  color: C.primary,
                 ),
               ),
             ],
@@ -245,7 +289,7 @@ class _TapeInReportsState extends State<TapeInReports> {
   Widget _summaryBar() {
     return Container(
       color: Colors.transparent,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(5),
       child: Row(
         children: [
           _box("Total Records", "$_totalRecords", C.bg),
@@ -292,10 +336,10 @@ class _TapeInReportsState extends State<TapeInReports> {
 
   Widget _table(List<TapelineInReportModel> data) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.only(top: 2),
       child: Card(
         elevation: 2,
-        shadowColor: Colors.black12,
+        shadowColor: C.bg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
@@ -305,9 +349,9 @@ class _TapeInReportsState extends State<TapeInReports> {
               columnSpacing: 14,
               horizontalMargin: 12,
               headingRowHeight: 42,
-              dataRowHeight: 38,
-              headingRowColor: MaterialStateProperty.all(
-                const Color(0xFFEAF2FF),
+              dataRowMinHeight: 38,
+              headingRowColor: WidgetStateProperty.all(
+                C.brand200
               ),
 
               columns: [
@@ -332,6 +376,13 @@ class _TapeInReportsState extends State<TapeInReports> {
                 final r = data[i];
 
                 return DataRow(
+                    color: WidgetStateProperty.resolveWith<Color?>(
+                          (states) {
+                        return i.isEven
+                            ? Colors.white
+                            : const Color(0xFFF7F9FC);
+                      },
+                    ),
                   cells: [
                     DataCell(_cell("${r.id}")),
                     DataCell(_cell(r.code)),
@@ -410,9 +461,9 @@ class _TapeInReportsState extends State<TapeInReports> {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 11,
+        fontSize: 13,
         fontWeight: FontWeight.w700,
-        color: Color(0xFF1565C0),
+        color: C.primaryDark,
       ),
     );
   }
@@ -442,7 +493,7 @@ class _TapeInReportsState extends State<TapeInReports> {
   /// PAGINATION
   Widget _paginationBar() {
     return Container(
-      color: Colors.white,
+      color: C.bg,
       padding: const EdgeInsets.all(10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

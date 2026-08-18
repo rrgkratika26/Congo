@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
 import '../../AdminDashBoard/DepartmentDashboard.dart';
@@ -112,10 +114,10 @@ class _LamOutScreenState extends State<LamOutScreen> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(color: C.appBar1),
         ),
-        leading: IconButton(onPressed: () =>  Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const NewAdminDashboard()),
-        ), icon: Icon(Icons.arrow_back)),
+        leading: IconButton(
+            onPressed: () => Get.back(result: true),
+
+            icon: Icon(Icons.arrow_back)),
         // C.primary,
         iconTheme: IconThemeData(color: C.bg),
       ),

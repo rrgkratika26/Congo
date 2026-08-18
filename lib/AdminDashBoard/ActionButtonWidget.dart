@@ -98,6 +98,7 @@ enum MenuAction {
   Bag_Report,
   Stock_Report,
   dispatch,
+  dispatch_report,
   scan,
   Pcs_Issue,
   OverAll_Report,

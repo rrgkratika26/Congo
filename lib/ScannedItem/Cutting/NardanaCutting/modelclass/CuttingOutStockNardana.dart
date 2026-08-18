@@ -36,6 +36,7 @@ class CuttingOutstockNaradana {
   final String location;
   final String component;
   final String productionType;
+  final String articleNo;
 
   CuttingOutstockNaradana({
     required this.active,
@@ -75,6 +76,7 @@ class CuttingOutstockNaradana {
     required this.component,
     required this.productionType,
     required this.bomNo,
+    required this.articleNo,
   });
 
   factory CuttingOutstockNaradana.fromJson(Map<String, dynamic> json) {
@@ -120,6 +122,7 @@ class CuttingOutstockNaradana {
       location: json['location'] ?? '',
       component: json['component'] ?? '',
       productionType: json['productioN_TYPE'] ?? '',
+      articleNo: json['articlE_NO'] ?? ''
     );
   }
 }

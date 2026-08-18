@@ -110,6 +110,7 @@ import '../screen/Baling/BailingDispatchScreen.dart';
 import '../JBL/JBLDispatch/DispatchEntry.dart';
 import '../screen/Baling/BaleSliderScreen.dart';
 import '../screen/Baling/StockReportScreen.dart';
+import '../screen/Baling/dispatch/DispatchEntryScreen.dart';
 import '../screen/MachineDepartment/MachineDepartmment.dart';
 
 // class AppRoutes {
@@ -360,6 +361,8 @@ class AppRoutes {
   static const String balingReport = '/balingReport';
   // static const String baleStockReport = '/bale-report';
   static const String baleDispatch = '/bale-dispatch';
+  static const String dispatchEntry = '/dispatchEntry';
+  static const String dispatchReport = '/dispatchReport';
   static const String jblWebbIn = '/jblWebbingStockIn';
   static const String machine = '/machine';
   static const String jblBailing = '/jbl-Webbing';
@@ -500,6 +503,9 @@ class AppRoutes {
     GetPage(name: balingReport, page: () => BailingReportScreen()),
 
     GetPage(name: baleDispatch, page: () => DispatchScreen()),
+    GetPage(name: dispatchEntry, page: () => BalingDispatchScreen()),
+
+    GetPage(name: dispatchReport, page: () => DispatchScreen()),
 
     GetPage(name: login, page: () => LoginPage()),
     // GetPage(name: dashboard, page: () => NewAdminDashboard()),

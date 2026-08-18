@@ -40,38 +40,38 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       // backgroundColor: const Color(0xFFEAF3FF), // Light blue background
-      appBar: AppBar(
-        backgroundColor: C.primary,
-        elevation: 10,
-        title: const Text(
-          "User Profile",
-          style: TextStyle(fontWeight: FontWeight.bold,color: C.bg),
-        ),
-        centerTitle: false,
-        actions: [
-          PopupMenuButton<ThemeMode>(
-            icon: const Icon(Icons.palette, color: Colors.white),
-            onSelected: (mode) {
-              Get.find<ThemeController>().changeTheme(mode);
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: ThemeMode.system,
-                child: Text("System"),
-              ),
-              PopupMenuItem(
-                value: ThemeMode.light,
-                child: Text("Light"),
-              ),
-              PopupMenuItem(
-                value: ThemeMode.dark,
-                child: Text("Dark"),
-              ),
-            ],
-          ),
-        ],
-        iconTheme: IconThemeData(color: C.bg),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: C.primary,
+      //   elevation: 10,
+      //   title: const Text(
+      //     "User Profile",
+      //     style: TextStyle(fontWeight: FontWeight.bold,color: C.bg),
+      //   ),
+      //   centerTitle: false,
+      //   actions: [
+      //     PopupMenuButton<ThemeMode>(
+      //       icon: const Icon(Icons.palette, color: Colors.white),
+      //       onSelected: (mode) {
+      //         Get.find<ThemeController>().changeTheme(mode);
+      //       },
+      //       itemBuilder: (context) => const [
+      //         PopupMenuItem(
+      //           value: ThemeMode.system,
+      //           child: Text("System"),
+      //         ),
+      //         PopupMenuItem(
+      //           value: ThemeMode.light,
+      //           child: Text("Light"),
+      //         ),
+      //         PopupMenuItem(
+      //           value: ThemeMode.dark,
+      //           child: Text("Dark"),
+      //         ),
+      //       ],
+      //     ),
+      //   ],
+      //   iconTheme: IconThemeData(color: C.bg),
+      // ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

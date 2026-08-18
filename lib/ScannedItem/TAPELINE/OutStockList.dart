@@ -70,11 +70,14 @@ class _TapelineOutStockScreenState extends State<TapelineOutStockScreen> {
         iconTheme: IconThemeData(color: C.bg),
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
+            Icons.arrow_back,
             size: 18,
             color: C.bg,
           ),
-          onPressed: () => Get.offAll(() => const NewAdminDashboard()),
+          // onPressed: () => Navigator.pop(context),
+          onPressed: () => Get.back(result: true),
+
+          // onPressed: () => Get.offAll(() => const NewAdminDashboard()),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(

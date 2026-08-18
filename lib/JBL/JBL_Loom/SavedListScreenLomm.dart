@@ -1337,8 +1337,8 @@ PRINT 1
       await Future.delayed(const Duration(milliseconds: 100));
 
       // Navigate to Dashboard
-      Get.offAll(() => const NewAdminDashboard());
-
+      // Get.offAll(() => const NewAdminDashboard());
+Get.back(result: true);
       /// Navigate to Dashboard
     } catch (e) {
       Get.snackbar(

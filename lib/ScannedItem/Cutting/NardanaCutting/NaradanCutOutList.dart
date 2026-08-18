@@ -442,16 +442,11 @@
 //   }
 // }
 
-
-
-
-
 import 'dart:async';
 
-import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thermal_printer_plus/printer.dart';
 
 import '../../../Color/Colorclass.dart';
@@ -474,100 +469,304 @@ class CutOutSavedListNardana extends StatefulWidget {
   State<CutOutSavedListNardana> createState() => _CutOutSavedListNardanaState();
 }
 
-// ─────────────────────────────────────────────
-
 class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
-  // ── Data ──
+  // ============================================================
+  // DATA
+  // ============================================================
+
   final ScrollController _scrollController = ScrollController();
-  final List<CuttingOutstockNaradana> _items = [];
-  List<CuttingOutstockNaradana> _filteredItems = [];
-  String _searchText = '';
   final TextEditingController _searchController = TextEditingController();
+
+  final List<CuttingOutstockNaradana> _items = [];
+
+  List<CuttingOutstockNaradana> _filteredItems = [];
+
+  String _searchText = '';
+  String unitName = '';
+
   int _page = 1;
   final int _pageSize = 50;
+
   bool _loading = false;
   bool _hasMore = true;
-  int? _selectedIndex;
-  Timer? _debounce;
-  // ── Printer ──
-  final _storage = GetStorage();
-  bool _printing = false;
-  String _status = '';
-  StreamSubscription<BTStatus>? _btSub;
+
   int? _selectedRollId;
+
+  Timer? _debounce;
+
+  String _status = '';
+
+  // ============================================================
+  // PRINTER
+  // ============================================================
+
+  final _storage = GetStorage();
+
+  bool _printing = false;
+
+  StreamSubscription<BTStatus>? _btSub;
+
+  // ============================================================
+  // ROLL FINISH
+  // ============================================================
+
   bool _isRollFinishLoading = false;
+
+  // ============================================================
+  // INIT
+  // ============================================================
+
   @override
   void initState() {
     super.initState();
-    // _fetchPage(1);
-    // _items.addAll(widget.initialItems);
-    // _filteredItems = List.from(_items);
-    _fetchInitial();
 
     _scrollController.addListener(_onScroll);
+
+    _fetchInitial();
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _btSub?.cancel();
+
+    _searchController.dispose();
     _scrollController.dispose();
+
     super.dispose();
   }
 
-  // ─────────────────────────────────────────────
-  // DATA
-  // ─────────────────────────────────────────────
+  // ============================================================
+  // INITIAL LOAD
+  // ============================================================
+
+  Future<void> _fetchInitial() async {
+    if (!mounted) return;
+
+    setState(() {
+      _loading = true;
+      _status = '';
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      unitName = prefs.getString('unit') ?? '';
+
+      // If unit is stored somewhere else in your project,
+      // you can replace this with AppGlobals.unit.
+      if (unitName.isEmpty) {
+        _setStatus("Unit not found.");
+        return;
+      }
+
+      final data = await NaradanaApiService.fetchOutStockListNaradana(
+        // plant: unitName,
+        // page: 1,
+        // pageSize: _pageSize,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _page = 1;
+
+        _items.clear();
+
+        // Add initial widget data only if API returned nothing.
+        if (data.isNotEmpty) {
+          _items.addAll(data);
+        } else if (widget.initialItems.isNotEmpty) {
+          _items.addAll(widget.initialItems);
+        }
+
+        _filteredItems = List.from(_items);
+
+        // If less than page size, probably last page.
+        _hasMore = data.length >= _pageSize;
+      });
+    } catch (e) {
+      _setStatus("❌ Load error: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  // ============================================================
+  // SEARCH
+  // ============================================================
 
   void _applyFilter(String value) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce?.cancel();
 
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      setState(() {
-        _searchText = value.toLowerCase();
+      if (!mounted) return;
 
-        _filteredItems = _searchText.isEmpty
-            ? List.from(_items)
-            : _items.where((item) {
-          return item.id.toString().toLowerCase().contains(_searchText) ||
-              item.barcode.toLowerCase().contains(_searchText) ||
-              item.rollCode.toString().toLowerCase().contains(
-                _searchText,
-              );
-        }).toList();
+      final query = value.trim().toLowerCase();
+
+      setState(() {
+        _searchText = query;
+
+        if (query.isEmpty) {
+          _filteredItems = List.from(_items);
+        } else {
+          _filteredItems = _items.where((item) {
+            return item.id.toString().toLowerCase().contains(query) ||
+                item.barcode.toLowerCase().contains(query) ||
+                item.rollCode.toString().toLowerCase().contains(query) ||
+                item.partyname.toLowerCase().contains(query) ||
+                item.fabricCode.toLowerCase().contains(query);
+          }).toList();
+        }
       });
     });
   }
 
-  Future<void> _fetchInitial() async {
-    setState(() => _loading = true);
+  // ============================================================
+  // LOAD MORE - INFINITE SCROLL
+  // ============================================================
+
+  Future<void> _loadMore() async {
+    if (_loading || !_hasMore || unitName.isEmpty) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      final nextPage = _page + 1;
+
+      final data = await NaradanaApiService.fetchOutStockListNaradana(
+        // plant: unitName,
+        // page: nextPage,
+        // pageSize: _pageSize,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        if (data.isNotEmpty) {
+          _items.addAll(data);
+          _page = nextPage;
+        }
+
+        _hasMore = data.length >= _pageSize;
+
+        _applyCurrentFilter();
+      });
+    } catch (e) {
+      _setStatus("❌ Pagination error: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  // ============================================================
+  // APPLY CURRENT FILTER
+  // ============================================================
+
+  void _applyCurrentFilter() {
+    if (_searchText.isEmpty) {
+      _filteredItems = List.from(_items);
+      return;
+    }
+
+    _filteredItems = _items.where((item) {
+      return item.id.toString().toLowerCase().contains(_searchText) ||
+          item.barcode.toLowerCase().contains(_searchText) ||
+          item.rollCode.toString().toLowerCase().contains(_searchText) ||
+          item.partyname.toLowerCase().contains(_searchText) ||
+          item.fabricCode.toLowerCase().contains(_searchText);
+    }).toList();
+  }
+
+  // ============================================================
+  // SCROLL
+  // ============================================================
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+
+    final position = _scrollController.position;
+
+    if (position.pixels >= position.maxScrollExtent - 250 &&
+        !_loading &&
+        _hasMore) {
+      _loadMore();
+    }
+  }
+
+  // ============================================================
+  // MANUAL PAGE LOAD
+  // ============================================================
+
+  Future<void> _fetchPage(int page) async {
+    if (_loading || page < 1 || unitName.isEmpty) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _loading = true;
+    });
 
     try {
       final data = await NaradanaApiService.fetchOutStockListNaradana(
-        plant: AppGlobals.unit,
-
-        // plant: 'UNIT-SILVASSA',
-        page: 1,
-        pageSize: _pageSize,
+        // plant: unitName,
+        // page: page,
+        // pageSize: _pageSize,
       );
 
-      setState(() {
-        _page = 1;
-        _items
-          ..clear()
-          ..addAll(data);
+      if (!mounted) return;
 
-        _filteredItems = List.from(_items); // ✅ FIX HERE
-        _hasMore = data.isNotEmpty;
+      setState(() {
+        _page = page;
+
+        _items.clear();
+        _items.addAll(data);
+
+        _applyCurrentFilter();
+
+        _hasMore = data.length >= _pageSize;
+
+        // Clear selected roll if it isn't in current page.
+        if (_selectedRollId != null &&
+            !_items.any((e) => e.id == _selectedRollId)) {
+          _selectedRollId = null;
+        }
       });
     } catch (e) {
-      _setStatus("❌ Load error: $e");
+      _setStatus("❌ Page load error: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
-
-    setState(() => _loading = false);
   }
 
+  // ============================================================
+  // ROLL FINISH
+  // ============================================================
+
   Future<void> _rollFinish() async {
-    if (_selectedRollId == null) return;
+    if (_selectedRollId == null || _isRollFinishLoading) {
+      return;
+    }
 
     setState(() {
       _isRollFinishLoading = true;
@@ -578,21 +777,30 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
 
       if (!mounted) return;
 
-      if (response["success"] == true) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(response["message"])));
+      final success = response["success"] == true;
 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            response["message"]?.toString() ??
+                (success ? "Roll finished successfully" : "Roll finish failed"),
+          ),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+
+      if (success) {
         Navigator.pop(context, true);
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(response["message"])));
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Roll finish error: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -602,91 +810,18 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
     }
   }
 
-  Future<void> _loadMore() async {
-    if (_loading || !_hasMore) return;
-
-    setState(() => _loading = true);
-
-    try {
-      final nextPage = _page + 1;
-
-      final data = await NaradanaApiService.fetchOutStockListNaradana(
-        plant: AppGlobals.unit,
-
-        // plant: 'UNIT-SILVASSA',
-        page: nextPage,
-        pageSize: _pageSize,
-      );
-
-      setState(() {
-        _page = nextPage;
-        _items.addAll(data);
-        _hasMore = data.isNotEmpty;
-      });
-
-      // Apply filter immediately
-      if (_searchText.isEmpty) {
-        setState(() {
-          _filteredItems = List.from(_items);
-        });
-      } else {
-        setState(() {
-          _filteredItems = _items.where((item) {
-            return item.id.toString().toLowerCase().contains(_searchText) ||
-                item.barcode.toLowerCase().contains(_searchText) ||
-                item.rollCode.toString().toLowerCase().contains(_searchText);
-          }).toList();
-        });
-      }
-    } catch (e) {
-      _setStatus("❌ Pagination error: $e");
-    }
-
-    setState(() => _loading = false);
-  }
-
-  Future<void> _fetchPage(int page) async {
-    setState(() => _loading = true);
-
-    try {
-      final data = await NaradanaApiService.fetchOutStockListNaradana(
-        plant: AppGlobals.unit,
-
-        // plant: 'UNIT-SILVASSA',
-        page: page,
-        pageSize: 20, // ✅ FIXED 20
-      );
-
-      setState(() {
-        _page = page;
-
-        _items
-          ..clear() // ✅ IMPORTANT (replace data)
-          ..addAll(data);
-        _filteredItems = List.from(_items);
-        _hasMore = data.length == 20; // if less → last page
-      });
-    } catch (e) {
-      _setStatus("❌ Page load error: $e");
-    }
-
-    setState(() => _loading = false);
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200 &&
-        !_loading) {
-      _loadMore();
-    }
-  }
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: C.bg,
+
       appBar: AppBar(
         backgroundColor: C.primary,
+
         title: Text(
           widget.title,
           style: const TextStyle(
@@ -695,6 +830,7 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
             color: C.bg,
           ),
         ),
+
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 12),
@@ -723,27 +859,39 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
             ),
           ),
         ],
-        iconTheme: IconThemeData(color: C.bg),
+
+        iconTheme: const IconThemeData(color: C.bg),
       ),
+
       body: Column(
         children: [
+          // =====================================================
+          // SEARCH
+          // =====================================================
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
               controller: _searchController,
               onChanged: _applyFilter,
+
               decoration: InputDecoration(
-                hintText: "Search by ID or Roll Code",
+                hintText: "Search ID, Roll Code, Party or Fabric",
+
                 prefixIcon: const Icon(Icons.search),
+
                 suffixIcon: _searchText.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    _applyFilter('');
-                  },
-                )
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          _applyFilter('');
+                        },
+                      )
                     : null,
+
+                filled: true,
+                fillColor: Colors.white,
+
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -751,41 +899,21 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
             ),
           ),
 
+          // =====================================================
+          // STATUS
+          // =====================================================
           if (_status.isNotEmpty) _statusBar(),
+
+          // =====================================================
+          // LIST
+          // =====================================================
           Expanded(
-            child: _loading && _items.isEmpty
-                ? Center(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: C.appBar3),
-                    const SizedBox(height: 15),
-                    Text(
-                      "Fetching Out List...",
-                      style: TextStyle(
-                        color: C.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-                : _buildTable(),
+            child: _loading && _items.isEmpty ? _buildLoading() : _buildTable(),
           ),
+
+          // =====================================================
+          // ROLL FINISH BUTTON
+          // =====================================================
           if (_selectedRollId != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
@@ -795,13 +923,13 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
                 child: ElevatedButton.icon(
                   icon: _isRollFinishLoading
                       ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : const Icon(Icons.check_circle),
 
                   label: Text(
@@ -817,22 +945,78 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
                 ),
               ),
             ),
+
+          // =====================================================
+          // PAGINATION
+          // =====================================================
           _bottomBar(),
         ],
       ),
     );
   }
 
-  // ── TABLE ──
+  // ============================================================
+  // LOADING
+  // ============================================================
+
+  Widget _buildLoading() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2),
+          ],
+        ),
+
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: C.appBar3),
+
+            const SizedBox(height: 15),
+
+            Text(
+              "Fetching Out List...",
+              style: TextStyle(color: C.primary, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // LIST
+  // ============================================================
+
   Widget _buildTable() {
+    if (_filteredItems.isEmpty && !_loading) {
+      return const Center(
+        child: Text(
+          "No records found",
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
+      controller: _scrollController,
+
       addAutomaticKeepAlives: false,
       addRepaintBoundaries: true,
 
-      controller: _scrollController,
       itemCount: _filteredItems.length + (_loading ? 1 : 0),
+
       itemBuilder: (context, index) {
-        // 🔹 Loader at bottom while pagination
+        // Bottom loader
         if (index == _filteredItems.length) {
           return const Padding(
             padding: EdgeInsets.all(16),
@@ -841,12 +1025,11 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
         }
 
         final r = _filteredItems[index];
-        final isSelected = _selectedIndex == index;
+
+        final isSelected = _selectedRollId == r.id;
 
         return InkWell(
           onTap: () {
-            setState(() => _selectedIndex = index);
-
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -854,21 +1037,34 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
               ),
             );
           },
+
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+
             padding: const EdgeInsets.all(12),
+
             decoration: BoxDecoration(
               color: isSelected ? C.warning.withOpacity(0.2) : Colors.white,
+
               borderRadius: BorderRadius.circular(10),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+
+              boxShadow: const [
+                BoxShadow(color: Colors.black12, blurRadius: 4),
+              ],
             ),
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
+                // =================================================
+                // SELECT
+                // =================================================
                 Row(
                   children: [
                     Checkbox(
-                      value: _selectedRollId == r.id,
+                      value: isSelected,
+
                       onChanged: (value) {
                         setState(() {
                           if (value == true) {
@@ -879,7 +1075,8 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
                         });
                       },
                     ),
-                    Expanded(
+
+                    const Expanded(
                       child: Text(
                         "Select Roll",
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -887,25 +1084,44 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
                     ),
                   ],
                 ),
+
                 _row("ID", r.id.toString()),
+
                 _row("Roll Code", r.rollCode.toString()),
+
                 _row("Barcode", r.barcode),
+
                 _row("WO", r.partyname),
+
                 _row("Supervisor", r.supervisorName),
+
                 _row("Operator", r.operatorName),
+
                 _row("Loom Type", r.loomNo),
+
                 _row("Fabric Type/use", r.fabricType),
+
                 _row("Party Name", r.component),
+
                 _row("Fabric Code", r.fabricCode),
+
                 _row("Week No", r.weekNo),
+
                 _row("Req Qty(KG)", r.requiredQtyKg.toString()),
+
                 _row("Req Qty(Mtr)", r.requiredQtyMtr.toString()),
+
                 _row("Loom No", r.loomType),
+
                 _row("Color", r.color),
+
                 _row("GSM", r.fabricGsm),
+
                 _row("Status", r.status),
-                _row("Date", r.date.split(" ")[0]),
-                _row("Time", r.time.split(" ")[0]),
+
+                _row("Date", _safeDate(r.date)),
+
+                _row("Time", _safeTime(r.time)),
               ],
             ),
           ),
@@ -914,61 +1130,132 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
     );
   }
 
-  // ── STATUS ──
-  Widget _statusBar() => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(10),
-    color: Colors.blue.shade50,
-    child: Text(_status),
-  );
+  // ============================================================
+  // BOTTOM PAGINATION
+  // ============================================================
 
-  // ── BOTTOM ──
-  Widget _bottomBar() => Container(
-    padding: const EdgeInsets.all(12),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        ElevatedButton(
-          onPressed: _page > 1 ? () => _fetchPage(_page - 1) : null,
-          child: const Text("Prev"),
-        ),
+  Widget _bottomBar() {
+    return Container(
+      padding: const EdgeInsets.all(12),
 
-        Text("Page $_page"),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+      ),
 
-        ElevatedButton(
-          onPressed: _hasMore ? () => _fetchPage(_page + 1) : null,
-          child: const Text("Next"),
-        ),
-      ],
-    ),
-  );
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-  // ── HELPERS ──
-  void _setStatus(String msg) {
-    if (mounted) setState(() => _status = msg);
+        children: [
+          ElevatedButton.icon(
+            onPressed: (_page > 1 && !_loading)
+                ? () => _fetchPage(_page - 1)
+                : null,
+
+            icon: const Icon(Icons.chevron_left),
+
+            label: const Text("Prev"),
+          ),
+
+          Text(
+            "Page $_page",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+
+          ElevatedButton.icon(
+            onPressed: (_hasMore && !_loading)
+                ? () => _fetchPage(_page + 1)
+                : null,
+
+            icon: const Icon(Icons.chevron_right),
+
+            label: const Text("Next"),
+          ),
+        ],
+      ),
+    );
   }
 
-  String _formatDate(String d) {
+  // ============================================================
+  // STATUS
+  // ============================================================
+
+  Widget _statusBar() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+
+      color: Colors.blue.shade50,
+
+      child: Text(_status, style: const TextStyle(fontSize: 12)),
+    );
+  }
+
+  void _setStatus(String message) {
+    if (!mounted) return;
+
+    setState(() {
+      _status = message;
+    });
+  }
+
+  // ============================================================
+  // SAFE DATE
+  // ============================================================
+
+  String _safeDate(String value) {
+    if (value.trim().isEmpty) {
+      return "-";
+    }
+
     try {
-      return DateTime.parse(d).toString().split(" ")[0];
+      return value.split(" ")[0];
     } catch (_) {
-      return d;
+      return value;
     }
   }
+
+  String _safeTime(String value) {
+    if (value.trim().isEmpty) {
+      return "-";
+    }
+
+    try {
+      return value.split(" ")[0];
+    } catch (_) {
+      return value;
+    }
+  }
+
+  // ============================================================
+  // ROW
+  // ============================================================
 
   Widget _row(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
+
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           SizedBox(
             width: 120,
+
             child: Text(
               "$label:",
+
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
             ),
           ),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
+
+          Expanded(
+            child: Text(
+              value.isEmpty ? "-" : value,
+
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
         ],
       ),
     );

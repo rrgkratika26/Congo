@@ -69,9 +69,9 @@ class _DispatchScreenState extends State<DispatchScreen> {
             padding: const EdgeInsets.symmetric(),
             child: Row(
               children: [
-                Expanded(
-                  child: _buildTabIndicator('Dispatch Entry', 0, isTablet),
-                ),
+                // Expanded(
+                //   child: _buildTabIndicator('Dispatch Entry', 0, isTablet),
+                // ),
                 Expanded(
                   child: _buildTabIndicator('Dispatch Report', 1, isTablet),
                 ),
@@ -153,7 +153,7 @@ class _DispatchScreenState extends State<DispatchScreen> {
                 },
               ),
               items: [
-                const BalingDispatchScreen(),
+                // const BalingDispatchScreen(),
                 DispatchReportScreen(
                   key: _dispatchReportKey,
                   startDate: startDate,

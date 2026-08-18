@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Color/Colorclass.dart';
 import '../../services/DashboardApiServices.dart';
@@ -39,6 +40,7 @@ class _GraphTabState extends State<GraphTab> {
   static const Color cuttingColor = Color(0xFFEE7D00);
 
   static const Color textDark = Color(0xFF1A1A2E);
+  String unitName = '';
 
   String get _fromStr => DateFormat('yyyy-MM-dd').format(fromDate);
 
@@ -62,7 +64,9 @@ class _GraphTabState extends State<GraphTab> {
 
   Future<void> _loadData() async {
     if (!mounted) return;
+    final prefs = await SharedPreferences.getInstance();
 
+    unitName = prefs.getString('unit') ?? 'UNIT';
     setState(() {
       _isLoading = true;
       _error = null;
@@ -93,7 +97,7 @@ class _GraphTabState extends State<GraphTab> {
             // ───────────────────────────────────────────
 
             final summary = await service.getDashboard(
-              unit: widget.unit,
+              unit:unitName,
               fromDate: dayStr,
               toDate: dayStr,
             );
@@ -433,7 +437,6 @@ class _GraphTabState extends State<GraphTab> {
     );
   }
 
-
   Widget _summaryCard({
     required IconData icon,
     required String title,
@@ -510,7 +513,6 @@ class _GraphTabState extends State<GraphTab> {
     );
   }
 
-
   Widget _productionLineChart() {
     if (_productionPoints.isEmpty) {
       return _emptyCard('No production data available');
@@ -550,7 +552,6 @@ class _GraphTabState extends State<GraphTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Row(
             children: [
               Container(
@@ -599,7 +600,6 @@ class _GraphTabState extends State<GraphTab> {
 
           const SizedBox(height: 15),
 
-
           Row(
             children: [
               _legendItem(color: rmdColor, label: 'RMD KG'),
@@ -619,7 +619,6 @@ class _GraphTabState extends State<GraphTab> {
               LineChartData(
                 minY: 0,
                 maxY: chartMax,
-
 
                 gridData: FlGridData(
                   show: true,
@@ -773,7 +772,6 @@ class _GraphTabState extends State<GraphTab> {
                 ),
 
                 lineBarsData: [
-
                   LineChartBarData(
                     spots: List.generate(_productionPoints.length, (index) {
                       return FlSpot(
@@ -1042,8 +1040,6 @@ class _GraphTabState extends State<GraphTab> {
       ),
     );
   }
-
-
 
   Widget _productionValue({
     required Color color,

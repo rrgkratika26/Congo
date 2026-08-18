@@ -64,6 +64,21 @@ class _TapeOutReportsState extends State<TapeOutReports> {
   //     ReportTotalHelper.totalRollLength(_filtered, (e) => e.);
 
   int get _totalRecords => ReportTotalHelper.totalRecords(_filtered);
+
+  List<TapelineOutReportModel> get _pagedData {
+    final start = (currentPage - 1) * pageSize;
+
+    if (start >= _filtered.length) {
+      return [];
+    }
+
+    final end = (start + pageSize).clamp(
+      0,
+      _filtered.length,
+    );
+
+    return _filtered.sublist(start, end);
+  }
   // CountText(count: _filtered.length);
 
   @override
@@ -93,8 +108,12 @@ class _TapeOutReportsState extends State<TapeOutReports> {
     }
   }
 
-  Future<void> _fetchData() async {
-    setState(() => _isLoading = true);
+  Future<void> _fetchData({bool showLoader = true}) async {
+    if (showLoader && mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       final data = await InStockService().fetchTapelineOutReport(
@@ -102,18 +121,28 @@ class _TapeOutReportsState extends State<TapeOutReports> {
         to: _to,
       );
 
+      if (!mounted) return;
+
       setState(() {
         _allReports = data;
+        currentPage = 1;
       });
     } catch (e) {
-      debugPrint('UI ERROR: $e');
+      debugPrint('Tapeline Out API ERROR: $e');
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to load data')));
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load data'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
+      if (mounted && showLoader) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -129,7 +158,7 @@ class _TapeOutReportsState extends State<TapeOutReports> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: C.bg,
+      // backgroundColor: C.bg,
       appBar: AppBar(
         title: const Text(
           "Tapeline Out Reports",
@@ -144,19 +173,20 @@ class _TapeOutReportsState extends State<TapeOutReports> {
         children: [
           _topBar(),
 
-          _isLoading
-              ? const Expanded(
-            child: Center(
-              child: CircularProgressIndicator(color: C.appBar3),
+          if (_isLoading)
+            const LinearProgressIndicator(
+              minHeight: 2,
+              color: C.appBar3,
             ),
-          )
-              : _filtered.isEmpty
-              ? Expanded(child: _emptyState())
-              : Expanded(
-            child: Column(
-              children: [
-                Expanded(child: _table(_filtered)),
 
+          Expanded(
+            child: _filtered.isEmpty
+                ? _emptyState()
+                : Column(
+              children: [
+                Expanded(
+                  child: _table(_pagedData),
+                ),
                 _paginationBar(),
               ],
             ),

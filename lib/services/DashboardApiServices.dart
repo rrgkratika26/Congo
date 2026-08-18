@@ -58,6 +58,8 @@ class DashboardService {
 
       print("========== MARKETING API ==========");
       print("TYPE : $type");
+      print("UNITNAME : $unit");
+
       print("URL : $url");
 
       final response = await http.get(

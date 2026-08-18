@@ -52,7 +52,7 @@ class _CuttingScreenState extends State<CuttingScreen> {
         shadowColor: Colors.black.withOpacity(0.1),
 
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: C.bg),
+          icon: const Icon(Icons.arrow_back, color: C.bg),
           onPressed: () => Navigator.pop(context),
         ),
 

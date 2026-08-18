@@ -117,17 +117,33 @@ class RmdService {
     required Map<String, dynamic> body,
   }) async {
     try {
+      final url = Uri.parse(
+        "${InStockService.baseUrl}/Rmd/SaveRollEntry",
+      );
+
+      final jsonBody = jsonEncode(body);
+
+      debugPrint("=================================");
+      debugPrint("SAVE URL : $url");
+      debugPrint("SAVE JSON : $jsonBody");
+      debugPrint("=================================");
+
       final response = await http.post(
-        Uri.parse("${InStockService.baseUrl}/Rmd/SaveRollEntry"),
-        headers: await InStockService.authHeaders(),
-        body: jsonEncode(body),
+        url,
+        headers: {
+          ...await InStockService.authHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: jsonBody,
       );
 
       debugPrint("SAVE STATUS : ${response.statusCode}");
-      debugPrint("SAVE Roll EntryRESPONSE : ${response.body}");
+      debugPrint("SAVE RESPONSE : ${response.body}");
 
       if (response.statusCode == 200) {
-        return response.body.toLowerCase().contains("data saved successfully");
+        return response.body
+            .toLowerCase()
+            .contains("data saved successfully");
       }
 
       return false;
@@ -136,7 +152,6 @@ class RmdService {
       return false;
     }
   }
-
   static Future<List<RmdRollEntrySavedListModel>> fetchSavedRollEntry({
     required String fromDate,
     required String toDate,

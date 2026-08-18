@@ -8,11 +8,11 @@ class LogoutService {
       //      'http://fibcsoftware.in:4430/api/api/Login/logout';
       // 'http://190.92.175.47:80/JblAPI/api/Login/logout';
       // 'http://190.92.175.47:80/JBL_DEMO/api/Login/logout';
-        'http://190.92.175.47:80/Nardana/api';
-  // 'http://192.168.29.1257:7165/api';
+      //   'http://190.92.175.47:80/Nardana/api';
+  // 'http://192.168.29.123:7165/api';
   // 'http://190.92.175.47/VISA_S/api';
   // 'http://190.92.175.47/Qualipack/api';
-  // 'http://190.92.175.47/CONGO_API/api';
+  'http://190.92.175.47/CONGO_API/api';
   // 'http://190.92.175.47:80/Visa/api';
 
  // ' http://190.92.175.47/ShriShakti/api';

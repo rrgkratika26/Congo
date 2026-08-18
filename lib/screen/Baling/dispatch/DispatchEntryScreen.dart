@@ -738,6 +738,27 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: C.primary,
+        elevation: 0,
+        shadowColor: Colors.black.withOpacity(0.05),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: C.bg),
+          onPressed: () => Navigator.pop(context),
+        ),
+
+        title: Text(
+          "Dispatch Entry",
+          style: const TextStyle(color: C.bg, fontWeight: FontWeight.bold),
+        ),
+
+        centerTitle: true,
+
+
+        iconTheme: IconThemeData(
+          color: C.bg, // 👈 Back arrow color white
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
         child: Column(

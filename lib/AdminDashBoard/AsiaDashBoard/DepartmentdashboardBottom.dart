@@ -50,7 +50,7 @@ class _DeptDashboardState extends State<DeptDashboard> {
     ];
 
     return Scaffold(
-      backgroundColor: C.bg,
+
 
       body: SafeArea(
         child: Stack(
@@ -87,7 +87,7 @@ class _DeptDashboardState extends State<DeptDashboard> {
             Positioned(
               left: isMobile ? 16 : 80,
               right: isMobile ? 16 : 80,
-              bottom: isMobile ? 16 : 24,
+              bottom: isMobile ? 28 : 35,
               child: _BottomNav(
                 selected: _navIndex,
                 onTap: (i) {
@@ -115,15 +115,15 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 12,
-      shadowColor: Colors.black.withOpacity(.18),
+      elevation: 5,
+      shadowColor: C.primary,
       borderRadius: BorderRadius.circular(28),
-      color: Colors.white,
+      color: Colors.orangeAccent.shade100,
       child: Container(
         height: 68,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: C.primary,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(color: Colors.grey.withOpacity(.08)),
         ),
@@ -137,7 +137,7 @@ class _BottomNav extends StatelessWidget {
             ),
 
             _NavItem(
-              icon: Icons.precision_manufacturing_rounded,
+              icon: Icons.all_inbox_outlined,
               label: 'Production',
               selected: selected == 1,
               onTap: () => onTap(1),
@@ -152,7 +152,7 @@ class _BottomNav extends StatelessWidget {
 
             _NavItem(
               icon: Icons.person_rounded,
-              label: 'Profile',
+              label: 'User',
               selected: selected == 3,
               onTap: () => onTap(3),
             ),
@@ -185,51 +185,54 @@ class _NavItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 3,
+          ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             gradient: selected
                 ? LinearGradient(
-                    colors: [C.bg, C.bg.withOpacity(0.85)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
+              colors: [
+                C.bg,
+                C.bg.withOpacity(0.85),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
                 : null,
           ),
-          child: Row(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedScale(
-                scale: selected ? 1.05 : 1,
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color: selected ? C.warning : C.appBar4,
-                ),
+              Icon(
+                icon,
+                size: selected ? 21 : 22,
+                color: selected ? C.warning : C.textLow,
               ),
 
-              if (selected) ...[
-                const SizedBox(height: 7),
 
-                Flexible(
-                  child: AnimatedOpacity(
-                    opacity: selected ? 1 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: C.warning,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
-                      ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                child: selected
+                    ? Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: C.warning,
+                      fontSize: 10,
+                      height: 1.0,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.1,
                     ),
                   ),
-                ),
-              ],
+                )
+                    : const SizedBox.shrink(),
+              ),
             ],
           ),
         ),

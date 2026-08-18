@@ -1556,9 +1556,6 @@ import 'package:flutter/material.dart';
 
 import 'OutSavedList.dart';
 
-// ════════════════════════════════════════════════════════════════
-//  CUTTING OUT-STOCK FORM  (Nardana-style architecture)
-// ════════════════════════════════════════════════════════════════
 class CuttingOutStockForm extends StatefulWidget {
   final CuttingOutstock production;
 
@@ -1569,7 +1566,7 @@ class CuttingOutStockForm extends StatefulWidget {
 }
 
 class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
-  // ─────────────── Theme ───────────────
+
   static const _primary = Color(0xFF1A56DB);
   static const _surface = Color(0xFFF8FAFF);
   static const _border = Color(0xFFDDE3F0);
@@ -1577,16 +1574,12 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   static const _inputBg = Colors.white;
   static const _readOnlyBg = Color(0xFFF4F6FB);
 
-  // ─────────────── Services ───────────────
   final _apiService = VisaApiService();
   final _inStockService = InStockService();
   final _formKey = GlobalKey<FormState>();
 
-  // ─────────────── Debounce ───────────────
   Timer? _debounce;
-
-  // ─────────────── Dropdown state ───────────────
-  String? _selectedShift;
+ String? _selectedShift;
   final List<String> _shiftOptions = ['A', 'B'];
 
   List<String> _bomNumbers = [];
@@ -1609,7 +1602,6 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   String? _operator2;
   String? _selectedSupervisor;
 
-  // ─────────────── Loading flags ───────────────
   bool _isLoadingFabricWidth = false;
   bool _isLoadingGsm = false;
   bool _isLoadingBomComponents = false;
@@ -1617,7 +1609,6 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
   bool _isLoadingSupervisor = false;
   bool _isLoading = false;
 
-  // ─────────────── Controllers ───────────────
   final _partyNameCtrl = TextEditingController();
   final _poNoCtrl = TextEditingController();
   final _articleNoCtrl = TextEditingController();
@@ -1726,7 +1717,6 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
     _wastageCtrl.addListener(_calculateUseAndFinalRem);
     _tillRemCtrl.addListener(_calculateUseAndFinalRem);
 
-    // ── Initial API load ──────────────────────────────────────
     _initialLoad();
   }
 
@@ -2209,7 +2199,7 @@ class _CuttingOutStockFormState extends State<CuttingOutStockForm> {
       foregroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+        icon: const Icon(Icons.arrow_back, size: 18),
         onPressed: () => Navigator.maybePop(context),
       ),
       title: Column(

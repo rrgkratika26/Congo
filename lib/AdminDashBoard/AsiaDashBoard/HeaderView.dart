@@ -38,16 +38,15 @@ class Header extends StatelessWidget {
           //   ),
           // ),
 
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+          ClipOval(
             child: Container(
               width: 45,
-              height: 40,
+              height: 45,
               color: Colors.white,
               padding: const EdgeInsets.all(4),
               child: Image.asset(
                 'assets/images/rrgLogo.jpeg',
-                fit: BoxFit.contain,
+                fit: BoxFit.cover,
               ),
             ),
           ),

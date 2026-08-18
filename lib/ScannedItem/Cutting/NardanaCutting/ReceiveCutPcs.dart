@@ -251,7 +251,7 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
   }
   Widget _searchField() {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.only(top: 12,left: 15,right: 15),
       child: TextField(
         // onChanged: (v) => setState(() => searchQuery = v),
         onChanged: (v) {
@@ -276,10 +276,10 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
   Widget _selectAllBar() {
     return Container(
       color: C.brand50,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12,),
       child: Row(
         children: [
-          Checkbox(value: selectAll, onChanged: _toggleSelectAll),
+          Checkbox(value: selectAll, onChanged: _toggleSelectAll,activeColor: C.success,),
           const Text("Select All", style: TextStyle(fontWeight: FontWeight.w600)),
           const Spacer(),
           Text("${filteredItems.length} items"),
@@ -298,7 +298,7 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
         child: DataTable(
           columnSpacing: 18,
           headingRowColor: WidgetStateProperty.all(C.brand100),
-
+dataRowColor:WidgetStateProperty.all(C.brand100) ,
           columns: const [
             DataColumn(label: Text("Select")),
             DataColumn(label: Text("ID")),
@@ -315,10 +315,19 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
 
           rows: list.map((item) {
             return DataRow(
+              color: WidgetStateProperty.resolveWith<Color?>(
+                    (states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return C.bg;
+                  }
+                  return C.bg;
+                },
+              ),
               selected: item.isSelected,
               cells: [
                 DataCell(
                   Checkbox(
+                    activeColor: C.success,
                     value: item.isSelected,
                     onChanged: (v) => setState(() => item.isSelected = v ?? false),
                   ),
@@ -328,7 +337,7 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
                     item.id.toString(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: C.success, // or your C.primaryBlue
+                      color: C.success,
                     ),
                   ),
                 ),

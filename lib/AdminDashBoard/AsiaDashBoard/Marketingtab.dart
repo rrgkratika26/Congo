@@ -18,7 +18,11 @@ class _DeptItem {
   final String title;
   final IconData icon;
   final Color color;
-  const _DeptItem({required this.title, required this.icon, required this.color});
+  const _DeptItem({
+    required this.title,
+    required this.icon,
+    required this.color,
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -148,6 +152,7 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.entry,
         MenuAction.bailing_Report,
         MenuAction.dispatch,
+        MenuAction.dispatch_report,
         MenuAction.stock,
       ];
     case 'JBL BALING':
@@ -229,25 +234,49 @@ class AdminDashboard extends StatelessWidget {
   static final _jblItems = [
     _DeptItem(title: 'JBL LOOM', icon: Icons.looks, color: _Palette.loom),
     _DeptItem(title: 'JBL RMD', icon: Icons.inventory, color: _Palette.rmd),
-    _DeptItem(title: 'JBL LAMINATION', icon: Icons.layers, color: _Palette.lamination),
+    _DeptItem(
+      title: 'JBL LAMINATION',
+      icon: Icons.layers,
+      color: _Palette.lamination,
+    ),
     _DeptItem(title: 'JBL CUTTING', icon: Icons.cut, color: _Palette.cutting),
     _DeptItem(title: 'JBL BAG', icon: Icons.shopping_bag, color: _Palette.bag),
     _DeptItem(title: 'JBL BALING', icon: Icons.waves, color: _Palette.baling),
-    _DeptItem(title: 'JBL DISPATCH', icon: Icons.local_shipping, color: _Palette.dispatch),
+    _DeptItem(
+      title: 'JBL DISPATCH',
+      icon: Icons.local_shipping,
+      color: _Palette.dispatch,
+    ),
     _DeptItem(title: 'JBL WEBBING', icon: Icons.web, color: _Palette.webbing),
   ];
 
   static final _allItems = [
-    _DeptItem(title: 'MARKETING', icon: Icons.bar_chart_rounded, color: _Palette.marketing),
-    _DeptItem(title: 'PLANNING', icon: Icons.next_plan_rounded, color: _Palette.planning),
+    _DeptItem(
+      title: 'MARKETING',
+      icon: Icons.bar_chart_rounded,
+      color: _Palette.marketing,
+    ),
+    _DeptItem(
+      title: 'PLANNING',
+      icon: Icons.next_plan_rounded,
+      color: _Palette.planning,
+    ),
     _DeptItem(title: 'LOOM', icon: Icons.looks, color: _Palette.loom),
     _DeptItem(title: 'RMD', icon: Icons.inventory, color: _Palette.rmd),
-    _DeptItem(title: 'LAMINATION', icon: Icons.layers, color: _Palette.lamination),
+    _DeptItem(
+      title: 'LAMINATION',
+      icon: Icons.layers,
+      color: _Palette.lamination,
+    ),
     _DeptItem(title: 'CUTTING', icon: Icons.cut, color: _Palette.cutting),
     _DeptItem(title: 'BAG', icon: Icons.shopping_bag, color: _Palette.bag),
     _DeptItem(title: 'BALING', icon: Icons.waves, color: _Palette.baling),
     _DeptItem(title: 'WEBBING', icon: Icons.web, color: _Palette.webbing),
-    _DeptItem(title: 'TAPELINE', icon: Icons.dashboard_rounded, color: _Palette.tapeline),
+    _DeptItem(
+      title: 'TAPELINE',
+      icon: Icons.dashboard_rounded,
+      color: _Palette.tapeline,
+    ),
   ];
 
   @override
@@ -262,14 +291,13 @@ class AdminDashboard extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-
             Expanded(
               child: GridView.builder(
                 padding: EdgeInsets.fromLTRB(
                   isMobile ? 16 : 24,
-                  isMobile ? 18 : 22,
                   isMobile ? 16 : 24,
                   isMobile ? 16 : 24,
+                  120, // 👈 extra space at the bottom
                 ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossCount,
@@ -278,11 +306,8 @@ class AdminDashboard extends StatelessWidget {
                   childAspectRatio: 1.05,
                 ),
                 itemCount: items.length,
-                itemBuilder: (ctx, i) => _DeptCard(
-                  item: items[i],
-                  ctrl: ctrl,
-                  isMobile: isMobile,
-                ),
+                itemBuilder: (ctx, i) =>
+                    _DeptCard(item: items[i], ctrl: ctrl, isMobile: isMobile),
               ),
             ),
           ],
@@ -291,7 +316,6 @@ class AdminDashboard extends StatelessWidget {
     );
   }
 }
-
 
 class _DeptDashboard extends StatelessWidget {
   final DashboardController ctrl;
@@ -325,7 +349,9 @@ class _DeptDashboard extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [C.appBar1, C.appBar1.withOpacity(.85)],
                 ),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(28),
+                ),
               ),
               child: Row(
                 children: [
@@ -339,7 +365,7 @@ class _DeptDashboard extends StatelessWidget {
                   SizedBox(width: isMobile ? 8 : 16),
                   Expanded(
                     child: Obx(
-                          () => Text(
+                      () => Text(
                         ctrl.user.value,
                         style: TextStyle(
                           color: Colors.white,
@@ -353,8 +379,11 @@ class _DeptDashboard extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Obx(
-                        () => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    () => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(.16),
                         borderRadius: BorderRadius.circular(20),
@@ -485,7 +514,11 @@ class _DeptDashboard extends StatelessWidget {
                       ctrl.logout();
                     }
                   },
-                  icon: const Icon(Icons.logout_rounded, size: 18, color: C.danger),
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    size: 18,
+                    color: C.danger,
+                  ),
                   label: Text(
                     "Logout",
                     style: TextStyle(
@@ -496,7 +529,10 @@ class _DeptDashboard extends StatelessWidget {
                   ),
                   style: TextButton.styleFrom(
                     backgroundColor: C.danger.withOpacity(.08),
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -530,7 +566,7 @@ class _DeptCard extends StatelessWidget {
       onTap: () {
         HapticFeedback.lightImpact();
         Get.to(
-              () => _DeptDashboard(ctrl: ctrl, department: item.title),
+          () => _DeptDashboard(ctrl: ctrl, department: item.title),
           transition: Transition.cupertino,
         );
       },
@@ -820,7 +856,7 @@ class _AppDrawer extends StatelessWidget {
                       const SizedBox(width: 14),
                       Expanded(
                         child: Obx(
-                              () => Text(
+                          () => Text(
                             ctrl.user.value,
                             style: const TextStyle(
                               color: Colors.white,
@@ -836,8 +872,11 @@ class _AppDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Obx(
-                        () => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    () => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -846,7 +885,11 @@ class _AppDrawer extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.factory, color: Colors.white, size: 18),
+                          const Icon(
+                            Icons.factory,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
@@ -869,7 +912,10 @@ class _AppDrawer extends StatelessWidget {
             // Dept list
             Expanded(
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 itemCount: items.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 2),
                 itemBuilder: (ctx, i) {
@@ -903,7 +949,8 @@ class _AppDrawer extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(ctx);
                       Get.to(
-                            () => _DeptDashboard(ctrl: ctrl, department: item.title),
+                        () =>
+                            _DeptDashboard(ctrl: ctrl, department: item.title),
                         transition: Transition.cupertino,
                       );
                     },
@@ -1088,7 +1135,9 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
       else if (action == MenuAction.bailing_Report)
         Get.toNamed(AppRoutes.balingReport);
       else if (action == MenuAction.dispatch)
-        Get.toNamed(AppRoutes.baleDispatch);
+        Get.toNamed(AppRoutes.dispatchEntry);
+      else if (action == MenuAction.dispatch)
+        Get.toNamed(AppRoutes.dispatchReport);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.baleStockgroup);
       break;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -20,7 +22,10 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
   DateTime? _to;
   List<RmdStockReportModel> _allReports = [];
   bool _isLoading = false;
+  Timer? _searchDebounce;
 
+  int currentPage = 1;
+  static const int pageSize = 15;
   String? _selectedParty;
   String? _selectedSupervisor;
   String? _selectedStatus;
@@ -68,7 +73,32 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
   double get _totalNet => _filtered.fold(0, (a, r) => a + r.netWeight);
   double get _totalGross => _filtered.fold(0, (a, r) => a + r.grossWeight);
   double get _totalLength => _filtered.fold(0, (a, r) => a + r.rollLength);
+  List<RmdStockReportModel> get _pagedData {
+    if (_filtered.isEmpty) {
+      return [];
+    }
 
+    final start = (currentPage - 1) * pageSize;
+
+    if (start >= _filtered.length) {
+      return [];
+    }
+
+    final end = (start + pageSize).clamp(
+      0,
+      _filtered.length,
+    );
+
+    return _filtered.sublist(start, end);
+  }
+
+  int get totalPages {
+    if (_filtered.isEmpty) {
+      return 1;
+    }
+
+    return ((_filtered.length + pageSize - 1) / pageSize).ceil();
+  }
   @override
   void initState() {
     super.initState();
@@ -101,25 +131,42 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
     }
   }
 
-  Future<void> _fetchData() async {
-    setState(() => _isLoading = true);
+  Future<void> _fetchData({bool showLoader = true}) async {
+    if (showLoader && mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
     try {
       final data = await NaradanaApiService().fetchRmdStock(
-        // from: _from!,
-        // to: _to!,
         1,
         5000,
       );
-      setState(() => _allReports = data);
+
+      if (!mounted) return;
+
+      setState(() {
+        _allReports = data;
+        currentPage = 1;
+      });
     } catch (e) {
-      debugPrint('UI ERROR: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to load data')));
-      }
+      debugPrint('RMD STOCK API ERROR: $e');
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load stock data'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted && showLoader) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -177,15 +224,35 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
         children: [
           _summaryBar(),
           _searchBar(),
-          _isLoading
-              ? const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : _filtered.isEmpty
-              ? Expanded(child: _emptyState())
-              : Expanded(
-                  child: Column(children: [Expanded(child: _table(_filtered))]),
+          if (_isLoading)
+            const LinearProgressIndicator(
+              minHeight: 2,
+              color: C.actionOrange,
+            ),
+
+          Expanded(
+            child: _filtered.isEmpty
+                ? _isLoading
+                ? const Center(
+              child: Text(
+                'Loading stock data...',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: C.textMid,
                 ),
+              ),
+            )
+                : _emptyState()
+                : Column(
+              children: [
+                Expanded(
+                  child: _table(_pagedData),
+                ),
+
+                _paginationBar(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -477,6 +544,71 @@ class _RmdStockReportScreenState extends State<RmdStockReportScreen> {
             borderSide: const BorderSide(color: C.actionOrange, width: 1.2),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _paginationBar() {
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: Colors.grey.shade200,
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Page $currentPage / $totalPages',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: C.textHigh,
+            ),
+          ),
+
+          Row(
+            children: [
+              IconButton(
+                tooltip: 'Previous',
+                onPressed: currentPage > 1
+                    ? () {
+                  setState(() {
+                    currentPage--;
+                  });
+                }
+                    : null,
+                icon: const Icon(
+                  Icons.chevron_left_rounded,
+                  size: 22,
+                ),
+              ),
+
+              IconButton(
+                tooltip: 'Next',
+                onPressed: currentPage < totalPages
+                    ? () {
+                  setState(() {
+                    currentPage++;
+                  });
+                }
+                    : null,
+                icon: const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

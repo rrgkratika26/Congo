@@ -38,15 +38,15 @@ import '../auth_exception.dart';
 class NaradanaApiService {
   // static const String _baseUrl = 'http://190.92.175.47:80/api/api';
   // static const String _baseUrl ='http://190.92.175.47/Qualipack/api';
-  // static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
-  // static const String _baseUrl = 'http://192.168.29.125:7165/api';
+  static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
+  // static const String _baseUrl = 'http://192.168.29.123:7165/api';
   // static const String _baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String _baseUrl = 'http://190.92.175.47/ShriShakti/api';
   //static const String _baseUrl = 'http://192.168.29.39:44349/api/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Visa/api';
-  static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  // static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String _baseUrl ='http://190.92.175.47:80/API/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Nardana';
@@ -155,7 +155,7 @@ class NaradanaApiService {
       final fromDate = from != null
           ? DateFormat('yyyy-MM-dd').format(from)
           : DateFormat(
-        'yyyy-MM-dd',
+              'yyyy-MM-dd',
             ).format(DateTime.now().subtract(const Duration(days: 1)));
 
       final toDate = to != null
@@ -175,7 +175,6 @@ class NaradanaApiService {
 
       _logApi(method: "GET", url: uri, response: response);
       _checkUnauthorized(response);
-
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -492,7 +491,6 @@ class NaradanaApiService {
     }
   }
 
-
   static Future<Map<String, dynamic>> rollFinish(int id) async {
     final url = Uri.parse("$_baseUrl/Cutting/RollFinish");
 
@@ -516,7 +514,6 @@ class NaradanaApiService {
       "Roll Finish Failed (${response.statusCode})\n${response.body}",
     );
   }
-
 
   static Future<List<dynamic>> getFabricCodeWiseReport({
     required String fabricCode,
@@ -678,19 +675,17 @@ class NaradanaApiService {
     }
   }
 
-  static Future<List<CuttingOutstockNaradana>> fetchOutStockListNaradana({
-    required String plant,
-    required int page,
-    required int pageSize,
-  }) async {
-    final url = Uri.parse(
-      "$_baseUrl/Cutting/cutting-out-list?plant=$plant&page=$page&pageSize=$pageSize",
-    );
+  static Future<List<CuttingOutstockNaradana>> fetchOutStockListNaradana(
+    // required String plant,
+    // required int page,
+    // required int pageSize,
+  ) async {
+    final url = Uri.parse("$_baseUrl/Cutting/cutting-out-list");
 
     final res = await http.get(url, headers: await authHeaders());
     print("🌐 GET => $url");
     // print("📡 Status => ${res.statusCode}");
-    debugPrint("📦 Response => ${res.body}",);
+    debugPrint("📦 Response => ${res.body}");
     print("======================================");
     if (res.statusCode == 200) {
       final jsonData = jsonDecode(res.body);
@@ -719,9 +714,66 @@ class NaradanaApiService {
     }
   }
 
+  static Future<List<String>> getBomLists() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/Marketing/bom-list'),
+        headers: await authHeaders(),
+      );
+
+      debugPrint("🌐 BOM LIST STATUS: ${response.statusCode}");
+      debugPrint("🌐 BOM LIST RESPONSE: ${response.body}");
+
+      if (response.statusCode != 200) {
+        return [];
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      List<String> bomList = [];
+
+      // API response:
+      // [
+      //   {
+      //     "bomNumbers": ["#2", "#3", "#4"]
+      //   }
+      // ]
+
+      if (decoded is List) {
+        for (final item in decoded) {
+          if (item is Map && item['bomNumbers'] is List) {
+            bomList.addAll(
+              (item['bomNumbers'] as List)
+                  .map((e) => e.toString())
+                  .where((e) => e.trim().isNotEmpty),
+            );
+          }
+        }
+      }
+      // Also support:
+      // {"bomNumbers":["#2","#3","#4"]}
+      else if (decoded is Map && decoded['bomNumbers'] is List) {
+        bomList = (decoded['bomNumbers'] as List)
+            .map((e) => e.toString())
+            .where((e) => e.trim().isNotEmpty)
+            .toList();
+      }
+
+      debugPrint("✅ BOM LIST: $bomList");
+
+      return bomList;
+    } catch (e) {
+      debugPrint("❌ getBomLists ERROR: $e");
+      return [];
+    }
+  }
+
   static Future<Map<String, dynamic>?> getBomAndComponents({
+    // required String po,
+    // required String article,
     required String po,
     required String article,
+    String? bom,
   }) async {
     final url = "$_baseUrl/Cutting/GetBomAndComponents?po=$po&article=$article";
 
@@ -1036,7 +1088,7 @@ class NaradanaApiService {
       final response = await http.get(
         Uri.parse(
           "$_baseUrl/Marketing/BomInquiryReport"
-          "?extra37=$unitName"
+          "?extra37=$unitName",
           // "&pageNumber=$pageNumber"
           // "&pageSize=$pageSize",
         ),
@@ -1044,7 +1096,6 @@ class NaradanaApiService {
       );
 
       if (response.statusCode == 200) {
-
         debugPrint("PRINT Bom Inquiry Report BODY : ${response.body}");
         final List data = jsonDecode(response.body);
 
@@ -1238,15 +1289,18 @@ class NaradanaApiService {
                               100))
                       .round()
                       .toString(),
-              "order_required_kg":(
-                  (double.tryParse(e.reqKg) ?? 0) +
-                      ((double.tryParse(e.reqKg) ?? 0) *
-                          (double.tryParse(e.wastage) ?? 0) / 100)
-              ).round().toString(),
-              "order_required_pcs": (
-                  (double.tryParse(e.quantity) ?? 0) +
-                      (double.tryParse(e.wastage) ?? 0)
-              ).round().toString(),
+              "order_required_kg":
+                  ((double.tryParse(e.reqKg) ?? 0) +
+                          ((double.tryParse(e.reqKg) ?? 0) *
+                              (double.tryParse(e.wastage) ?? 0) /
+                              100))
+                      .round()
+                      .toString(),
+              "order_required_pcs":
+                  ((double.tryParse(e.quantity) ?? 0) +
+                          (double.tryParse(e.wastage) ?? 0))
+                      .round()
+                      .toString(),
 
               "combined_column": e.combinedColumn,
             },
@@ -1490,10 +1544,10 @@ class NaradanaApiService {
       headers: await authHeaders(),
     );
 
-    debugPrint("ForwardList Status : ${  Uri.parse(
-      "$_baseUrl/Planning/ForwardList"
-          "?unit=$unit&orderNo=$orderNo",
-    )}");
+    debugPrint(
+      "ForwardList Status : ${Uri.parse("$_baseUrl/Planning/ForwardList"
+      "?unit=$unit&orderNo=$orderNo")}",
+    );
 
     debugPrint("ForwardList Response : ${response.body}");
 
