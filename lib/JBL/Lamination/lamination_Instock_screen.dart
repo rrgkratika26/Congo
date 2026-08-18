@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Color/Colorclass.dart';
 import '../../services/JBL_apis/jbl_api_bailing_reports.dart';
 import '../JBL_RMD/screens/JBL_ReportDetailScreen.dart';
 import 'jbl_LaminationQrScann.dart';
@@ -233,15 +234,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        backgroundColor: Colors.green.shade100,
-        centerTitle: true,
-        title: Text(
-          "$unitTitle Lamination IN",
-          style: const TextStyle(color: Colors.black),
-        ),
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -297,7 +290,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          Icon(icon, color: Colors.blue),
+          Icon(icon, color: C.warning),
           const SizedBox(width: 10),
           Expanded(
             child: DropdownButtonHideUnderline(
@@ -322,7 +315,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
     padding: const EdgeInsets.all(14),
     child: Row(
       children: [
-        const Icon(Icons.location_on, color: Colors.blue),
+        const Icon(Icons.location_on, color: C.warning),
         const SizedBox(width: 10),
         Text(unitTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
@@ -334,7 +327,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
     padding: const EdgeInsets.all(14),
     child: Row(
       children: [
-        const Icon(Icons.business, color: Colors.blue),
+        const Icon(Icons.business, color: C.warning),
         const SizedBox(width: 10),
         Text(department, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
@@ -348,7 +341,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          const Text("Total Items Scanned", style: TextStyle(fontSize: 20)),
+          const Text("Total Items Scanned", style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,)),
           const SizedBox(height: 10),
           // isLoading
           // ? const CircularProgressIndicator()

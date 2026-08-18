@@ -369,7 +369,7 @@ class _RMDStockInState extends State<RMDStockIn> {
           textCapitalization: TextCapitalization.characters,
 
           keyboardType: TextInputType.text,
-          decoration: const InputDecoration(labelText: 'Enter Barcode'),
+          decoration: const InputDecoration(labelText: 'Enter Barcode',focusColor: C.textHigh),
         ),
         actions: [
           TextButton(

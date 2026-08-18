@@ -769,22 +769,39 @@ class NaradanaApiService {
   }
 
   static Future<Map<String, dynamic>?> getBomAndComponents({
-    // required String po,
-    // required String article,
     required String po,
     required String article,
     String? bom,
   }) async {
-    final url = "$_baseUrl/Cutting/GetBomAndComponents?po=$po&article=$article";
+    try {
+      final uri = Uri.parse(
+        "$_baseUrl/Cutting/GetBomAndComponents",
+      ).replace(
+        queryParameters: {
+          "po": po,
+          "article": article,
+          if (bom != null && bom.isNotEmpty) "bom": bom,
+        },
+      );
 
-    final response = await http.get(
-      Uri.parse(url),
-      headers: await authHeaders(),
-    );
-    debugPrint("Response Bom and Component Body: ${response.body}");
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
+      debugPrint("🔗 BOM API URL: $uri");
+
+      final response = await http.get(
+        uri,
+        headers: await authHeaders(),
+      );
+
+      debugPrint("📥 Status Code: ${response.statusCode}");
+      debugPrint("📥 Response Bom and Component Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+
+      debugPrint("❌ BOM API Error: ${response.statusCode}");
+      return null;
+    } catch (e) {
+      debugPrint("❌ getBomAndComponents Error: $e");
       return null;
     }
   }

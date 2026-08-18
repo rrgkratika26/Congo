@@ -3,31 +3,25 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../Color/Colorclass.dart';
+import '../../../JBL/Lamination/lamination_Instock_screen.dart';
 import '../../../QRScan/QrScanScreen.dart';
 import '../../../screen/inStock/ReportScreen.dart';
 import '../../../screen/inStock/inStockController.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 import '../../../util/sharedpreference/shared_preference.dart';
+import '../../RmdOut/OutReportDetailScreen.dart';
 import 'LainationQrScan.dart';
 import 'LaminationController.dart';
 import 'LaminationDetailReportScreen.dart';
-
-class LaminationInStockScreen extends StatefulWidget {
-  const LaminationInStockScreen({Key? key}) : super(key: key);
-
-  @override
-  State<LaminationInStockScreen> createState() =>
-      _LaminationInStockScreenState();
-}
-
-class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
+class LaminationInStockScreenState extends State<LaminationInStockScreen> {
   String? selectedOperator;
   String? selectedSupervisor;
   final controller = Laminationcontroller();
-  // String plant= "INNOWEAVE";
-  String? plant;
+
+  String? unitName;              // 👈 nullable now
   int totalScanned = 0;
   bool isLoadingCount = true;
+
   String getApiDate() {
     final now = DateTime.now();
     return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
@@ -46,10 +40,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
   final List<String> operators = [];
   List<String> supervisors = [];
   bool isLoadingSupervisors = false;
-
   final List<String> locations = [];
-
-  // ================= VALIDATION =================
 
   bool _isFormValid() {
     return selectedOperator!.isNotEmpty &&
@@ -69,47 +60,47 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
     );
   }
 
+  bool _hasLoadedOnce = false;   // 👈 guard so didChangeDependencies doesn't double-fire on first build
+
   @override
   void initState() {
     super.initState();
     _loadData();
-    _loadPlant();
+    _loadPlant();               // 👈 only source of truth for first load — removed the extra bare refreshCount() call here
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    refreshCount();
+    if (_hasLoadedOnce && unitName != null) {
+      refreshCount();          // 👈 only refresh on return-to-screen, not on very first build (plant load handles that)
+    }
+    _hasLoadedOnce = true;
   }
-  Future<void> _loadPlant() async {
-    plant = await AppSession.getUnit();
 
-    if (plant == null) {
+  Future<void> _loadPlant() async {
+    final savedUnit = await AppSession.getUnit();
+
+    if (savedUnit == null || savedUnit.isEmpty) {
       debugPrint("Plant not found in session");
+      setState(() => isLoadingCount = false);
       return;
     }
 
-    await refreshCount();
-
-    setState(() {});
-  }
-
-  Future<void> _loadData() async {
-    await controller.loadInitialData();
-    setState(() {});
+    unitName = savedUnit;
+    await refreshCount();       // now guaranteed to run AFTER unitName is set
   }
 
   Future<void> refreshCount() async {
-    if (plant == null) return;
+    if (unitName == null) return;
 
     setState(() {
       isLoadingCount = true;
     });
 
     try {
-      final apiCount = await InStockService().getLaminationScannedItemsCount(
-        getApiDate(),
-        plant!,
-      );
+      final apiCount = await InStockService()
+          .getLaminationScannedItemsCount(getApiDate(), unitName!);
 
       setState(() {
         totalScanned = apiCount;
@@ -119,10 +110,16 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       setState(() {
         isLoadingCount = false;
       });
-
       debugPrint("Refresh Error : $e");
     }
   }
+
+  Future<void> _loadData() async {
+    await controller.loadInitialData();
+    setState(() {});
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -285,18 +282,11 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => ReportDetailScreen(date: getApiDate())),
-        // );
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => LaminationDetailScreen(
-              date: getApiDate(),
-              plant: plant!,
-              // plant: 'INNOWEAVE',
-            ),
+            builder: (_) => LaminationDetailScreen(      date: getApiDate(),
+              plant: unitName ?? '',),
           ),
         );
       },
@@ -304,37 +294,22 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
         child: Container(
           decoration: _boxDecoration(borderRadius: 20),
           padding: const EdgeInsets.all(24),
-          child:Column(
+          child: Column(
             children: [
               const Text(
-                'Total Items Scanned',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Total Items In Scanned',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 16),
-
               isLoadingCount
-                  ? const CircularProgressIndicator(
-                color: C.appBar4,
-              )
+                  ? const CircularProgressIndicator(color: C.appBar4)
                   : Text(
                 '$totalScanned',
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
               ),
-
               Text(
                 getCurrentDate(),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500),
               ),
             ],
           ),

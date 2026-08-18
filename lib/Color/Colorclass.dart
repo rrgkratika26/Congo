@@ -183,6 +183,7 @@ class C {
   static const Color primary = Color(0xFF1E3A8A); // Logo Blue
   static const Color primaryDark = Color(0xFF1E628D);
   static const Color primaryLight = Color(0xFFEAF5FC);
+  static const Color rmdColor = Color(0xFF06B6D4);
 
   static const Color secondary = Color(0xFF1F2937); // Logo Orange
   static const Color secondaryDark = Color(0xFFD86D00);

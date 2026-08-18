@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Color/Colorclass.dart';
+import '../../JBL/Lamination/lamination_Instock_screen.dart';
 import 'LaminationIn/LaminationInScreen.dart';
 import 'LaminationOutScreen.dart';
 

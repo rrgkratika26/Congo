@@ -22,6 +22,7 @@ class OutReportScreen extends StatefulWidget {
 class _OutReportScreenState extends State<OutReportScreen> {
   final controller = InStockController();
   final loader = Get.find<LoaderController>();
+  int _refreshKey = 0;
   String? unit = AppSession.unit;
   String getApiDate() {
     final now = DateTime.now();
@@ -39,14 +40,14 @@ class _OutReportScreenState extends State<OutReportScreen> {
   }
 
   // ---------------- STATIC ISSUE TO ----------------
-  // final List<String> issueToList = ['LAMINATION', 'CUTTING', 'FOLDING','PRINTING','SLITTING','OTHERS'];
-  final List<String> issueToList = [
-    'LAMINATION',
-    'CUTTING',
-    'PRINTING',
-    'SLITTING',
-    'OTHERS',
-  ];
+  final List<String> issueToList = ['LAMINATION', 'CUTTING', 'FOLDING','PRINTING','SLITTING','OTHERS'];
+  // final List<String> issueToList = [
+  //   'LAMINATION',
+  //   'CUTTING',
+  //   'PRINTING',
+  //   'SLITTING',
+  //   'OTHERS',
+  // ];
 
   String? selectedIssueTo; // Local state for IssueTo
   String department = 'RMD';
@@ -265,29 +266,29 @@ class _OutReportScreenState extends State<OutReportScreen> {
         child: Container(
           decoration: _boxDecoration(borderRadius: 20),
           padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Text(
-                'Total Items Out',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '$totalScanned',
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                getCurrentDate(),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          child: FutureBuilder<int>(
+            key: ValueKey(_refreshKey), // 👈 force rebuild trigger
+            future: InStockService().getOutScannedItemsCount(getApiDate()),
+            builder: (context, snapshot) {
+              final count = snapshot.data ?? totalScanned;
+              return Column(
+                children: [
+                  const Text(
+                    'Total Items Out',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '$count',
+                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    getCurrentDate(),
+                    style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -495,7 +496,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
         );
 
         if (apiResult['status'] == 'ok') {
-          await loadTodayCount();
+          setState(() => _refreshKey++);
         }
       } catch (e) {
         debugPrint("Error: $e");
@@ -596,17 +597,20 @@ class _OutReportScreenState extends State<OutReportScreen> {
                 );
 
                 // 🔁 Refresh count only on success
+                // if (status == 'ok') {
+                //   try {
+                //     final apiCount = await InStockService()
+                //         .getOutScannedItemsCount(getApiDate());
+                //
+                //     setState(() {
+                //       totalScanned = apiCount;
+                //     });
+                //   } catch (e) {
+                //     debugPrint('Refresh count error: $e');
+                //   }
+                // }
                 if (status == 'ok') {
-                  try {
-                    final apiCount = await InStockService()
-                        .getOutScannedItemsCount(getApiDate());
-
-                    setState(() {
-                      totalScanned = apiCount;
-                    });
-                  } catch (e) {
-                    debugPrint('Refresh count error: $e');
-                  }
+                  setState(() => _refreshKey++);
                 }
               } catch (e) {
                 debugPrint(e.toString());

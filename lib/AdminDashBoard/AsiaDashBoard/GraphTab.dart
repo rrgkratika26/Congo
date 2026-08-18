@@ -42,9 +42,7 @@ class _GraphTabState extends State<GraphTab> {
   static const Color textDark = Color(0xFF1A1A2E);
   String unitName = '';
 
-  String get _fromStr => DateFormat('yyyy-MM-dd').format(fromDate);
 
-  String get _toStr => DateFormat('yyyy-MM-dd').format(toDate);
 
   @override
   void initState() {
@@ -75,10 +73,7 @@ class _GraphTabState extends State<GraphTab> {
     try {
       final service = DashboardService();
 
-      // Limit graph to 31 days.
-      //
-      // This prevents too many API calls while still allowing
-      // monthly production analysis.
+
 
       final days = toDate.difference(fromDate).inDays.clamp(0, 30) + 1;
 
@@ -92,9 +87,7 @@ class _GraphTabState extends State<GraphTab> {
           final dayStr = DateFormat('yyyy-MM-dd').format(date);
 
           try {
-            // ───────────────────────────────────────────
-            // API CALL
-            // ───────────────────────────────────────────
+
 
             final summary = await service.getDashboard(
               unit:unitName,
@@ -102,23 +95,15 @@ class _GraphTabState extends State<GraphTab> {
               toDate: dayStr,
             );
 
-            // ───────────────────────────────────────────
-            // CONVERT API DATA
-            // ───────────────────────────────────────────
 
             final departments = createDepartments(summary);
 
-            // ───────────────────────────────────────────
-            // FIND RMD
-            // ───────────────────────────────────────────
+
 
             final rmdDepartment = _findDepartment(departments, 'RMD');
 
             final rmdKg = _getRmdValue(rmdDepartment);
 
-            // ───────────────────────────────────────────
-            // FIND CUTTING
-            // ───────────────────────────────────────────
 
             final cuttingDepartment = _findDepartment(departments, 'CUTTING');
 
@@ -166,10 +151,6 @@ class _GraphTabState extends State<GraphTab> {
     }
   }
 
-  // ─────────────────────────────────────────────────────────
-  // FIND DEPARTMENT
-  // ─────────────────────────────────────────────────────────
-
   DeptCountItem? _findDepartment(List<DeptCountItem> departments, String name) {
     try {
       return departments.firstWhere(
@@ -180,11 +161,6 @@ class _GraphTabState extends State<GraphTab> {
       return null;
     }
   }
-
-  // ─────────────────────────────────────────────────────────
-  // GET RMD VALUE
-  // ─────────────────────────────────────────────────────────
-
   num _getRmdValue(DeptCountItem? department) {
     if (department == null || department.metrics.isEmpty) {
       return 0;
@@ -198,7 +174,6 @@ class _GraphTabState extends State<GraphTab> {
       return 0;
     }
 
-    // Look specifically for KG metric
     for (final metric in department.metrics) {
       final label = metric.label.trim().toUpperCase();
 
@@ -238,10 +213,6 @@ class _GraphTabState extends State<GraphTab> {
     _loadData();
   }
 
-  // ─────────────────────────────────────────────────────────
-  // NUMBER FORMAT
-  // ─────────────────────────────────────────────────────────
-
   String _fmt(num value) {
     if (value >= 1000000) {
       return '${(value / 1000000).toStringAsFixed(1)}M';
@@ -258,98 +229,98 @@ class _GraphTabState extends State<GraphTab> {
     return NumberFormat('#,##0.##').format(value);
   }
 
-  // ─────────────────────────────────────────────────────────
-  // BUILD
-  // ─────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: _loadData,
+    return Scaffold(
+      backgroundColor: C.brand50,
+      body: RefreshIndicator(
+        onRefresh: _loadData,
 
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
 
-        padding: EdgeInsets.symmetric(vertical: widget.isMobile ? 16 : 24),
+          padding: EdgeInsets.symmetric(vertical: widget.isMobile ? 16 : 24),
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
 
-          children: [
-            // ─────────────────────────────────────
-            // HEADER
-            // ─────────────────────────────────────
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.isMobile ? 16 : 24,
-              ),
+            children: [
+              // ─────────────────────────────────────
+              // HEADER
+              // ─────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: widget.isMobile ? 16 : 24,
+                ),
 
-              child: Row(
-                children: [
-                  // TITLE
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  children: [
+                    // TITLE
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
 
-                      children: [
-                        const Text(
-                          'Production Analytics',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: textDark,
+                        children: [
+                          const Text(
+                            'Production Analytics',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: textDark,
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 4),
+                          const SizedBox(height: 4),
 
-                        Text(
-                          '${widget.unit} • RMD & Cutting',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black45,
+                          Text(
+                            '${widget.unit} • RMD & Cutting',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: C.rmdColor,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
 
-                  // DATE
-                  _dateRangeChip(),
-                ],
+                    // DATE
+                    _dateRangeChip(),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 18),
+              const SizedBox(height: 18),
 
-            // ─────────────────────────────────────
-            // LOADING
-            // ─────────────────────────────────────
-            if (_isLoading) ...[
-              _loadingCard(),
-            ]
-            // ─────────────────────────────────────
-            // ERROR
-            // ─────────────────────────────────────
-            else if (_error != null) ...[
-              _errorCard(),
-            ]
-            // ─────────────────────────────────────
-            // DATA
-            // ─────────────────────────────────────
-            else ...[
-              _summaryCards(),
+              // ─────────────────────────────────────
+              // LOADING
+              // ─────────────────────────────────────
+              if (_isLoading) ...[
+                _loadingCard(),
+              ]
+              // ─────────────────────────────────────
+              // ERROR
+              // ─────────────────────────────────────
+              else if (_error != null) ...[
+                _errorCard(),
+              ]
+              // ─────────────────────────────────────
+              // DATA
+              // ─────────────────────────────────────
+              else ...[
+                _summaryCards(),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              _productionLineChart(),
+                _productionLineChart(),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              _dailyProductionList(),
+                _dailyProductionList(),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

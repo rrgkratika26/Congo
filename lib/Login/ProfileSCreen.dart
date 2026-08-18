@@ -1,30 +1,54 @@
-import 'package:IMS/services/GlobalLoader/GloabalUnit.dart';
 import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 
 import '../Color/Colorclass.dart';
-import '../services/LogoutServices.dart';
-import '../util/widget/ThemeController.dart';
+import '../util/sharedpreference/shared_preference.dart';
 import 'LoginNardanaScreen.dart';
 import 'LoginScreen.dart';
 
-class ProfileScreen extends StatelessWidget {
-  final String? user;
-  final String? unit;
-  final String? department;
-  final String? userType;
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
 
-  const ProfileScreen({
-    Key? key,
-    this.user,
-    this.unit,
-    this.department,
-    this.userType,
-  }) : super(key: key);
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
+  String? userName;
+  String? unitName;
+  String? departmentName;
+  String? userTypeName;
+
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSession();
+  }
+
+  Future<void> _loadSession() async {
+    try {
+      final loadedUser = await AppSession.getUserType();
+      final loadedUnit = await AppSession.getUnit();
+      final loadedDept = await AppSession.getDepartment();
+      final loadedUserType = await AppSession.getUserType();
+
+      if (!mounted) return;
+
+      setState(() {
+        userName = loadedUser;
+        unitName = loadedUnit;
+        departmentName = loadedDept;
+        userTypeName = loadedUserType;
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Profile load error: $e");
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,41 +63,11 @@ class ProfileScreen extends StatelessWidget {
         : 20.0;
 
     return Scaffold(
-      // backgroundColor: const Color(0xFFEAF3FF), // Light blue background
-      // appBar: AppBar(
-      //   backgroundColor: C.primary,
-      //   elevation: 10,
-      //   title: const Text(
-      //     "User Profile",
-      //     style: TextStyle(fontWeight: FontWeight.bold,color: C.bg),
-      //   ),
-      //   centerTitle: false,
-      //   actions: [
-      //     PopupMenuButton<ThemeMode>(
-      //       icon: const Icon(Icons.palette, color: Colors.white),
-      //       onSelected: (mode) {
-      //         Get.find<ThemeController>().changeTheme(mode);
-      //       },
-      //       itemBuilder: (context) => const [
-      //         PopupMenuItem(
-      //           value: ThemeMode.system,
-      //           child: Text("System"),
-      //         ),
-      //         PopupMenuItem(
-      //           value: ThemeMode.light,
-      //           child: Text("Light"),
-      //         ),
-      //         PopupMenuItem(
-      //           value: ThemeMode.dark,
-      //           child: Text("Dark"),
-      //         ),
-      //       ],
-      //     ),
-      //   ],
-      //   iconTheme: IconThemeData(color: C.bg),
-      // ),
+      backgroundColor: C.brand50,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator(color: C.appBar3))
+            : SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: horizontalPadding,
@@ -86,7 +80,7 @@ class ProfileScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color:C.primaryblue,
+                    color: C.primaryblue,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -104,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                         child: Icon(
                           Icons.person,
                           size: 40,
-                          color: Color(0xFF1E5AA8),
+                          color: C.primary,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -113,7 +107,7 @@ class ProfileScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user ?? "User Name",
+                              userName ?? "User Name",
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -123,22 +117,22 @@ class ProfileScreen extends StatelessWidget {
                             const SizedBox(height: 6),
 
                             Text(
-                              "Unit: ${unit ?? AppGlobals.unit}",
-                              style: const TextStyle(color: C.bg,),
+                              "Unit: ${unitName ?? 'N/A'}",
+                              style: const TextStyle(color: C.bg),
                             ),
 
                             const SizedBox(height: 4),
 
                             Text(
-                              "Department: ${department ?? "N/A"}",
-                              style: const TextStyle(color: C.bg,),
+                              "Department: ${departmentName ?? 'N/A'}",
+                              style: const TextStyle(color: C.bg),
                             ),
 
                             const SizedBox(height: 4),
 
                             Text(
-                              "User Type: ${userType ?? "N/A"}",
-                              style: const TextStyle(color: C.bg,),
+                              "User Type: ${userTypeName ?? 'N/A'}",
+                              style: const TextStyle(color: C.bg),
                             ),
                           ],
                         ),
@@ -148,12 +142,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 30),
-
-                /// 🔹 Menu Tiles
-                // _buildTile(Icons.contact_phone, "Contact Us"),
-                // _buildTile(Icons.description, "Terms & Conditions"),
-                // _buildTile(Icons.security, "Privacy Policies"),
-                // _buildTile(Icons.info_outline, "About Us"),
                 const SizedBox(height: 80),
 
                 /// 🔹 Logout Button
@@ -207,7 +195,7 @@ class ProfileScreen extends StatelessWidget {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginPage()),
-                (route) => false,
+                    (route) => false,
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),

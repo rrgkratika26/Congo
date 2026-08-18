@@ -21,6 +21,10 @@ class _DeptDashboardState extends State<DeptDashboard> {
   late final DashboardController ctrl;
   late final String department;
 
+
+  static const double _navBarHeight = 68;
+  static const double _navBarBottomMargin = 28;
+
   @override
   void initState() {
     super.initState();
@@ -38,20 +42,12 @@ class _DeptDashboardState extends State<DeptDashboard> {
     final mq = MediaQuery.of(context);
     final isMobile = mq.size.width < 600;
 
-    final pages = [
-      NewAdminDashboard(),
-      ProductionTab(),
-      GraphTab(
-        unit: ctrl.unit.value,
-        department: department,
-        isMobile: isMobile,
-      ),
-      ProfileScreen(),
-    ];
+    final navBottomMargin = isMobile ? 28.0 : 35.0;
+
+
+    final bottomReserved = _navBarHeight + navBottomMargin + 16;
 
     return Scaffold(
-
-
       body: SafeArea(
         child: Stack(
           children: [
@@ -60,25 +56,21 @@ class _DeptDashboardState extends State<DeptDashboard> {
                 Header(ctrl: ctrl, isMobile: isMobile),
 
                 Expanded(
-                  child: IndexedStack(
-                    index: _navIndex,
-                    children: [
-                      // Dashboard
-                      NewAdminDashboard(),
-
-                      // Production
-                      ProductionTab(),
-
-                      // Analytics
-                      GraphTab(
-                        unit: ctrl.unit.value,
-                        department: department,
-                        isMobile: isMobile,
-                      ),
-
-                      // Profile
-                      ProfileScreen(),
-                    ],
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: bottomReserved),  // 👈 yahi fix hai
+                    child: IndexedStack(
+                      index: _navIndex,
+                      children: [
+                        NewAdminDashboard(),
+                        ProductionTab(),
+                        GraphTab(
+                          unit: ctrl.unit.value,
+                          department: department,
+                          isMobile: isMobile,
+                        ),
+                        ProfileScreen(),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -87,12 +79,11 @@ class _DeptDashboardState extends State<DeptDashboard> {
             Positioned(
               left: isMobile ? 16 : 80,
               right: isMobile ? 16 : 80,
-              bottom: isMobile ? 28 : 35,
+              bottom: navBottomMargin,
               child: _BottomNav(
                 selected: _navIndex,
                 onTap: (i) {
                   HapticFeedback.selectionClick();
-
                   setState(() {
                     _navIndex = i;
                   });

@@ -301,8 +301,9 @@ class _ManualToLoomScreenState extends State<ManualToLoomScreen> {
           backgroundColor: Colors.green,
         ),
       );
+      Get.back(result: true);
 
-      Get.to(() => NewAdminDashboard());
+      // Get.to(() => NewAdminDashboard());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

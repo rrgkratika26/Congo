@@ -741,7 +741,7 @@ class _SavedListScreenState extends State<SavedListScreen> {
   bool isScanning = false;
   int _currentPage = 1;
   int _pageSize = 50;
-  int _totalRecords = 0; // API should return this
+
 
   Future<void> _checkPrinterConnection() async {
     bool? isConnected = await PrintBluetoothThermal.connectionStatus;
@@ -978,10 +978,7 @@ class _SavedListScreenState extends State<SavedListScreen> {
                             DataCell(Text(e.supervisor)),
                             DataCell(Text(e.machineNo)),
                             DataCell(Text(e.partyName)),
-
-                            /// ✅ NEW
                             DataCell(Text(e.workOrderNo)),
-
                             DataCell(Text(e.requiredNetWt.toString())),
                             DataCell(Text(e.requiredQtyMtr.toString())),
 
@@ -998,11 +995,8 @@ class _SavedListScreenState extends State<SavedListScreen> {
                             DataCell(Text(e.color)),
                             DataCell(Text(e.netWt.toString())),
                             DataCell(Text(e.quantity.toString())),
-
-                            /// ✅ NEW
                             DataCell(Text(e.modelNo)),
                             DataCell(Text(e.department)),
-
                             // DataCell(
                             //   ElevatedButton(
                             //     onPressed: () => _printBarcodeApi(e),
@@ -1563,7 +1557,8 @@ Get.back(result: true);
       await Future.delayed(const Duration(milliseconds: 500));
 
       /// Navigate to Dashboard
-      Get.offAll(() => const NewAdminDashboard());
+      // Get.offAll(() => const NewAdminDashboard());
+      Get.back(result: true);
     } catch (e) {
       Get.snackbar(
         "Error",
