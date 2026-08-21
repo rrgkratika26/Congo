@@ -117,13 +117,13 @@ class _WebbingInStockState extends State<WebbingInStock> {
         backgroundColor: C.primary,
         elevation: 2,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: C.bg),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "${_unitTitle.isNotEmpty ? _unitTitle : 'Unit'} WEBBING",
           style: TextStyle(
-            color: Colors.black87,
+            color: C.bg,
             fontSize: isTablet ? 20 : 18,
             fontWeight: FontWeight.bold,
           ),
@@ -245,8 +245,8 @@ class _WebbingInStockState extends State<WebbingInStock> {
                     child: DropdownButton<String>(
                       value: value, // null initially
                       hint: Text(
-                        'Select an option',
-                        style: TextStyle(color: Colors.grey.shade400),
+                        'Select an Operator',
+                        style: TextStyle(color: C.textMid),
                       ),
                       isExpanded: true,
                       items: items
@@ -285,7 +285,7 @@ class _WebbingInStockState extends State<WebbingInStock> {
             children: [
               const Text(
                 "DEPARTMENT",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: C.textHigh),
               ),
 
               Text(

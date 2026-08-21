@@ -56,131 +56,14 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
     _loadDispatchInit();
   }
 
-  // Future<void> _saveDispatch() async {
-  //   if (barcodeDataList.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Please scan at least one barcode")),
-  //     );
-  //     return;
-  //   }
-  //
-  //   if (party == null || supervisor == null) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Please complete required fields")),
-  //     );
-  //     return;
-  //   }
-  //
-  //   setState(() => isSaving = true);
-  //
-  //   try {
-  //     final now = DateTime.now();
-  //     final formattedDate =
-  //         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}T"
-  //         "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00";
-  //
-  //     // ✅ Loop through all barcodes and save each one
-  //     int successCount = 0;
-  //     int failCount = 0;
-  //
-  //     for (var barcodeData in barcodeDataList) {
-  //       final request = DispatchSaveRequest(
-  //         flag: "U",
-  //         // id: int.tryParse(barcodeData.id) ?? 0,
-  //         id: barcodeData.id,
-  //         // id: int.tryParse(barcodeData.id) ?? 0,
-  //         srNo: barcodeData.srno,
-  //         barcode: barcodeData.barcode ?? "",
-  //         partyName: party ?? "",
-  //         articleNo: articleCtrl.text.replaceAll('"', '').trim(),
-  //         supervisorName: supervisor ?? "",
-  //         operatorName: operatorName ?? "",
-  //         baleNo: "${barcodeData.entryout ?? ""}(bale no)",
-  //         bagType: barcodeData.barcode ?? "",
-  //         laminationDate1: formattedDate,
-  //         laminationToRoll1: "",
-  //         laminationTime1: "",
-  //         laminationOperator1: operatorName ?? "",
-  //         laminationRoll1: bom ?? "",
-  //         laminationLocation1: "",
-  //         laminationSupervisor1: supervisor ?? "",
-  //         toRoll: "",
-  //         forward: "",
-  //         rmdSupervisor: supervisor ?? "",
-  //         rmdLocation: "",
-  //         rmdOperator: operatorName ?? "",
-  //         rmdSupervisor1: "",
-  //         rmdLocation1: "",
-  //         rmdOperator1: "",
-  //         toRoll1: "",
-  //         forward1: "",
-  //         statusRollType: srCtrl.text,
-  //         rmStatus: "OUT",
-  //         rmdRemark: "OUT_STOCK",
-  //         rmdSupervisorOut: "ART001",
-  //         fromRoll: "OUT_STOCK",
-  //         rmdTime: int.tryParse(srCtrl.text) ?? 0,
-  //         tableBaleNo: "${barcodeData.entryout ?? ""}(bale no)",
-  //           machine: "testing",   // ✅ REQUIRED
-  //
-  //           entries: entries.map((e) => e.toJson()).toList(), // ✅ REQUIRED
-  //       );
-  //
-  //       debugPrint("SAVING BARCODE: ${barcodeData.srno}");
-  //
-  //       final success = await InStockService.saveDispatch(request);
-  //
-  //       if (success) {
-  //         successCount++;
-  //       } else {
-  //         failCount++;
-  //       }
-  //     }
-  //
-  //     if (successCount > 0) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text(
-  //             "Saved $successCount barcode(s) successfully" +
-  //                 (failCount > 0 ? ", $failCount failed" : ""),
-  //           ),
-  //           backgroundColor: failCount > 0 ? Colors.orange : Colors.green,
-  //         ),
-  //       );
-  //
-  //       // ✅ Clear the list after successful save
-  //       setState(() {
-  //         barcodeDataList.clear();
-  //       });
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text("All saves failed - please check your data"),
-  //           backgroundColor: Colors.red,
-  //         ),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Error while saving dispatch: $e")),
-  //     );
-  //   } finally {
-  //     setState(() => isSaving = false);
-  //   }
-  // }
-
   Future<void> _saveDispatch() async {
     if (barcodeDataList.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please scan at least one barcode")),
-      );
+      _snack("Please scan at least one barcode");
       return;
     }
 
     if (party == null || supervisor == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please complete required fields")),
-      );
+      _snack("Please complete required fields");
       return;
     }
 
@@ -212,37 +95,17 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         "DispatchSrNo": srCtrl.text,
         "articleNo": articleCtrl.text.replaceAll('"', '').trim(),
         "supervisorName": supervisor ?? "",
-        // "operatorName": operatorName ?? "",
         "operatorName": bom ?? "",
         "baleNo": "MULTI",
-        // "bagType": "MULTI",
         "bagType": barcodeData?.barcode ?? "",
-
         "laminationDate1": formattedDate,
         "machine": party ?? "", // ✅ REQUIRED
-        // id: int.tryParse(barcodeData.id) ?? 0,
         "id": barcodeData?.id,
-
-        // id: int.tryParse(barcodeData.id) ?? 0,
-        // "articleNo": articleCtrl.text.replaceAll('"', '').trim(),
-        // "supervisorName": supervisor ?? "",
-        // "operatorName": operatorName ?? "",
-        // "baleNo": "${barcodeData?.entryout ?? ""}(bale no)",
-        // "bagType": barcodeData?.barcode ?? "",
         "laminationToRoll1": "0",
         "laminationTime1": "0",
-
-        // "laminationOperator1": operatorName ?? "",
-        // "laminationRoll1": bom ?? "",
         "laminationLocation1": "",
         "laminationSupervisor1": supervisor ?? "",
-
         "status": srCtrl.text,
-        // "rmStatus": "OUT",
-        // "rmdRemark": "OUT_STOCK",
-        // "rmdSupervisorOut": "ART001",
-        // "fromRoll": "OUT_STOCK",
-        // "rmdTime": int.tryParse(srCtrl.text) ?? 0,
         "BaleNo": "${barcodeData?.entryout ?? ""}(bale no)",
         "entries": entries, // ✅ REQUIRED
       };
@@ -254,12 +117,7 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       final success = await InStockService.saveDispatch(requestBody);
 
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Dispatch saved successfully"),
-            backgroundColor: Colors.green,
-          ),
-        );
+        _snack("Dispatch saved successfully", color: Colors.green);
 
         setState(() {
           barcodeDataList.clear();
@@ -267,114 +125,14 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         // ✅ THIS WILL POP SCREEN
         Navigator.pop(context);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Save failed"),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _snack("Save failed", color: Colors.red);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error while saving dispatch: $e")),
-      );
+      _snack("Error while saving dispatch: $e");
     } finally {
       setState(() => isSaving = false);
     }
   }
-  // Future<void> _saveDispatch() async {
-  //   if (!isBarcodeValid || barcodeData == null) return;
-  //
-  //   if (party == null || supervisor == null) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Please complete required fields")),
-  //     );
-  //     return;
-  //   }
-  //
-  //   setState(() => isSaving = true);
-  //
-  //   try {
-  //     final now = DateTime.now();
-  //
-  //     final formattedDate =
-  //         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}T"
-  //         "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00";
-  //
-  //     final request = DispatchSaveRequest(
-  //       flag: "U",
-  //       id: int.tryParse(srCtrl.text) ?? 0,
-  //       srNo: srCtrl.text,
-  //
-  //       barcode: barcodeData?.barcode ?? "",
-  //       partyName: party ?? "",
-  //       articleNo: articleCtrl.text,
-  //       supervisorName: supervisor ?? "",
-  //       operatorName: operatorName ?? "",
-  //
-  //       baleNo: "${barcodeData?.entryout ?? ""}(bale no)",
-  //       bagType: barcodeData?.barcode ?? "",
-  //
-  //       laminationDate1: formattedDate,
-  //       laminationToRoll1: "",
-  //       laminationTime1: "",
-  //       laminationOperator1: "",
-  //       laminationRoll1: "",
-  //       laminationLocation1: "",
-  //       laminationSupervisor1: "",
-  //
-  //       toRoll: "",
-  //       forward: "",
-  //
-  //       rmdSupervisor: "",
-  //       rmdLocation: "",
-  //       rmdOperator: "",
-  //       rmdSupervisor1: "",
-  //       rmdLocation1: "",
-  //       rmdOperator1: "",
-  //       toRoll1: "",
-  //       forward1: "",
-  //
-  //       statusRollType: "17",
-  //       rmStatus: "OUT",
-  //       rmdRemark: "OUT_STOCK",
-  //       rmdSupervisorOut: "ART001",
-  //       fromRoll: "OUT_STOCK",
-  //
-  //       rmdTime: 17,
-  //       tableBaleNo: "${barcodeData?.entryout ?? ""}(bale no)",
-  //     );
-  //
-  //     // ✅ ADD THIS HERE
-  //     debugPrint("FINAL REQUEST BODY 👉 ${jsonEncode(request.toJson())}");
-  //     final success = await InStockService.saveDispatch(request);
-  //
-  //     if (success) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text("Dispatch saved successfully"),
-  //           backgroundColor: Colors.green,
-  //         ),
-  //       );
-  //
-  //       setState(() {
-  //         barcodeCtrl.clear();
-  //         barcodeData = null;
-  //         isBarcodeValid = false;
-  //       });
-  //     } else {
-  //       ScaffoldMessenger.of(
-  //         context,
-  //       ).showSnackBar(const SnackBar(content: Text("Save failed")));
-  //     }
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Error while saving dispatch: $e")),
-  //     );
-  //   } finally {
-  //     setState(() => isSaving = false);
-  //   }
-  // }
 
   Future<void> _fetchBomNumbers(String partyName) async {
     try {
@@ -390,9 +148,7 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         bomList = boms;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to load BOM numbers")),
-      );
+      _snack("Failed to load BOM numbers");
     }
   }
 
@@ -409,9 +165,7 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         poList = pos;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to load PO numbers")),
-      );
+      _snack("Failed to load PO numbers");
     }
   }
 
@@ -436,98 +190,23 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         articleCtrl.clear();
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to fetch article number")),
-      );
+      _snack("Failed to fetch article number");
     }
   }
-
-  // Future<void> _fetchBarcodeDetails() async {
-  //   if (barcodeCtrl.text.isEmpty) {
-  //     ScaffoldMessenger.of(
-  //       context,
-  //     ).showSnackBar(const SnackBar(content: Text("Please enter SR No")));
-  //     return;
-  //   }
-  //
-  //   final srNo = int.tryParse(barcodeCtrl.text);
-  //
-  //   if (srNo == null) {
-  //     ScaffoldMessenger.of(
-  //       context,
-  //     ).showSnackBar(const SnackBar(content: Text("Invalid SR No")));
-  //     return;
-  //   }
-  //
-  //   try {
-  //     FocusScope.of(context).unfocus();
-  //
-  //     final result = await InStockService.fetchBarcodeBySrNo(srNo: srNo);
-  //
-  //     if (!result.found) {
-  //       setState(() {
-  //         isBarcodeValid = false;
-  //         barcodeData = null;
-  //         dispatchId = null;
-  //         dispatchSrNo = null;
-  //         dispatchRmdTime = null;
-  //       });
-  //
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text(result.message ?? "Record not found")),
-  //       );
-  //       return;
-  //     }
-  //
-  //     setState(() {
-  //       isBarcodeValid = true;
-  //       barcodeData = result;
-  //
-  //       // 🔥 Save backend fields dynamically
-  //       dispatchId = int.tryParse(result.srno) ?? 0; // backend ID
-  //       dispatchSrNo = result.srno; // backend SR No
-  //       dispatchRmdTime = int.tryParse(result.srno) ?? 0; // backend RMD time
-  //     });
-  //
-  //     debugPrint("BARCODE DATA UI 👉 ${result.toString()}");
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text("Barcode details loaded"),
-  //         backgroundColor: Colors.green,
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     setState(() {
-  //       isBarcodeValid = false;
-  //       barcodeData = null;
-  //       dispatchId = null;
-  //       dispatchSrNo = null;
-  //       dispatchRmdTime = null;
-  //     });
-  //
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Failed to fetch barcode details")),
-  //     );
-  //   }
-  // }
 
   Future<void> _fetchBarcodeDetails([String? scannedCode]) async {
     // Use scanned code if provided, otherwise use text field value
     final inputCode = scannedCode ?? barcodeCtrl.text;
 
     if (inputCode.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please enter Barcode No.")));
+      _snack("Please enter Barcode No.");
       return;
     }
 
     final srNo = int.tryParse(inputCode);
 
     if (srNo == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Invalid SR No")));
+      _snack("Invalid SR No");
       return;
     }
 
@@ -542,25 +221,17 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       final result = await InStockService.fetchBarcodeBySrNo(srNo: srNo);
 
       if (!result.found) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result.message ?? "Record not found")),
-        );
+        _snack(result.message ?? "Record not found");
         return;
       }
 
       // ✅ Check if barcode already exists (prevent duplicates)
       final isDuplicate = barcodeDataList.any(
-        (item) => item.srno == result.srno,
+            (item) => item.srno == result.srno,
       );
 
       if (isDuplicate) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("This barcode is already added!"),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        _snack("This barcode is already added!", color: Colors.orange);
         barcodeCtrl.clear(); // Clear the input
         return;
       }
@@ -574,41 +245,21 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       barcodeCtrl.clear();
 
       debugPrint("BARCODE DATA UI 👉 ${result.toString()}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Barcode added successfully"),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      _snack("Barcode added successfully", color: Colors.green);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to fetch barcode details")),
-      );
+      _snack("Failed to fetch barcode details");
     }
   }
 
-  // void _showQRScanner() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => Dialog(
-  //       child: SizedBox(
-  //         height: 400,
-  //         child: QRView(
-  //           key: GlobalKey(debugLabel: 'QR'),
-  //           onQRViewCreated: (QRViewController controller) {
-  //             controller.scannedDataStream.listen((scanData) async {
-  //               await controller.pauseCamera();
-  //               Navigator.pop(context);
-  //               _fetchBarcodeDetails(scanData.code?.trim() ?? "");
-  //             });
-  //           },
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
+  void _snack(String msg, {Color? color}) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(msg),
+        backgroundColor: color,
+        duration: const Duration(seconds: 2),
+      ));
+  }
 
   void _showQRScanner() {
     QRViewController? qrController;
@@ -618,23 +269,20 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: SizedBox(
           height: 450,
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Row(
                   children: [
+                    const Icon(Icons.qr_code_scanner_rounded, color: C.primary),
+                    const SizedBox(width: 8),
                     const Text(
                       "Scan Barcode",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const Spacer(),
                     IconButton(
@@ -647,30 +295,28 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
                   ],
                 ),
               ),
-
               Expanded(
-                child: QRView(
-                  key: GlobalKey(debugLabel: 'QR'),
-                  onQRViewCreated: (controller) {
-                    qrController = controller;
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                  child: QRView(
+                    key: GlobalKey(debugLabel: 'QR'),
+                    onQRViewCreated: (controller) {
+                      qrController = controller;
 
-                    controller.scannedDataStream.listen((scanData) async {
-                      if (scanned) return;
-                      scanned = true;
+                      controller.scannedDataStream.listen((scanData) async {
+                        if (scanned) return;
+                        scanned = true;
 
-                      final code = scanData.code?.trim();
+                        final code = scanData.code?.trim();
+                        if (code == null || code.isEmpty) return;
 
-                      if (code == null || code.isEmpty) return;
-
-                      await controller.pauseCamera();
-
-                      Navigator.pop(dialogContext);
-
-                      await _fetchBarcodeDetails(code);
-
-                      qrController?.dispose();
-                    });
-                  },
+                        await controller.pauseCamera();
+                        Navigator.pop(dialogContext);
+                        await _fetchBarcodeDetails(code);
+                        qrController?.dispose();
+                      });
+                    },
+                  ),
                 ),
               ),
             ],
@@ -679,38 +325,6 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       ),
     );
   }
-
-  // void _showQRScanner() {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false, // optional (user manually close na kare)
-  //     builder: (context) => Dialog(
-  //       child: SizedBox(
-  //         height: 400,
-  //         child: QRView(
-  //           key: GlobalKey(debugLabel: 'QR'),
-  //           onQRViewCreated: (QRViewController controller) {
-  //             controller.scannedDataStream.listen((scanData) async {
-  //               final code = scanData.code?.trim();
-  //
-  //               if (code == null || code.isEmpty) return;
-  //
-  //               // ❌ REMOVE THESE LINES
-  //               await controller.pauseCamera();
-  //               Navigator.pop(context);
-  //
-  //               // ✅ Direct fetch karo
-  //               _fetchBarcodeDetails(code);
-  //
-  //               // OPTIONAL: duplicate fast scanning avoid karne ke liye delay
-  //               await Future.delayed(const Duration(seconds: 2));
-  //             });
-  //           },
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Future<void> _loadDispatchInit() async {
     try {
@@ -727,559 +341,374 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       });
     } catch (e) {
       setState(() => isLoading = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to load dispatch data")),
-      );
+      _snack("Failed to load dispatch data");
     }
   }
 
+  bool _wide(double w) => w >= 700;
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        appBar: _appBar(),
+        body: Center(child: CircularProgressIndicator(color: C.primary)),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: C.primary,
-        elevation: 0,
-        shadowColor: Colors.black.withOpacity(0.05),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: C.bg),
-          onPressed: () => Navigator.pop(context),
-        ),
-
-        title: Text(
-          "Dispatch Entry",
-          style: const TextStyle(color: C.bg, fontWeight: FontWeight.bold),
-        ),
-
-        centerTitle: true,
-
-
-        iconTheme: IconThemeData(
-          color: C.bg, // 👈 Back arrow color white
-        ),
+      backgroundColor: Colors.grey.shade100,
+      appBar: _appBar(),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = _wide(constraints.maxWidth);
+          return SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 100),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1000),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _card('Article', C.primary, [_articleRow()]),
+                    _card('Order Details', C.appBar3, [
+                      _rowOrColumn(wide, [
+                        _dropdown("Party Name", party, partyList, (v) {
+                          if (v == null) return;
+                          setState(() {
+                            party = v;
+                            bom = null;
+                            po = null;
+                            articleCtrl.clear();
+                          });
+                          _fetchBomNumbers(v);
+                          _fetchPONumbers(v);
+                        }),
+                        _dropdown("BOM No.", bom, bomList, (v) {
+                          setState(() => bom = v);
+                          _fetchArticleNumber();
+                        }),
+                      ]),
+                      const SizedBox(height: 12),
+                      _dropdown("PO Number", po, poList, (v) => setState(() => po = v)),
+                    ]),
+                    _card('Personnel', Colors.teal, [
+                      _rowOrColumn(wide, [
+                        _dropdown("Supervisor", supervisor, supervisorList,
+                                (v) => setState(() => supervisor = v)),
+                        _dropdown("Operator", operatorName, operatorList,
+                                (v) => setState(() => operatorName = v)),
+                      ]),
+                    ]),
+                    _card('Scan Barcode', C.warning, [_barcodeInputRow()]),
+                    if (barcodeDataList.isNotEmpty) _barcodeListSection(wide),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _articleSection(),
-            const SizedBox(height: 1),
+      bottomNavigationBar: _saveBar(),
+    );
+  }
 
-            _sectionCard(title: "Order Details", child: _dropdownSection()),
-
-
-            _sectionCard(title: "Personnel", child: _supervisorSection()),
-            const SizedBox(height: 1),
-            _barcodeSection(),
-            // if (isBarcodeValid && barcodeData != null) ...[
-            //   const SizedBox(height: 16),
-            //   _barcodeDetailsCard(),
-            // ],
-            if (barcodeDataList.isNotEmpty) ...[
-              const SizedBox(height: 2),
-              _barcodeDetailsListView(),
-            ],
-
-            const SizedBox(height: 1),
-            _actionButtons(),
-          ],
-        ),
+  PreferredSizeWidget _appBar() {
+    return AppBar(
+      backgroundColor: C.primary,
+      elevation: 0,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: C.bg),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: const Text(
+        "Dispatch Entry",
+        style: TextStyle(color: C.bg, fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget _barcodeDetailsListView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Scanned Barcodes (${barcodeDataList.length})",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            if (barcodeDataList.isNotEmpty)
-              TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    barcodeDataList.clear();
-                  });
-                },
-                icon: const Icon(Icons.delete_sweep, size: 18),
-                label: const Text("Clear All"),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
+  // ---------------------
+  // Sections
+  // ---------------------
 
-        // ✅ List of barcode cards
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: barcodeDataList.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final barcodeData = barcodeDataList[index];
-            return _barcodeDetailsCard(barcodeData, index);
-          },
+  Widget _articleRow() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: _textField(articleCtrl, "Article Number", readOnly: true),
+        ),
+        const SizedBox(width: 10),
+        Expanded(child: _textField(srCtrl, "Sr. No.", readOnly: true)),
+      ],
+    );
+  }
+
+  Widget _barcodeInputRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: barcodeCtrl,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onSubmitted: (_) => _fetchBarcodeDetails(),
+            decoration: _decoration("Enter Barcode"),
+          ),
+        ),
+        const SizedBox(width: 8),
+        _roundIconButton(
+          icon: Icons.search_rounded,
+          bg: C.primary,
+          fg: Colors.white,
+          onTap: _fetchBarcodeDetails,
+        ),
+        const SizedBox(width: 8),
+        _roundIconButton(
+          icon: Icons.qr_code_scanner_rounded,
+          bg: C.warning.withOpacity(.12),
+          fg: C.warning,
+          onTap: _showQRScanner,
         ),
       ],
     );
   }
 
-  Widget _barcodeDetailsCard(BarcodeResponseModel barcodeData, int index) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.green.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Barcode #${index + 1}",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                  onPressed: () {
-                    setState(() {
-                      barcodeDataList.removeAt(index);
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Barcode removed"),
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 8),
-            _detailRow("Barcode No", barcodeData.srno),
-            _detailRow("Bag WT(GM):", barcodeData.partyname),
-            _detailRow("BagType", barcodeData.barcode),
-            _detailRow("Bag Size", barcodeData.department),
-            _detailRow("Bale No", barcodeData.entryout),
-            _detailRow("BagQNT(PCS): ", barcodeData.status),
-            _detailRow("BaleNWT: ", barcodeData.remark),
-            _detailRow("Bale(GWT): ", barcodeData.activein),
-            _detailRow("Pallet Size: ", barcodeData.activeout),
-          ],
+  Widget _barcodeListSection(bool wide) {
+    return _card('Scanned Barcodes (${barcodeDataList.length})', Colors.green.shade600, [
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton.icon(
+          onPressed: () => setState(() => barcodeDataList.clear()),
+          icon: const Icon(Icons.delete_sweep, size: 18),
+          label: const Text("Clear All"),
+          style: TextButton.styleFrom(foregroundColor: Colors.red),
         ),
+      ),
+      wide ? _barcodeGrid() : _barcodeList(),
+    ]);
+  }
+
+  Widget _barcodeList() {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: barcodeDataList.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) => _barcodeCard(barcodeDataList[index], index),
+    );
+  }
+
+  Widget _barcodeGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: barcodeDataList.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1.6,
+      ),
+      itemBuilder: (context, index) => _barcodeCard(barcodeDataList[index], index),
+    );
+  }
+
+  Widget _barcodeCard(BarcodeResponseModel item, int index) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Barcode #${index + 1}",
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              InkWell(
+                onTap: () {
+                  setState(() => barcodeDataList.removeAt(index));
+                  _snack("Barcode removed");
+                },
+                child: const Icon(Icons.close, color: Colors.red, size: 18),
+              ),
+            ],
+          ),
+          const Divider(height: 14),
+          _detailRow("Barcode No", item.srno),
+          _detailRow("Bag WT (GM)", item.partyname),
+          _detailRow("Bag Type", item.barcode),
+          _detailRow("Bag Size", item.department),
+          _detailRow("Bale No", item.entryout),
+          _detailRow("Bag Qnt (PCS)", item.status),
+        ],
       ),
     );
   }
 
   Widget _detailRow(String title, dynamic value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           Expanded(
             flex: 3,
-            child: Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
+            child: Text(title,
+                style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600)),
           ),
-          Expanded(flex: 4, child: Text(value?.toString() ?? "-")),
-        ],
-      ),
-    );
-  }
-
-  Widget _sectionCard({
-    required String title,
-    required Widget child,
-    IconData? icon,
-    Color? color,
-  }) {
-    final sectionColor = color ?? C.primary;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          colors: [Colors.white, Color(0xFFF8FAFC)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔷 HEADER
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    sectionColor.withOpacity(.12),
-                    sectionColor.withOpacity(.05),
-                  ],
-                ),
-                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-              ),
-              child: Row(
-                children: [
-
-
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey.shade800,
-                        letterSpacing: .3,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // 🔷 BODY
-            Padding(padding: const EdgeInsets.all(18), child: child),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _articleSection() {
-    return Row(
-      children: [
-        // 🔹 ARTICLE NUMBER
-        Expanded(
-          flex: 3,
-          child: _buildTextField(
-            controller: articleCtrl,
-            label: "Article Number",
-            readOnly: true,
-
-          ),
-        ),
-
-        const SizedBox(width: 10),
-
-        // 🔹 SR NUMBER
-        Expanded(
-          child: _buildTextField(
-            controller: srCtrl,
-            label: "Sr.No.",
-            readOnly: true,
-
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  Widget _dropdownSection() {
-    return Column(
-      children: [
-        _dropdown("Party Name", party, partyList, (v) {
-          if (v == null) return;
-
-          setState(() {
-            party = v;
-            bom = null;
-            po = null;
-            articleCtrl.clear();
-          });
-
-          _fetchBomNumbers(v); // 🔥 Fetch BOM
-          _fetchPONumbers(v); // 🔥 Fetch PO
-        }),
-
-        const SizedBox(height: 14),
-        _dropdown("BOM No.", bom, bomList, (v) {
-          setState(() {
-            bom = v;
-          });
-
-          _fetchArticleNumber(); // already implemented earlier
-        }),
-
-        const SizedBox(height: 14),
-        _dropdown("PO Number", po, poList, (v) {
-          setState(() => po = v);
-        }),
-      ],
-    );
-  }
-
-  Widget _supervisorSection() {
-    return Column(
-      children: [
-        _dropdown(
-          "Supervisor",
-          supervisor,
-          supervisorList,
-          (v) => setState(() => supervisor = v),
-        ),
-        const SizedBox(height: 14),
-        _dropdown(
-          "Operator",
-          operatorName,
-          operatorList,
-          (v) => setState(() => operatorName = v),
-        ),
-      ],
-    );
-  }
-
-  Widget _barcodeSection() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // 🔍 Barcode Field
           Expanded(
-            child: TextField(
-              controller: barcodeCtrl,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onSubmitted: (_) => _fetchBarcodeDetails(),
-              decoration: InputDecoration(
-                hintText: "Enter Barcode",
-                labelText: "Barcode",
-                filled: true,
-                fillColor: const Color(0xFFF5F7FA),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
-                ),
-
-
-
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(
-                    color: C.primary,
-                    width: 1.5,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          // 🔎 Search Button
-          Material(
-            color: C.primary,
-            borderRadius: BorderRadius.circular(14),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: _fetchBarcodeDetails,
-              child: const Padding(
-                padding: EdgeInsets.all(14),
-                child: Icon(
-                  Icons.search_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          // 📷 Scanner Button
-          Material(
-            color: C.warning.withOpacity(.12),
-            borderRadius: BorderRadius.circular(14),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: _showQRScanner,
-              child: const Padding(
-                padding: EdgeInsets.all(14),
-                child: Icon(
-                  Icons.qr_code_scanner_rounded,
-                  color: C.warning,
-                  size: 24,
-                ),
-              ),
-            ),
+            flex: 4,
+            child: Text(value?.toString() ?? "-",
+                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
           ),
         ],
       ),
     );
   }
 
-  Widget _actionButtons() {
-    return Row(
-      children: [
-        Expanded(
+  Widget _saveBar() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
+        child: SizedBox(
+          width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: (barcodeDataList.isNotEmpty && !isSaving)
-                ? _saveDispatch
-                : null, // ✅ Enable only if barcodes exist
+            style: ElevatedButton.styleFrom(
+              backgroundColor: C.primary,
+              disabledBackgroundColor: Colors.grey.shade300,
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: (barcodeDataList.isNotEmpty && !isSaving) ? _saveDispatch : null,
             icon: isSaving
                 ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: C.appBar3,
-                    ),
-                  )
-                : const Icon(Icons.save),
+                width: 18, height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Icon(Icons.save, color: Colors.white),
             label: Text(
-              isSaving ? "Saving..." : "SAVE",
-              style: TextStyle(color: C.textBody),
+              isSaving ? "Saving..." : "Save Dispatch",
+              style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
         ),
-        // const SizedBox(width: 12),
-        // Expanded(
-        //   child: ElevatedButton.icon(
-        //     autofocus: true,
-        //     onPressed: _showQRScanner,
-        //     icon: const Icon(Icons.qr_code_scanner, color: Colors.black),
-        //     label: const Text("SCAN", style: TextStyle(color: Colors.black)),
-        //   ),
-        // ),
+      ),
+    );
+  }
+
+  // ---------------------
+  // Shared UI helpers
+  // ---------------------
+
+  Widget _card(String title, Color color, List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border(left: BorderSide(color: color, width: 4)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+          const SizedBox(height: 10),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _rowOrColumn(bool wide, List<Widget> children) {
+    if (!wide) {
+      return Column(
+        children: [
+          for (int i = 0; i < children.length; i++) ...[
+            children[i],
+            if (i != children.length - 1) const SizedBox(height: 12),
+          ],
+        ],
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < children.length; i++) ...[
+          Expanded(child: children[i]),
+          if (i != children.length - 1) const SizedBox(width: 12),
+        ],
       ],
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    bool readOnly = false,
-    IconData? prefixIcon,
+  Widget _roundIconButton({
+    required IconData icon,
+    required Color bg,
+    required Color fg,
+    required VoidCallback onTap,
   }) {
-    return TextField(
-      controller: controller,
-      readOnly: readOnly,
-      decoration: InputDecoration(
-        labelText: label,
-        isDense: true,
-
-        prefixIcon: prefixIcon != null
-            ? Icon(
-          prefixIcon,
-          size: 20,
-          color: C.primary,
-        )
-            : null,
-
-        filled: true,
-        fillColor: const Color(0xFFF7F9FC),
-
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
-        ),
-
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.grey.shade300,
-          ),
-        ),
-
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: C.primary,
-            width: 1.2,
-          ),
+    return Material(
+      color: bg,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(13),
+          child: Icon(icon, color: fg, size: 22),
         ),
       ),
+    );
+  }
+
+  Widget _textField(TextEditingController ctrl, String label, {bool readOnly = false}) {
+    return TextField(
+      controller: ctrl,
+      readOnly: readOnly,
+      decoration: _decoration(label, filledColor: readOnly ? Colors.grey.shade100 : null),
     );
   }
 
   Widget _dropdown(
-    String label,
-    String? value,
-    List<String> items,
-    Function(String?) onChanged,
-  ) {
+      String label,
+      String? value,
+      List<String> items,
+      ValueChanged<String?> onChanged,
+      ) {
     return DropdownButtonFormField<String>(
-      isExpanded: true, // ✅ VERY IMPORTANT (fix overflow)
+      isExpanded: true,
       value: items.contains(value) ? value : null,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      ),
+      decoration: _decoration(label),
       items: items
           .toSet()
-          .map(
-            (e) => DropdownMenuItem(
-              value: e,
-              child: Text(
-                e,
-                overflow: TextOverflow.ellipsis, // ✅ prevent overflow
-              ),
-            ),
-          )
+          .map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.ellipsis)))
           .toList(),
       onChanged: onChanged,
+    );
+  }
+
+  InputDecoration _decoration(String label, {Color? filledColor}) {
+    return InputDecoration(
+      labelText: label,
+      isDense: true,
+      filled: true,
+      fillColor: filledColor ?? Colors.grey.shade50,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: C.primary, width: 1.4)),
     );
   }
 }

@@ -287,10 +287,11 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
       backgroundColor: C.appBar1,
       foregroundColor: Colors.white,
       elevation: 0,
-      iconTheme: IconThemeData(color: C.bg),
+      // iconTheme: IconThemeData(color: C.bg),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back, size: 22),
+        // onPressed: () => Navigator.pop(context),
+      onPressed:   ()=>Get.back(result: true),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

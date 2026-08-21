@@ -42,13 +42,11 @@ class Header extends StatelessWidget {
             child: Container(
               width: 45,
               height: 45,
-              color: Colors.white,
+
               padding: const EdgeInsets.all(4),
-              child: Image.asset(
-                'assets/images/rrgLogo.jpeg',
-                fit: BoxFit.cover,
-              ),
-            ),
+              child:Icon(Icons.shopping_bag_rounded,color: C.bg,size: 32,)
+
+    ),
           ),
 
           const SizedBox(width: 8),
@@ -78,7 +76,7 @@ class Header extends StatelessWidget {
                 Text(
                   'ERP',
                   style: TextStyle(
-                    color: C.bg,
+                    color: C.warning,
                     fontSize: isMobile ? 20 : 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -90,9 +88,9 @@ class Header extends StatelessWidget {
           // Logout Button
           Align(
             alignment: Alignment.center,
-            child: TextButton(
+            child: IconButton(
               onPressed: () async {
-                final confirm = await Get.dialog(
+                final confirm = await Get.dialog<bool>(
                   AlertDialog(
                     title: const Text("Logout"),
                     content: const Text("Are you sure you want to logout?"),
@@ -116,12 +114,13 @@ class Header extends StatelessWidget {
                 );
 
                 if (confirm == true) {
-                  ctrl.logout();
+                  await ctrl.logout();
                 }
               },
-              child: Text(
-                "Logout",
-                style: TextStyle(color: C.danger, fontSize: 14),
+              icon: Icon(
+                Icons.logout_rounded,
+                color: C.bg,
+                size: 25,
               ),
             ),
           ),

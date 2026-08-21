@@ -1,6 +1,7 @@
 
 import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../Color/Colorclass.dart';
 import '../RecentEntryScreen.dart';
@@ -69,6 +70,9 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
   List<String> articleList = [];
   bool isLoading = true;
   String? _selectedParty;
+  String _getNumericDnr() {
+    return _dnrController.text.replaceAll(RegExp(r'[^0-9]'), '');
+  }
   String? _selectedRecipe;
   String? _selectedPO;
   String? _selectedArticle;
@@ -346,19 +350,46 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
         String placeholder = '',
         bool readOnly = false,
       }) {
+    final isDnr = label == 'DNR';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 13, color: C.primaryDark),
+          style: const TextStyle(
+            fontSize: 13,
+            color: C.primaryDark,
+          ),
         ),
+
         TextField(
           controller: controller,
           readOnly: readOnly,
-          keyboardType: keyboardType,
+
+          // DNR will use numeric keyboard
+          keyboardType: isDnr
+              ? TextInputType.number
+              : keyboardType,
+
+          // Only numbers allowed for DNR
+          inputFormatters: isDnr
+              ? <TextInputFormatter>[
+            FilteringTextInputFormatter.digitsOnly,
+          ]
+              : null,
+
           style: const TextStyle(fontSize: 15),
-          decoration: InputDecoration(hintText: placeholder),
+
+          decoration: InputDecoration(
+            hintText: placeholder,
+
+            // Optional error-style validation if empty
+            errorText: isDnr && controller.text.isEmpty
+                ? null
+                : null,
+          ),
+
           onChanged: (!readOnly &&
               (label == 'Gross Weight (kg)' ||
                   label == 'Tare Weight (kg)'))
@@ -608,7 +639,7 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF212121),
+              backgroundColor: C.warning,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
@@ -628,13 +659,43 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
           child: ElevatedButton(
             onPressed: () async {
               try {
+                // ─────────────────────────────────────
+                // DNR VALIDATION
+                // ─────────────────────────────────────
+                final dnr = _dnrController.text.trim();
+
+                if (dnr.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Please enter DNR"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                // Make sure DNR contains ONLY numbers
+                if (!RegExp(r'^[0-9]+$').hasMatch(dnr)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("DNR must contain numbers only"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
                 final now = DateTime.now();
 
                 final time =
                     "${now.hour}:${now.minute.toString().padLeft(2, '0')}:00";
 
                 final batch = _generateBatchNumber();
-                final code = _generateFinalCode();
+
+                // Generate code using numeric DNR
+                final code = "${dnr}DNR/"
+                    "${_selectedRecipe ?? ''}/"
+                    "${_widthController.text.trim()}MM";
 
                 _batchController.text = batch;
                 _generatedCodeController.text = code;
@@ -651,14 +712,16 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
                   "time": time,
                   "recipeType": _selectedRecipe,
 
-                  "dnr": _dnrController.text,
+                  // Numeric DNR only
+                  "dnr": dnr,
+
                   "widthMM": _widthController.text,
                   "grossWeight": _grossController.text,
                   "tareWeight": _tareController.text,
                   "netWeight": _netController.text,
                   "shift": _selectedShift,
-                  "batchNo": _batchController.text,
-                  "generateCode": _generatedCodeController.text,
+                  "batchNo": batch,
+                  "generateCode": code,
                   "ppLotNo": _ppLotController.text,
                   "remark": _remarkController.text,
                 };
@@ -666,6 +729,7 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
                 final res = await api.saveTapeLineEntry(body);
 
                 print(res);
+
                 if (!mounted) return;
 
                 Navigator.pushAndRemoveUntil(
@@ -676,9 +740,14 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
                       (route) => false,
                 );
               } catch (e) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text("Error: $e")));
+                if (!mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Error: $e"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             style: ElevatedButton.styleFrom(
@@ -704,26 +773,21 @@ class _ManualTapeLineEntryScreenState extends State<ManualTapeLineEntryScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            const Text(
-              'Recent Entries',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF757575),
-              ),
-            ),
+
             TextButton(
               onPressed: () {
-                Navigator.pop(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => const RecentEntriesScreen(),
                   ),
                 );
+
               },
-              child: const Text("View All"),
+              child: const Text("View All Entries",style: TextStyle(fontSize: 18,
+                  fontWeight: FontWeight.w500,color: C.primary),),
             ),
           ],
         ),

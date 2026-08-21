@@ -281,8 +281,8 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           backgroundColor: Colors.green,
         ),
       );
-
-      Get.to(() => NewAdminDashboard());
+      Get.back(result: true);
+      // Get.to(() => NewAdminDashboard());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

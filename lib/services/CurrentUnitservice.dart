@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 
 class CurrentUnitService {
   static const String baseUrl =
-      'http://190.92.175.47/CONGO_API';
-      // 'http://192.168.193.237:7165';
+      // 'http://190.92.175.47/CONGO_API';
+      'https://192.168.29.39:44349';
 
   static Future<String?> getCurrentUnit() async {
     try {

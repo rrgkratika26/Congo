@@ -4,12 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LogoutService {
   static const String logoutUrl =
       // 'http://190.92.175.47:80/JblAPI/api/Login/logout';
-      // "http://190.92.175.47:80/Innoweave/api/Login/logout";
+      // "http://190.92.175.47:80/Innoweave/api";
       //      'http://fibcsoftware.in:4430/api/api/Login/logout';
       // 'http://190.92.175.47:80/JblAPI/api/Login/logout';
       // 'http://190.92.175.47:80/JBL_DEMO/api/Login/logout';
       //   'http://190.92.175.47:80/Nardana/api';
-  // 'http://192.168.29.123:7165/api';
+  // 'https://192.168.29.39:44349/api';
   // 'http://190.92.175.47/VISA_S/api';
   // 'http://190.92.175.47/Qualipack/api';
   'http://190.92.175.47/CONGO_API/api';

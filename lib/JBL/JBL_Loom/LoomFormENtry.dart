@@ -24,7 +24,6 @@ class _LoomFormState extends State<LoomForm> {
   List<String> operators = [];
   List<String> machines = [];
   List<String> machineTypes = [];
-
   String? selectedSupervisor;
   String? selectedMachine;
   String? selectedBom;
@@ -290,7 +289,7 @@ class _LoomFormState extends State<LoomForm> {
     });
   }
 
-  Future<void> _loadDropdowns({String? machine, }) async {
+  Future<void> _loadDropdowns({String? machine}) async {
     print("UNIT BEFORE API = '$unit'");
 
     if (unit.trim().isEmpty) {
@@ -298,16 +297,17 @@ class _LoomFormState extends State<LoomForm> {
       return;
     }
 
-
     try {
-      final res = await InStockService.fetchSuperDropdownData(machine: machine,  unit: unit,);
+      final res = await InStockService.fetchSuperDropdownData(
+        machine: machine,
+        unit: unit,
+      );
 
       print("✅ Supervisors: ${res.supervisors}");
       print("✅ Machines: ${res.machines}");
       print("✅ Operators: ${res.operators}");
 
       setState(() {
-
         supervisors = res.supervisors.toSet().toList();
 
         machines = res.machines
@@ -337,17 +337,18 @@ class _LoomFormState extends State<LoomForm> {
     final url = Uri.parse(
       "${InStockService.baseUrl}/LoomForward/save-loom-entry",
     );
-
+    final now = DateTime.now();
     final body = {
       // "date": DateTime.now().toString().split(' ')[0],
-      "date": DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      // "date": DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
+      "date": now.toIso8601String(),
       "machine": selectedMachine,
       "boM_NO": bomNoController.text,
+      "Article_No": articleNoCtrl.text,
       // "operator": selectedOperator1,
       "operator": selectedOperator2,
       "fabricCode": fabricController.text,
       "supervisor": selectedSupervisor,
-
       "buffie": baffleCtrl.text,
       "typeUse": fabricTypeCtrl.text,
       "fabricWidth": fabricWidthCtrl.text,
@@ -531,10 +532,12 @@ class _LoomFormState extends State<LoomForm> {
                           hint: const Text("Select Supervisor"),
                           items: supervisors
                               .toSet()
-                              .map((e) => DropdownMenuItem<String>(
-                            value: e,
-                            child: Text(e),
-                          ))
+                              .map(
+                                (e) => DropdownMenuItem<String>(
+                                  value: e,
+                                  child: Text(e),
+                                ),
+                              )
                               .toList(),
                           onChanged: (value) {
                             setState(() {
@@ -705,10 +708,12 @@ class _LoomFormState extends State<LoomForm> {
                               : null,
                           items: machineTypes
                               .toSet()
-                              .map((e) => DropdownMenuItem<String>(
-                            value: e,
-                            child: Text(e),
-                          ))
+                              .map(
+                                (e) => DropdownMenuItem<String>(
+                                  value: e,
+                                  child: Text(e),
+                                ),
+                              )
                               .toList(),
                           onChanged: (value) async {
                             setState(() {
@@ -717,7 +722,7 @@ class _LoomFormState extends State<LoomForm> {
 
                             await _fetchLoomReading();
                           },
-                        )
+                        ),
                         // DropdownButtonFormField<String>(
                         //   initialValue:
                         //       machineTypes.contains(selectedMachineType)
@@ -1021,7 +1026,7 @@ class _LoomFormState extends State<LoomForm> {
               GestureDetector(
                 onTap: () => Navigator.maybePop(context),
                 child: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
+                  Icons.arrow_back,
                   color: Colors.white,
                   size: 18,
                 ),
@@ -1051,10 +1056,7 @@ class _LoomFormState extends State<LoomForm> {
                         const SizedBox(width: 4),
                         Text(
                           dateStr,
-                          style: const TextStyle(
-                            color: C.bg,
-                            fontSize: 15,
-                          ),
+                          style: const TextStyle(color: C.bg, fontSize: 15),
                         ),
                       ],
                     ),
@@ -1256,11 +1258,7 @@ class _LoomFormState extends State<LoomForm> {
           flex: 2,
           child: OutlinedButton.icon(
             onPressed: _clearForm,
-            icon: const Icon(
-              Icons.refresh_rounded,
-              size: 18,
-              color: C.warning,
-            ),
+            icon: const Icon(Icons.refresh_rounded, size: 18, color: C.warning),
             label: const Text(
               "Clear",
               style: TextStyle(
@@ -1289,6 +1287,7 @@ class _LoomFormState extends State<LoomForm> {
       unit = savedUnit ?? "";
     });
   }
+
   Future<void> _initializeData() async {
     setState(() => isLoading = true);
 
@@ -1310,11 +1309,9 @@ class _LoomFormState extends State<LoomForm> {
 
     await _loadDropdowns();
 
-    if (selectedMachine != null &&
-        selectedMachineType != null) {
+    if (selectedMachine != null && selectedMachineType != null) {
       await _fetchLoomReading();
     }
-
 
     setState(() => isLoading = false);
   }

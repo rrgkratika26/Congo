@@ -148,9 +148,19 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
        backgroundColor: C.primary,
         foregroundColor: Colors.white,
         elevation: 0,
+        leading: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: C.primaryLight),
+              onPressed: () => Navigator.pop(context),
+            ),
+          
+          ],
+        ),
         title: const Text(
           'Loom Report',
           style: TextStyle(fontWeight: FontWeight.w700),
+
         ),
         // actions: [
         //   IconButton(

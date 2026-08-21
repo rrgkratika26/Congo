@@ -35,10 +35,8 @@ class _GraphTabState extends State<GraphTab> {
   String? _error;
 
   List<_ProductionPoint> _productionPoints = [];
-
   static const Color rmdColor = Color(0xFF06B6D4);
   static const Color cuttingColor = Color(0xFFEE7D00);
-
   static const Color textDark = Color(0xFF1A1A2E);
   String unitName = '';
 
@@ -97,9 +95,6 @@ class _GraphTabState extends State<GraphTab> {
 
 
             final departments = createDepartments(summary);
-
-
-
             final rmdDepartment = _findDepartment(departments, 'RMD');
 
             final rmdKg = _getRmdValue(rmdDepartment);
@@ -533,13 +528,11 @@ class _GraphTabState extends State<GraphTab> {
                 ),
                 child: Icon(
                   Icons.show_chart_rounded,
-                  color: C.primary,
+                  color: C.warning,
                   size: 21,
                 ),
               ),
-
               const SizedBox(width: 10),
-
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,7 +547,6 @@ class _GraphTabState extends State<GraphTab> {
                     ),
 
                     SizedBox(height: 3),
-
                     Text(
                       'RMD KG vs Cutting KG',
                       style: TextStyle(
@@ -1061,9 +1053,6 @@ class _GraphTabState extends State<GraphTab> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────
-  // LOADING CARD
-  // ─────────────────────────────────────────────────────────
 
   Widget _loadingCard() {
     return Container(
@@ -1085,9 +1074,6 @@ class _GraphTabState extends State<GraphTab> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────
-  // ERROR CARD
-  // ─────────────────────────────────────────────────────────
 
   Widget _errorCard() {
     return Container(
@@ -1166,9 +1152,6 @@ class _GraphTabState extends State<GraphTab> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────
-  // EMPTY CARD
-  // ─────────────────────────────────────────────────────────
 
   Widget _emptyCard(String message) {
     return Container(
@@ -1227,9 +1210,6 @@ class _GraphTabState extends State<GraphTab> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// PRODUCTION POINT MODEL
-// ─────────────────────────────────────────────────────────────
 
 class _ProductionPoint {
   final DateTime date;

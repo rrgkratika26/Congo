@@ -2361,6 +2361,7 @@ class _CuttingOutStockFormNardanaState
   final TextEditingController _articleNoCtrl = TextEditingController();
   final TextEditingController _bomCtrl = TextEditingController();
   final TextEditingController _componentCtrl = TextEditingController();
+  final TextEditingController _barcode =TextEditingController();
   final TextEditingController _reqFabricCtrl = TextEditingController();
   final TextEditingController _dateCtrl = TextEditingController();
   final TextEditingController _timeCtrl = TextEditingController();
@@ -2431,6 +2432,7 @@ class _CuttingOutStockFormNardanaState
     _rollWeightCtrl.addListener(_onRollWeightChanged);
     // ─── BASIC INFO ───
 
+    _barcode.text = p.barcode ?? "";
     _partyNameCtrl.text = widget.production.component;
     // _partyNameCtrl.text = p.component ?? "" ;
     _poNoCtrl.text = p.workOrderNo;
@@ -2574,22 +2576,6 @@ class _CuttingOutStockFormNardanaState
     super.dispose();
   }
 
-  // ── Helpers ────────────────────────────────────────────────────
-  String _monthName(int m) => const [
-    '',
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ][m];
 
   // ── Calculations ───────────────────────────────────────────────
   void _calculateCutLength() {
@@ -2656,6 +2642,9 @@ class _CuttingOutStockFormNardanaState
       _isLoadingFabricWidth = false;
     });
   }
+
+
+
 
   // Future<void> _loadLaminationAndBaffle() async {
   //   setState(() => _isLoadingLamination = true);
@@ -2771,48 +2760,83 @@ class _CuttingOutStockFormNardanaState
   }
 
   Future<void> _loadBomAndComponents() async {
-    setState(() => _isLoadingBomComponents = true);
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingBomComponents = true;
+      _componentList = [];
+      _selectedComponent = null;
+      _componentCtrl.clear();
+    });
 
     try {
-      final data = await NaradanaApiService.getBomAndComponents(
-        po: widget.production.workOrderNo,
-        article: _articleNoCtrl.text.trim(),
-      );
+      // ============================================================
+      // STEP 1: GET BOM LIST
+      // ============================================================
 
-      if (data != null) {
-        final boms = List<String>.from(data['bomNumbers'] ?? []);
-        final comps = List<String>.from(data['components'] ?? []);
+      final boms = await NaradanaApiService.getBomLists();
+
+      debugPrint("📦 BOM LIST: $boms");
+
+      if (boms.isEmpty) {
+        if (!mounted) return;
 
         setState(() {
-          _bomNumbers = boms;
-          _componentList = comps;
-
-          if (boms.isNotEmpty) {
-            final previousBom = widget.production.bomNo; // from previous screen
-
-            if (previousBom.isNotEmpty && boms.contains(previousBom)) {
-              _selectedBomNo = previousBom;
-            } else {
-              _selectedBomNo = boms.first;
-            }
-
-            _bomCtrl.text = _selectedBomNo!;
-          }
-
-          if (comps.isNotEmpty) {
-            _selectedComponent = comps.first;
-            _componentCtrl.text = comps.first;
-          }
-
+          _bomNumbers = [];
+          _selectedBomNo = null;
+          _componentList = [];
+          _selectedComponent = null;
+          _componentCtrl.clear();
           _isLoadingBomComponents = false;
         });
 
-        // ✅ optional
-        await _fetchCutSize();
+        debugPrint("⚠️ No BOM found");
+        return;
       }
+
+      // ============================================================
+      // STEP 2: SELECT BOM
+      // ============================================================
+
+      final previousBom = widget.production.bomNo.trim();
+
+      String selectedBom;
+
+      if (previousBom.isNotEmpty && boms.contains(previousBom)) {
+        selectedBom = previousBom;
+      } else {
+        selectedBom = boms.first;
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _bomNumbers = boms;
+        _selectedBomNo = selectedBom;
+        _bomCtrl.text = selectedBom;
+      });
+
+      debugPrint("🎯 SELECTED BOM: $selectedBom");
+
+      // ============================================================
+      // STEP 3: GET COMPONENTS BASED ON SELECTED BOM
+      // ============================================================
+
+      await _loadComponentsForBom(selectedBom);
+
     } catch (e) {
-      setState(() => _isLoadingBomComponents = false);
-      _showSnack("BOM fetch failed: $e", Colors.red);
+      debugPrint("❌ BOM ERROR: $e");
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingBomComponents = false;
+      });
+
+      _showSnack(
+        "BOM fetch failed: $e",
+        Colors.red,
+      );
     }
   }
 
@@ -3077,21 +3101,17 @@ class _CuttingOutStockFormNardanaState
       "realShift": _selectedShift,
       "articleno": _articleNoCtrl.text,
       "ordertype": widget.production.orderType,
-
       "operatorName": _operator2 ?? "",
-
+      "Barcode_1":_barcode.text ?? "",
       "partyNamebom": _bomCtrl.text,
       // "partyname": _partyNameCtrl.text,
       "partyname": widget.production.component,
-
       "orderno": widget.production.partyname,
       // "poNum": widget.production.component,
       "poNum": _componentCtrl.text,
       "poNUMBER": _poNoCtrl.text,
       "fabricType": _fabricTypeCtrl.text,
-
       // "opName": _colorCtrl.text,
-
       // "articleNo": _articleNoCtrl.text,
       // "bomNo": _bomCtrl.text,
       // "componentName": _componentCtrl.text,
@@ -3233,20 +3253,44 @@ class _CuttingOutStockFormNardanaState
             _field("Purchase Order No", _poNoCtrl, readOnly: true),
           ]),
           _row([
-            _isLoadingBomComponents
-                ? _loadingLabelBox("BOM")
-                : _genericDropdownStr(
+            // _isLoadingBomComponents
+            //     ? _loadingLabelBox("BOM")
+            //     : _genericDropdownStr(
+            //   label: "BOM",
+            //   items: _bomNumbers,
+            //   value: _selectedBomNo,
+            //   onChanged: (v) {
+            //     setState(() {
+            //       _selectedBomNo = v;
+            //       _bomCtrl.text = v ?? '';
+            //     });
+            //     _fetchCutSize();
+            //   },
+            // ),
+
+            _genericDropdownStr(
               label: "BOM",
               items: _bomNumbers,
               value: _selectedBomNo,
-              onChanged: (v) {
+              onChanged: (v) async {
+                if (v == null || v.trim().isEmpty) return;
+
                 setState(() {
                   _selectedBomNo = v;
-                  _bomCtrl.text = v ?? '';
+                  _bomCtrl.text = v;
+
+                  // Clear previous component
+                  _selectedComponent = null;
+                  _componentList = [];
+                  _componentCtrl.clear();
                 });
-                _fetchCutSize();
+
+                // Fetch components according to selected BOM
+                await _loadComponentsForBom(v);
               },
             ),
+
+
             _staticDropdown(
               label: "Shift",
               items: _shiftOptions,
@@ -3314,12 +3358,16 @@ class _CuttingOutStockFormNardanaState
               label: "Component",
               items: _componentList,
               value: _selectedComponent,
-              onChanged: (v) {
+              onChanged: (v) async {
+                if (v == null || v.trim().isEmpty) return;
+
                 setState(() {
                   _selectedComponent = v;
-                  _componentCtrl.text = v ?? '';
+                  _componentCtrl.text = v;
                 });
-                _fetchCutSize();
+
+                // BOM + Component are now available
+                await _fetchCutSize();
               },
             ),
           ]),
@@ -4115,6 +4163,95 @@ class _CuttingOutStockFormNardanaState
       ),
     ),
   );
+
+  Future<void> _loadComponentsForBom(String bom) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingBomComponents = true;
+
+      // Clear old component when BOM changes
+      _componentList = [];
+      _selectedComponent = null;
+      _componentCtrl.clear();
+    });
+
+    try {
+      debugPrint("🔄 Fetching components for BOM: $bom");
+
+      final components =
+      await NaradanaApiService.getComponentLists(bom);
+
+      debugPrint(
+        "📦 COMPONENTS for BOM $bom: $components",
+      );
+
+      if (!mounted) return;
+
+      String? selectedComponent;
+
+      if (components.isNotEmpty) {
+        // If production already has same component,
+        // keep it if it exists in new BOM components.
+        final previousComponent =
+        widget.production.component.trim();
+
+        if (previousComponent.isNotEmpty &&
+            components.contains(previousComponent)) {
+          selectedComponent = previousComponent;
+        } else {
+          selectedComponent = components.first;
+        }
+      }
+
+      setState(() {
+        _componentList = components;
+        _selectedComponent = selectedComponent;
+
+        _componentCtrl.text = selectedComponent ?? '';
+
+        _isLoadingBomComponents = false;
+      });
+
+      debugPrint(
+        "🎯 FINAL BOM: $_selectedBomNo",
+      );
+
+      debugPrint(
+        "🎯 FINAL COMPONENT: $_selectedComponent",
+      );
+
+      // ============================================================
+      // STEP 4: FETCH CUT SIZE
+      // ============================================================
+
+      if (_selectedBomNo != null &&
+          _selectedBomNo!.isNotEmpty &&
+          _selectedComponent != null &&
+          _selectedComponent!.isNotEmpty) {
+        await _fetchCutSize();
+      }
+
+    } catch (e) {
+      debugPrint(
+        "❌ Component API ERROR: $e",
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _componentList = [];
+        _selectedComponent = null;
+        _componentCtrl.clear();
+        _isLoadingBomComponents = false;
+      });
+
+      _showSnack(
+        "Component fetch failed: $e",
+        Colors.red,
+      );
+    }
+  }
 }
 
 class _NameValue {

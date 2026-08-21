@@ -31,6 +31,19 @@ List<DeptCountItem> createDepartments(DashboardSummary d) {
         // MetricItem("Out", d.totalBagOut),
       ],
     ),
+
+
+    DeptCountItem(
+      title: "BOM",
+
+      icon: Icons.assignment,
+      color: Colors.blueGrey.shade200,
+      metrics: [
+        MetricItem("Total", d.bomCount),
+        // MetricItem("Net Wt", d.totalNetWt),
+        // MetricItem("Out", d.totalBagOut),
+      ],
+    ),
     DeptCountItem(
       title: "Planning",
       icon: Icons.event_note,
@@ -98,18 +111,20 @@ List<DeptCountItem> createDepartments(DashboardSummary d) {
       color: Colors.green,
       metrics: [
         MetricItem("Kg", d.cutPieceKg),
-        MetricItem("Total", d.cutPieceTotal),
+        MetricItem("Total Pcs", d.cutPieceTotal),
       ],
     ),
 
-    // DeptCountItem(
-    //   title: "WEBBING",
-    //   icon: Icons.check_box,
-    //   color: Colors.green,
-    //   metrics: [
-    //     MetricItem("Kg", d.)
-    //   ],
-    // ),
+    DeptCountItem(
+      title: "WEBBING",
+      icon: Icons.check_box,
+      color: Colors.green,
+      metrics: [
+        MetricItem("Kg", d.totalNetWt),
+
+        MetricItem("Total Stock Kg", d.totalNetWt),
+      ],
+    ),
     DeptCountItem(
       title: "Bag Production",
       icon: Icons.shopping_bag,
@@ -126,19 +141,14 @@ List<DeptCountItem> createDepartments(DashboardSummary d) {
       title: "Tape Line",
       icon: Icons.straighten,
       color: Colors.cyan,
-      metrics: [MetricItem("Kg", d.tapeLineKg)],
-    ),
-
-    DeptCountItem(
-      title: "Webbing",
-      icon: Icons.account_tree,
-      color: Colors.deepOrange.shade200,
       metrics: [
-        MetricItem("Prod", d.totalBagProduction),
-        MetricItem("Net Wt", d.totalNetWt),
-        MetricItem("Out", d.totalBagOut),
+        MetricItem("Kg", d.tapeLineKg),
+        MetricItem("Stock Kg", d.totalNetWt)
+
       ],
     ),
+
+
     DeptCountItem(
       title: "Cutting",
       icon: Icons.content_cut,
@@ -162,15 +172,7 @@ List<DeptCountItem> createDepartments(DashboardSummary d) {
     ),
     //
     // // In/Out
-    DeptCountItem(
-      title: "Bailing",
-      icon: Icons.login,
-      color: Colors.indigo,
-      metrics: [
-        MetricItem("In Kg", d.inCount),
-        MetricItem("Out kg", d.inBagNwt),
-      ],
-    ),
+
     //
     DeptCountItem(
       title: "BOM",
@@ -194,17 +196,17 @@ List<DeptCountItem> createDepartments(DashboardSummary d) {
         MetricItem("Out", d.totalBagOut),
       ],
     ),
-    DeptCountItem(
-      title: "Quality",
-
-      icon: Icons.verified,
-      color: Colors.green.shade200,
-      metrics: [
-        MetricItem("Prod", d.totalBagProduction),
-        MetricItem("Net Wt", d.totalNetWt),
-        MetricItem("Out", d.totalBagOut),
-      ],
-    ),
+    // DeptCountItem(
+    //   title: "Quality",
+    //
+    //   icon: Icons.verified,
+    //   color: Colors.green.shade200,
+    //   metrics: [
+    //     MetricItem("Prod", d.totalBagProduction),
+    //     MetricItem("Net Wt", d.totalNetWt),
+    //     MetricItem("Out", d.totalBagOut),
+    //   ],
+    // ),
     //
     // /// ── Show Metrics (netWeight, rollLength, noOfRoll) ──
     DeptCountItem(

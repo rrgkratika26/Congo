@@ -35,11 +35,21 @@ class _JBl_laminationQrScanScreenState
 
   bool isProcessing = false;
 
+  // 🔒 Prevents the same barcode from re-triggering the API/snackbar
+  // repeatedly while it's still in view of the camera.
+  String? _lastScannedCode;
+  DateTime? _lastScanTime;
+  static const _rescanCooldown = Duration(seconds: 3);
+
   // 🔗 API CALL
   Future<void> submitBarcode(String barcode) async {
     if (isProcessing) return;
 
     setState(() => isProcessing = true);
+
+    // Pause immediately so the camera doesn't keep firing scan events
+    // for the same code while the request is in flight.
+    await controller?.pauseCamera();
 
     try {
       final url = Uri.parse(
@@ -79,35 +89,44 @@ class _JBl_laminationQrScanScreenState
       final status = res['status'] ?? 'error';
       final message = res['message'] ?? 'No message';
 
-      // Show snackbar based on status
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: status == 'ok'
-              ? Colors.green
-              : (status == 'exists' ? Colors.orange : Colors.red),
-        ),
-      );
+      if (mounted) {
+        // Clear any currently-showing snackbar before showing the new one,
+        // so repeated statuses don't stack up on screen.
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: status == 'ok'
+                ? Colors.green
+                : (status == 'exists' ? Colors.orange : Colors.red),
+          ),
+        );
+      }
 
       if (status == 'ok') {
-        Navigator.pop(context, true); // success
-      } else if (status == 'exists') {
-        // continue scanning
-        controller?.resumeCamera();
-      } else {
-        controller?.resumeCamera(); // allow retry on error
+        if (mounted) Navigator.pop(context, true); // success
+        return;
       }
+
+      // For 'exists' or 'error', wait briefly before resuming so the same
+      // QR code (still under the camera) isn't picked up again instantly.
+      await Future.delayed(_rescanCooldown);
+      await controller?.resumeCamera();
     } catch (e) {
       debugPrint("❌ API ERROR: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Something went wrong"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      controller?.resumeCamera();
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Something went wrong"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      await Future.delayed(_rescanCooldown);
+      await controller?.resumeCamera();
     } finally {
-      setState(() => isProcessing = false);
+      if (mounted) setState(() => isProcessing = false);
     }
   }
 
@@ -117,10 +136,23 @@ class _JBl_laminationQrScanScreenState
 
     ctrl.scannedDataStream.listen((scanData) async {
       final code = scanData.code;
+      if (code == null || isProcessing) return;
 
-      if (code != null && !isProcessing) {
-        await submitBarcode(code);
+      final now = DateTime.now();
+
+      // Ignore the same barcode if it was just scanned within the
+      // cooldown window — this is what was causing repeated
+      // "already exists" snackbars for a single physical scan.
+      if (_lastScannedCode == code &&
+          _lastScanTime != null &&
+          now.difference(_lastScanTime!) < _rescanCooldown) {
+        return;
       }
+
+      _lastScannedCode = code;
+      _lastScanTime = now;
+
+      await submitBarcode(code);
     });
   }
 

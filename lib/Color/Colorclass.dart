@@ -176,9 +176,7 @@
 import 'package:flutter/material.dart';
 
 class C {
-  // ==========================================================
-  // BRAND COLORS (FROM MULTI PACKAGING CONGO LOGO)
-  // ==========================================================
+
 
   static const Color primary = Color(0xFF1E3A8A); // Logo Blue
   static const Color primaryDark = Color(0xFF1E628D);
@@ -248,6 +246,7 @@ class C {
   // ==========================================================
 
   static const Color success = Color(0xFF16A34A);
+  static const Color darkgreen = Color(0xFF166534);
   static const Color successBg = Color(0xFFECFDF5);
 
   static const Color warning = Color(0xFFEE7D00);

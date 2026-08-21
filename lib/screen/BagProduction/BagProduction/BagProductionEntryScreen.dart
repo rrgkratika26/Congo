@@ -3,7 +3,7 @@ import '../../../Color/Colorclass.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 import '../../../util/widget/dateFilterService.dart';
 import '../../../util/widget/searchBar.dart';
-import '../modelClass/BagReportModelClass.dart';
+
 import 'BadProductionModel.dart';
 import 'FormScreen.dart';
 
@@ -39,7 +39,7 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
     _loadInitialData();
     _scrollController.addListener(_onScroll);
     _searchController.addListener(
-      () => _onSearchChanged(_searchController.text),
+          () => _onSearchChanged(_searchController.text),
     );
   }
 
@@ -54,7 +54,7 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
+        _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore) {
       _loadMore();
     }
@@ -108,11 +108,11 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
     final filtered = q.isEmpty
         ? _allData
         : _allData.where((item) {
-            return item.customerName.toLowerCase().contains(q) ||
-                item.generatedInquiry.toLowerCase().contains(q) ||
-                item.articleNo.toLowerCase().contains(q) ||
-                item.poNum.toLowerCase().contains(q);
-          }).toList();
+      return item.customerName.toLowerCase().contains(q) ||
+          item.generatedInquiry.toLowerCase().contains(q) ||
+          item.articleNo.toLowerCase().contains(q) ||
+          item.poNum.toLowerCase().contains(q);
+    }).toList();
 
     setState(() {
       _filteredData = filtered;
@@ -147,21 +147,34 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
+      backgroundColor: C.bg,
 
       appBar: AppBar(
-        title: const Text("Bag Entries", style: TextStyle(color: C.bg,  fontWeight: FontWeight.w600,)),
-        backgroundColor: C.appBar1,
-        iconTheme: IconThemeData(
-          color: C.bg, // 👈 Back arrow color white
+        title: const Text(
+          "Bag Entries",
+          style: TextStyle(color: C.bg, fontWeight: FontWeight.w600),
         ),
+        backgroundColor: C.appBar1,
+        iconTheme: const IconThemeData(color: C.bg),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _showDateFilter ? Icons.filter_alt : Icons.filter_alt_outlined,
+              color: C.bg,
+            ),
+            tooltip: "Date filter",
+            onPressed: () => setState(() => _showDateFilter = !_showDateFilter),
+          ),
+        ],
       ),
 
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             if (_isLoading) {
-              return const Center(child: CircularProgressIndicator(color: C.appBar3,));
+              return const Center(
+                child: CircularProgressIndicator(color: C.appBar3),
+              );
             }
 
             if (_allData.isEmpty) {
@@ -170,6 +183,7 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
 
             return RefreshIndicator(
               onRefresh: _refreshData,
+              color: C.appBar3,
 
               child: Column(
                 children: [
@@ -186,33 +200,30 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
                       },
                     ),
 
-                  /// Count Bar
-                  _CountBar(
-                    visible: _visibleData.length,
-                    total: _filteredData.length,
-                  ),
-
                   /// Search
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
                     child: InlineSearchBar(
                       controller: _searchController,
                       onChanged: _onSearchChanged,
                     ),
                   ),
 
+                  /// Count Bar
+                  _CountBar(
+                    visible: _visibleData.length,
+                    total: _filteredData.length,
+                  ),
+
                   /// List
                   Expanded(
-                    child: ListView.builder(
+                    child: _filteredData.isEmpty
+                        ? _NoSearchResults(query: _searchController.text)
+                        : ListView.builder(
                       controller: _scrollController,
-
-                      padding: const EdgeInsets.all(5),
-
-                      itemCount: _visibleData.length + (_isLoadingMore ? 1 : 0),
-
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+                      itemCount:
+                      _visibleData.length + (_isLoadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index == _visibleData.length) {
                           return const _LoadingIndicator();
@@ -237,8 +248,6 @@ class _BagEntryScreenState extends State<BagEntryScreen> {
   }
 }
 
-/// ───────────────── Count Bar ─────────────────
-
 class _CountBar extends StatelessWidget {
   final int visible;
   final int total;
@@ -247,25 +256,21 @@ class _CountBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-
-      color: const Color(0xFF42A5F6).withOpacity(0.15),
-
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
       child: Row(
         children: [
-          const Icon(Icons.list, size: 18),
-
-          const SizedBox(width: 8),
-
-          Text("Showing $visible of $total entries"),
+          Icon(Icons.list_alt, size: 16, color: C.textLow),
+          const SizedBox(width: 6),
+          Text(
+            "Showing $visible of $total entries",
+            style: TextStyle(fontSize: 12.5, color: C.textLow),
+          ),
         ],
       ),
     );
   }
 }
-
-/// ───────────────── Card ─────────────────
 
 class _BagEntryCard extends StatelessWidget {
   final BagEntryModel item;
@@ -273,107 +278,201 @@ class _BagEntryCard extends StatelessWidget {
 
   const _BagEntryCard({required this.item, required this.onTap});
 
+  // Party name -> brand blue, BOM No -> brand orange (per app palette)
+  static const Color _partyColor = C.appBar1; // Logo Blue #287DB3
+  static const Color _bomColor = C.actionOrange; // Logo Orange #EE7D00
+
+  Color _remainingColor(double qty, double remaining) {
+    if (qty <= 0) return C.textLow;
+    final ratio = remaining / qty;
+    if (ratio <= 0.15) return const Color(0xFFD64545); // red - almost done
+    if (ratio <= 0.4) return const Color(0xFFE0A22C); // amber - low
+    return const Color(0xFF16A34A); // green - healthy
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      // margin: const EdgeInsets.only(bottom: 12),
-      color: C.cardBg,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    final remColor = _remainingColor(item.quantity, item.remainingBag);
+    final initial = (item.customerName ?? '').trim().isNotEmpty
+        ? item.customerName.trim()[0].toUpperCase()
+        : '?';
 
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-
-        onTap: onTap,
-
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ───── Customer Name + Arrow ─────
-              Row(
-                children: [
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: const TextStyle(fontSize: 16),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: C.bg.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(14),
+        border: Border(left: BorderSide(color: C.rmdColor, width: 4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ───── Header: avatar + party name + arrow ─────
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor:  C.darkgreen.withOpacity(0.12),
+                      child: Text(
+                        initial,
+                        style: TextStyle(
+                          color: C.darkgreen,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TextSpan(
-                            text: (item.customerName ?? '').toUpperCase(),
+                          Text(
+                            (item.customerName ?? '').toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              color: C.actionOrange,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 15.5,
+                              color: C.darkgreen,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
                             ),
                           ),
-                          TextSpan(
-                            text: "  •  ${item.generatedInquiry}", // BOM No
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: C.secondary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          const SizedBox(height: 4),
+                          _Chip(
+                            label: "BOM ${item.generatedInquiry}",
+                            color: _bomColor,
                           ),
                         ],
                       ),
                     ),
-                  ),
+                    Icon(Icons.chevron_right, color: C.primary),
+                  ],
+                ),
 
-                  const Icon(Icons.arrow_forward_ios, size: 16),
-                ],
-              ),
+                const SizedBox(height: 12),
+                Divider(height: 1, color: C.rmdColor),
+                const SizedBox(height: 12),
 
-              const Divider(),
-
-              // ───── Details ─────
-              _row("Generated Enq.", item.generatedInquiry),
-              const SizedBox(height: 6),
-
-              _row("Article No", item.articleNo), // ✅ ADDED
-              const SizedBox(height: 6),
-
-              _row("PO Number", item.poNum),
-              const SizedBox(height: 6),
-
-              _row("Bag Qty", item.quantity.toStringAsFixed(0)),
-              const SizedBox(height: 6),
-
-              _row("Remaining Bag", item.remainingBag.toStringAsFixed(0)), // ✅ ADDED
-            ],
+                // ───── Details grid ─────
+                Row(
+                  children: [
+                    Expanded(
+                      child: _InfoBlock(label: "Article No", value: item.articleNo),
+                    ),
+                    Expanded(
+                      child: _InfoBlock(label: "PO Number", value: item.poNum),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _InfoBlock(
+                        label: "Bag Qty",
+                        value: item.quantity.toStringAsFixed(0),
+                      ),
+                    ),
+                    Expanded(
+                      child: _InfoBlock(
+                        label: "Remaining",
+                        value: item.remainingBag.toStringAsFixed(0),
+                        valueColor: remColor,
+                        bold: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _row(String label, String value) {
-    return Row(
+/// Small pill/chip used for BOM No (and reusable elsewhere)
+class _Chip extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _Chip({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 12,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+/// Label-on-top / value-below block for scannable details
+class _InfoBlock extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final bool bold;
+
+  const _InfoBlock({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.bold = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 4,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: C.textBody,
-              fontWeight: FontWeight.w600,
-            ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: C.textLow,
+            fontWeight: FontWeight.w500,
           ),
         ),
-
-        const SizedBox(width: 8),
-
-        Expanded(
-          flex: 6,
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            softWrap: true,
-            overflow: TextOverflow.visible,
-            maxLines: null,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 14,
+            color: valueColor ?? C.textBody,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
           ),
         ),
       ],
@@ -390,13 +489,12 @@ class _LoadingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.all(16),
-
-      child: Center(child: CircularProgressIndicator(color: C.appBar3,)),
+      child: Center(child: CircularProgressIndicator(color: C.appBar3)),
     );
   }
 }
 
-/// ───────────────── Empty State ─────────────────
+/// ───────────────── Empty State (no data at all) ─────────────────
 
 class _EmptyState extends StatelessWidget {
   final VoidCallback onRefresh;
@@ -408,17 +506,48 @@ class _EmptyState extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-
         children: [
-          const Icon(Icons.inbox, size: 60),
+          Icon(Icons.inbox_outlined, size: 64, color: C.textLow),
+          const SizedBox(height: 12),
+          Text(
+            "No entries found",
+            style: TextStyle(color: C.textLow, fontSize: 15),
+          ),
+          const SizedBox(height: 14),
+          ElevatedButton.icon(
+            onPressed: onRefresh,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text("Refresh"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: C.appBar3,
+              foregroundColor: C.bg,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
+/// ───────────────── No Search Results (data exists, filter is empty) ─────────────────
+
+class _NoSearchResults extends StatelessWidget {
+  final String query;
+
+  const _NoSearchResults({required this.query});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 56, color: C.textLow),
           const SizedBox(height: 10),
-
-          const Text("No entries found"),
-
-          const SizedBox(height: 10),
-
-          ElevatedButton(onPressed: onRefresh, child: const Text("Refresh")),
+          Text(
+            'No results for "$query"',
+            style: TextStyle(color: C.textLow, fontSize: 14),
+          ),
         ],
       ),
     );

@@ -126,7 +126,8 @@ class _WebbingEntryScreenState extends State<WebbingEntryScreen> {
         .toString()
         .padLeft(2, '0');
 
-    return "$shift$machine$month$day{0}-$id";
+    // return "$shift$machine$month$day0-$id";
+    return "$shift$machine$month${day}0-$id";
   }
 
   Future<void> _generateLotNo() async {
@@ -426,7 +427,6 @@ class _WebbingEntryScreenState extends State<WebbingEntryScreen> {
                           ),
                         ],
                       ),
-
                       _sectionCard(
                         title: 'Quantity Details',
                         color: Colors.teal,

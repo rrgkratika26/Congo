@@ -679,10 +679,10 @@ class _CutOutSavedListNardanaState extends State<CutOutSavedListNardana> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? C.warning
+              ? C.warning.withOpacity(0.25)
               : (isRoll
-              ? C.primaryDark
-              : C.danger),
+              ? Colors.blue.withOpacity(0.10)
+              : Colors.green.withOpacity(0.10)),
           borderRadius: BorderRadius.circular(5),
           border: Border.all(
             color: isSelected

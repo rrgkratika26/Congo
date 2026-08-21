@@ -39,7 +39,7 @@ class NaradanaApiService {
   // static const String _baseUrl = 'http://190.92.175.47:80/api/api';
   // static const String _baseUrl ='http://190.92.175.47/Qualipack/api';
   static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
-  // static const String _baseUrl = 'http://192.168.29.123:7165/api';
+  // static const String _baseUrl = 'https://192.168.29.39:44349/api';
   // static const String _baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String _baseUrl = 'http://190.92.175.47/ShriShakti/api';
   //static const String _baseUrl = 'http://192.168.29.39:44349/api/api';
@@ -767,6 +767,55 @@ class NaradanaApiService {
       return [];
     }
   }
+  static Future<List<String>> getComponentLists(String bom) async {
+    try {
+      final encodedBom = Uri.encodeComponent(bom);
+
+      final response = await http.get(
+        Uri.parse(
+          '$_baseUrl/Cutting/getComponentList?bomno=$encodedBom',
+        ),
+        headers: await authHeaders(),
+      );
+
+      debugPrint(
+        "🌐 COMPONENT API URL: "
+            '${'$_baseUrl/Cutting/getComponentList?bomno=$encodedBom'}',
+      );
+      debugPrint("🌐 COMPONENT STATUS: ${response.statusCode}");
+      debugPrint("🌐 COMPONENT RESPONSE: ${response.body}");
+
+      if (response.statusCode != 200) {
+        debugPrint(
+          "❌ Component API failed: ${response.statusCode}",
+        );
+        return [];
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is Map<String, dynamic>) {
+        final rawComponents = decoded['components'];
+
+        if (rawComponents is List) {
+          final components = rawComponents
+              .map((e) => e.toString().trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
+
+          debugPrint("✅ COMPONENT LIST for BOM $bom: $components");
+
+          return components;
+        }
+      }
+
+      debugPrint("⚠️ No components found for BOM: $bom");
+      return [];
+    } catch (e) {
+      debugPrint("❌ getComponentLists ERROR: $e");
+      return [];
+    }
+  }
 
   static Future<Map<String, dynamic>?> getBomAndComponents({
     required String po,
@@ -935,8 +984,8 @@ class NaradanaApiService {
         headers: headers,
       );
 
-      // debugPrint("📥 Status Code => ${response.statusCode}");
-      // debugPrint("📥 Response => ${response.body}");
+      debugPrint("📥 Status Code => ${response.statusCode}");
+      debugPrint("📥 Response => ${response.body}");
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);

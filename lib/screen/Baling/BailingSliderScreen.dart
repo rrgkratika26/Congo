@@ -52,33 +52,18 @@ class _DispatchScreenState extends State<DispatchScreen> {
         elevation: 0,
         shadowColor: Colors.black.withOpacity(0.05),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: C.bg),
+          icon: const Icon(Icons.arrow_back, color: C.bg),
           onPressed: () => Navigator.pop(context),
         ),
 
         title: Text(
-          _unitTitle,
+          "Dispatch Report",
           style: const TextStyle(color: C.bg, fontWeight: FontWeight.bold),
         ),
 
         centerTitle: true,
 
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(20),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(),
-            child: Row(
-              children: [
-                // Expanded(
-                //   child: _buildTabIndicator('Dispatch Entry', 0, isTablet),
-                // ),
-                Expanded(
-                  child: _buildTabIndicator('Dispatch Report', 1, isTablet),
-                ),
-              ],
-            ),
-          ),
-        ),
+
 
         actions: [
           if (_currentIndex == 1)

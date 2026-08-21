@@ -21,7 +21,7 @@ class VisaApiService {
   // static const String baseUrlJBL ='http://190.92.175.47:80/api/api';
   // static const String baseUrlJBL ='http://190.92.175.47/Qualipack/api';
   static const String baseUrlJBL ='http://190.92.175.47/CONGO_API/api';
-  // static const String baseUrlJBL = 'http://192.168.29.123:7165/api';
+  // static const String baseUrlJBL = 'https://192.168.29.39:44349/api';
   // static const String baseUrlJBL = 'http://190.92.175.47/VISA_S/api';
 
 
@@ -214,8 +214,11 @@ class VisaApiService {
         body: jsonEncode(data),
       );
 
-      print("STATUS: ${response.statusCode}");
-      print("RESPONSE: ${response.body}");
+      debugPrint("════════════════════════════════════");
+      debugPrint("SAVE OUTSTOCK STATUS: ${response.statusCode}");
+      debugPrint("SAVE OUTSTOCK RESPONSE:");
+      debugPrint(response.body);
+      debugPrint("════════════════════════════════════");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;

@@ -917,7 +917,7 @@ class _ManualToLoomScreenState extends State<ManualToLoomScreen> {
                       },
 
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: C.primaryDark,
+                  backgroundColor: C.warning.withOpacity(0.7),
 
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),

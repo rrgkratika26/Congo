@@ -1136,7 +1136,7 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.balingReport);
       else if (action == MenuAction.dispatch)
         Get.toNamed(AppRoutes.dispatchEntry);
-      else if (action == MenuAction.dispatch)
+      else if (action == MenuAction.dispatch_report)
         Get.toNamed(AppRoutes.dispatchReport);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.baleStockgroup);

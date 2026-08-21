@@ -338,12 +338,12 @@ class _DeptDashboard extends StatelessWidget {
                     icon: const Icon(Icons.arrow_back, color: C.bg),
                     onPressed: () {
                       Get.offAllNamed(AppRoutes.login);
-                      // Ya agar GetX use kar rahe hain:
+
                       Get.back();
                     },
                   ),
                   SizedBox(width: isMobile ? 10 : 18),
-                  // User info
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -486,9 +486,6 @@ class _DeptDashboard extends StatelessWidget {
   }
 }
 
-// // ─────────────────────────────────────────────
-// //  DEPT CARD (PADMIN grid)
-// // ─────────────────────────────────────────────
 class _DeptCard extends StatelessWidget {
   final _DeptItem item;
   final DashboardController ctrl;
@@ -692,9 +689,6 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  DRAWER  (PADMIN only)
-// ─────────────────────────────────────────────
 class _AppDrawer extends StatelessWidget {
   final DashboardController ctrl;
   final List<_DeptItem> items;
@@ -1056,7 +1050,7 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
       else if (action == MenuAction.dispatch)
         Get.toNamed(AppRoutes.dispatchEntry);
       else if (action == MenuAction.dispatch_report)
-        Get.toNamed(AppRoutes.baleDispatch);
+        Get.toNamed(AppRoutes.dispatchReport);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.baleStockgroup);
       break;

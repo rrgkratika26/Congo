@@ -140,7 +140,7 @@ class DashboardSummary {
 
       laminationNetWeight: toDouble(laminationJson["netWeight"]),
       laminationRollLength: toDouble(laminationJson["rollLength"]),
-      laminationNoOfRoll: toDouble(laminationJson[""]),
+      laminationNoOfRoll: toDouble(laminationJson["noOfRoll"]),
 
       loomNetWeight: toDouble(loomJson["netWeight"]),
       loomRollLength: toDouble(loomJson["rollLength"]),

@@ -23,7 +23,7 @@ class _CuttingInReportState extends State<CuttingInReport> {
   /// ✅ FILTER
   List<CuttingInReportModel> get _filtered => reportList;
   int currentPage = 1;
-  final int pageSize= 50000000;
+  final int pageSize= 50;
   bool hasNextPage = true;
   /// ✅ TOTALS
   double get _totalRollWt =>

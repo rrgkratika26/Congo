@@ -25,7 +25,7 @@ class BailingReportScreen extends StatefulWidget {
 class _BailingReportScreenState extends State<BailingReportScreen> {
   final _service = InStockService();
   final GetStorage _storage = GetStorage();
-  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 30));
+  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime _toDate = DateTime.now();
   List printers = [];
   bool isScanning = false;
@@ -669,7 +669,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
             textColor: zeroWt ? Colors.black87 : null,
           ),
 
-          _dataCell(item.date, _colDate),
+          _dataCell(_formatOnlyDate(item.date), _colDate),
           _dataCell(item.time, _colTime),
         ],
       ),
@@ -830,5 +830,20 @@ PRINT 1
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Printed Successfully")),
     );
+  }
+
+  String _formatOnlyDate(String value) {
+    if (value.isEmpty) return '-';
+
+    try {
+      final date = DateTime.parse(value);
+
+      return '${date.day.toString().padLeft(2, '0')}-'
+          '${date.month.toString().padLeft(2, '0')}-'
+          '${date.year}';
+    } catch (_) {
+      // If API already sends only a date, return it as-is
+      return value.split(' ').first.split('T').first;
+    }
   }
 }

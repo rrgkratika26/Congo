@@ -34,7 +34,8 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class InStockService {
-  // static const String baseUrl = 'http://192.168.29.123:7165/api';
+
+  // static const String baseUrl = 'https://192.168.29.39:44349/api';
   // static const String baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String baseUrl = 'http://190.92.175.47/Qualipack/api';
   // http://190.92.175.47/CONGO_API/
@@ -107,8 +108,8 @@ class InStockService {
             "Authorization": "Bearer $token",
           },
         );
-        print("Logout Status: ${response.statusCode}");
-        print("Logout Response: ${response.body}");
+        // print("Logout Status: ${response.statusCode}");
+        // print("Logout Response: ${response.body}");
       }
 
       // ✅ Always clear local session
@@ -150,7 +151,7 @@ class InStockService {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        print('data:::::$jsonData');
+        // print('data:::::$jsonData');
         // debugPrint("API URL: $url");
         // debugPrint("GET SUPERVISORS STATUS: ${response.statusCode}");
         // debugPrint("GET SUPERVISORS RESPONSE: ${response.body}");
@@ -201,9 +202,9 @@ class InStockService {
   Future<List<dynamic>> getScannedItems(String date) async {
     final url = Uri.parse('$baseUrl/Rmd/GetScannedItems?date=$date');
     final response = await http.get(url, headers: await authHeaders());
-    debugPrint("API URL: $url");
-    debugPrint("GET SCANNED ITEMS STATUS: ${response.statusCode}");
-    debugPrint("GET SCANNED ITEMS RESPONSE: ${response.body}");
+    // debugPrint("API URL: $url");
+    // debugPrint("GET SCANNED ITEMS STATUS: ${response.statusCode}");
+    // debugPrint("GET SCANNED ITEMS RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
@@ -278,9 +279,9 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      debugPrint("API URL: $url");
-      debugPrint("GET OUT SCANNED ITEMS STATUS: ${response.statusCode}");
-      debugPrint("GET OUT SCANNED ITEMS RESPONSE: ${response.body}");
+      // debugPrint("API URL: $url");
+      // debugPrint("GET OUT SCANNED ITEMS STATUS: ${response.statusCode}");
+      // debugPrint("GET OUT SCANNED ITEMS RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -332,9 +333,9 @@ class InStockService {
           "department": department,
         },
       );
-      debugPrint("API URL: $url");
-      debugPrint("CHECK BARCODE STATUS: ${response.statusCode}");
-      debugPrint("CHECK BARCODE BODY: ${response.body}");
+      // debugPrint("API URL: $url");
+      // debugPrint("CHECK BARCODE STATUS: ${response.statusCode}");
+      // debugPrint("CHECK BARCODE BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -368,14 +369,14 @@ class InStockService {
           "department": department,
         },
       );
-      debugPrint("Barcode : $barcode");
-      debugPrint("Storage : $storage");
-      debugPrint("Operator : $operatorName");
-      debugPrint("Supervisor : $supervisor");
-      debugPrint("Department : $department");
-      debugPrint("Roll Entry : $roll_entry");
-      debugPrint("CHECK OUT STATUS: ${response.statusCode}");
-      debugPrint("CHECK OUT BODY: ${response.body}");
+      // debugPrint("Barcode : $barcode");
+      // debugPrint("Storage : $storage");
+      // debugPrint("Operator : $operatorName");
+      // debugPrint("Supervisor : $supervisor");
+      // debugPrint("Department : $department");
+      // debugPrint("Roll Entry : $roll_entry");
+      // debugPrint("CHECK OUT STATUS: ${response.statusCode}");
+      // debugPrint("CHECK OUT BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -406,10 +407,10 @@ class InStockService {
       "REQUEST BODY: ${jsonEncode({"username": username, "password": password, "unit": unit})}",
     );
 
-    print("RESPONSE CODE: $url");
-    print("RESPONSE BODY: ${response.body}");
-    debugPrint('LOGIN STATUS: ${response.statusCode}');
-    debugPrint('LOGIN RESPONSE: ${response.body}');
+    // print("RESPONSE CODE: $url");
+    // print("RESPONSE BODY: ${response.body}");
+    // debugPrint('LOGIN STATUS: ${response.statusCode}');
+    // debugPrint('LOGIN RESPONSE: ${response.body}');
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
@@ -456,7 +457,7 @@ class InStockService {
     );
 
     final response = await http.get(url, headers: await authHeaders());
-    debugPrint("LAMINATION OPERATORS: ${response.body}");
+    // debugPrint("LAMINATION OPERATORS: ${response.body}");
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -472,7 +473,7 @@ class InStockService {
     );
 
     final response = await http.get(url, headers: await authHeaders());
-    debugPrint("LAMINATION SUPERVISORS: ${response.body}");
+    // debugPrint("LAMINATION SUPERVISORS: ${response.body}");
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -486,7 +487,7 @@ class InStockService {
     final url = Uri.parse('$baseUrl/Lamination/GetLaminationLocations');
     final response = await http.get(url, headers: await authHeaders());
 
-    debugPrint("LAMINATION LOCATIONS: ${response.body}");
+    // debugPrint("LAMINATION LOCATIONS: ${response.body}");
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -528,8 +529,8 @@ class InStockService {
           )
           .timeout(const Duration(seconds: 10));
 
-      debugPrint("STATUS: ${response.statusCode}");
-      debugPrint("BODY: ${response.body}");
+      // debugPrint("STATUS: ${response.statusCode}");
+      // debugPrint("BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -553,8 +554,8 @@ class InStockService {
     try {
       final response = await http.get(url, headers: await authHeaders());
 
-      debugPrint('LAMINATION STATUS: ${response.statusCode}');
-      debugPrint('LAMINATION RESPONSE: ${response.body}');
+      // debugPrint('LAMINATION STATUS: ${response.statusCode}');
+      // debugPrint('LAMINATION RESPONSE: ${response.body}');
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -585,8 +586,8 @@ class InStockService {
     final url = Uri.parse('$baseUrl/Cutting/GetOperators');
     final response = await http.get(url, headers: await authHeaders());
 
-    debugPrint("GET Cutting OPERATORS STATUS: ${response.statusCode}");
-    debugPrint("GET OPERATORS RESPONSE: ${response.body}");
+    // debugPrint("GET Cutting OPERATORS STATUS: ${response.statusCode}");
+    // debugPrint("GET OPERATORS RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -599,8 +600,8 @@ class InStockService {
     final url = Uri.parse('$baseUrl/Cutting/GetSupervisors');
     final response = await http.get(url, headers: await authHeaders());
 
-    debugPrint("GET Cutting SUPERVISORS STATUS: ${response.statusCode}");
-    debugPrint("GET SUPERVISORS RESPONSE: ${response.body}");
+    // debugPrint("GET Cutting SUPERVISORS STATUS: ${response.statusCode}");
+    // debugPrint("GET SUPERVISORS RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -613,8 +614,8 @@ class InStockService {
     final url = Uri.parse('$baseUrl/Cutting/GetLocations');
     final response = await http.get(url, headers: await authHeaders());
 
-    debugPrint("GET  Cutting LOCATIONS STATUS: ${response.statusCode}");
-    debugPrint("GET LOCATIONS RESPONSE: ${response.body}");
+    // debugPrint("GET  Cutting LOCATIONS STATUS: ${response.statusCode}");
+    // debugPrint("GET LOCATIONS RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
@@ -649,10 +650,10 @@ class InStockService {
       final response = await http
           .post(url, headers: await authHeaders(), body: jsonEncode(body))
           .timeout(const Duration(seconds: 10));
-      debugPrint('URL => $url');
-      debugPrint('BODY => ${jsonEncode(body)}');
-      debugPrint("Cutting scan STATUS: ${response.statusCode}");
-      debugPrint("BODY: ${response.body}");
+      // debugPrint('URL => $url');
+      // debugPrint('BODY => ${jsonEncode(body)}');
+      // debugPrint("Cutting scan STATUS: ${response.statusCode}");
+      // debugPrint("BODY: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -680,7 +681,7 @@ class InStockService {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        log(response.body, name: 'BAG ENTRY RESPONSE');
+        // log(response.body, name: 'BAG ENTRY RESPONSE');
         if (decoded['status'] == 'ok') {
           final List list = decoded['data'];
           return list.map((e) => BagEntryModel.fromJson(e)).toList();
@@ -698,9 +699,9 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      debugPrint('URL: ${url}');
-      debugPrint('Next Bag Entry ID STATUS: ${response.statusCode}');
-      debugPrint('BODY: ${response.body}');
+      // debugPrint('URL: ${url}');
+      // debugPrint('Next Bag Entry ID STATUS: ${response.statusCode}');
+      // debugPrint('BODY: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -730,12 +731,12 @@ class InStockService {
 
     try {
       final response = await http.get(uri, headers: await authHeaders());
-      debugPrint('URL: ${uri}');
+      // debugPrint('URL: ${uri}');
       // debugPrint('PRODUCT DETAILS STATUS: ${response.statusCode}');
-      debugPrint('PRODUCT DETAILS BODY: ${response.body}');
+      // debugPrint('PRODUCT DETAILS BODY: ${response.body}');
 
       if (response.statusCode == 200) {
-        debugPrint('BAG ENTRY STATUS: ${response.body}');
+        // debugPrint('BAG ENTRY STATUS: ${response.body}');
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           return data;
@@ -752,8 +753,8 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      debugPrint('SUPERVISOR STATUS: $url');
-      debugPrint('SUPERVISOR BODY: ${response.body}');
+      // debugPrint('SUPERVISOR STATUS: $url');
+      // debugPrint('SUPERVISOR BODY: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -774,8 +775,8 @@ class InStockService {
 
     try {
       final response = await http.get(url, headers: await authHeaders());
-      debugPrint('Bale SUPERVISOR STATUS: $url');
-      debugPrint('SUPERVISOR BODY: ${response.body}');
+      // debugPrint('Bale SUPERVISOR STATUS: $url');
+      // debugPrint('SUPERVISOR BODY: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -1696,7 +1697,7 @@ class InStockService {
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      debugPrint("OuTSTOCK id fetch data ::::::$jsonData");
+      // debugPrint("OuTSTOCK id fetch data ::::::$jsonData");
 
       if (jsonData['success'] == true) {
         return LaminationOutModel.fromJson(jsonData['data']);
@@ -1790,10 +1791,10 @@ class InStockService {
 
     if (response.statusCode == 200) {
       final decoded = json.decode(response.body);
-      print("OutList URL: ${response}");
-
-      print("STATUS CODE: ${response.statusCode}");
-      print("RESPONSE BODY: ${response.body}");
+      // print("OutList URL: ${response}");
+      //
+      // print("STATUS CODE: ${response.statusCode}");
+      // print("RESPONSE BODY: ${response.body}");
       // if API returns list directly
       if (decoded is List) {
         return decoded;
@@ -1812,21 +1813,13 @@ class InStockService {
       headers: await InStockService.authHeaders(),
     );
 
-    // ✅ PRINT STATUS & BODY
-    print("OutList URL: ${response}");
-
     print("STATUS CODE: ${response.statusCode}");
     print("RESPONSE BODY: ${response.body}");
-
     if (response.statusCode == 200) {
       final decoded = json.decode(response.body);
-
-      // if API returns list
       if (decoded is List) {
         return decoded;
       }
-
-      // if single object
       return [decoded];
     } else {
       throw Exception("Failed to load OutStock list");
@@ -1956,10 +1949,10 @@ class InStockService {
       body: jsonEncode(body),
     );
 
-    print("====== FINAL MATCH POSTMAN ======");
-    print("BODY: ${jsonEncode(body)}");
-    print("STATUS: ${response.statusCode}");
-    print("RESPONSE: ${response.body}");
+    // print("====== FINAL MATCH POSTMAN ======");
+    // print("BODY: ${jsonEncode(body)}");
+    // print("STATUS: ${response.statusCode}");
+    // print("RESPONSE: ${response.body}");
 
     return json.decode(response.body);
   }
@@ -2008,7 +2001,7 @@ class InStockService {
     );
 
     /// 🔹 PRINT URL
-    debugPrint("REQUEST URL: $url");
+    // debugPrint("REQUEST URL: $url");
 
     final response = await http.get(url, headers: await authHeaders());
 
@@ -2101,8 +2094,8 @@ class InStockService {
 
       final response = await http.get(uri, headers: await authHeaders());
 
-      print("Status => ${response.statusCode}");
-      print("Response => ${response.body}");
+      // print("Status => ${response.statusCode}");
+      // print("Response => ${response.body}");
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
@@ -2193,8 +2186,8 @@ class InStockService {
 
     final response = await http.get(url, headers: await authHeaders());
 
-    print("👉 STATUS CODE: ${response.statusCode}"); // ✅ STATUS
-    print("👉 RESPONSE BODY: ${response.body}"); // ✅ FULL RESPONSE
+    // print("👉 STATUS CODE: ${response.statusCode}"); // ✅ STATUS
+    // print("👉 RESPONSE BODY: ${response.body}"); // ✅ FULL RESPONSE
 
     if (response.statusCode == 200) {
       return LoomSupervisorData.fromJson(jsonDecode(response.body));
@@ -2212,9 +2205,9 @@ class InStockService {
       url,
       headers: await InStockService.authHeaders(),
     );
-    print("👉 Loom List Response: ${url}");
-
-    print("👉 Loom List Response: ${res.body}");
+    // print("👉 Loom List Response: ${url}");
+    //
+    // print("👉 Loom List Response: ${res.body}");
 
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body);
@@ -2362,8 +2355,8 @@ class InStockService {
           .where((e) => e.isNotEmpty)
           .toList();
 
-      print("After Filter = ${parties.length}");
-      print(parties);
+      // print("After Filter = ${parties.length}");
+      // print(parties);
 
       return parties;
     }
@@ -2376,6 +2369,7 @@ class InStockService {
       Uri.parse("$baseUrl/Tapeline/required-fibc?customerName=$customerName"),
       headers: await authHeaders(),
     );
+    print("URL: $baseUrl/Tapeline/required-fibc?customerName=$customerName");
     print("STATUS TAPELINE LIST////: ${response.statusCode}");
     print("RESPONSE BODY: ${response.body}");
     if (response.statusCode == 200) {
@@ -2431,7 +2425,7 @@ class InStockService {
     final response = await http.get(url, headers: await authHeaders());
 
     if (response.statusCode == 200) {
-      print("RESPONSE Tape out Report BODY: ${response.body}");
+      // print("RESPONSE Tape out Report BODY: ${response.body}");
       final List data = jsonDecode(response.body);
 
       return data.map((e) => TapelineOutReportModel.fromJson(e)).toList();
@@ -2454,8 +2448,8 @@ class InStockService {
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
       // print(url);
-      print("STATUS: ${response.statusCode}");
-      print("BODY: ${response.body}");
+      // print("STATUS: ${response.statusCode}");
+      // print("BODY: ${response.body}");
       return data.map((e) => TapeStockReportModel.fromJson(e)).toList();
     }
 
@@ -2482,10 +2476,10 @@ class InStockService {
         body: jsonEncode(body),
       );
 
-      debugPrint("UPDATE LOCATION URL: $url");
-      debugPrint("UPDATE LOCATION REQUEST: ${jsonEncode(body)}");
-      debugPrint("UPDATE LOCATION STATUS: ${response.statusCode}");
-      debugPrint("UPDATE LOCATION RESPONSE: ${response.body}");
+      // debugPrint("UPDATE LOCATION URL: $url");
+      // debugPrint("UPDATE LOCATION REQUEST: ${jsonEncode(body)}");
+      // debugPrint("UPDATE LOCATION STATUS: ${response.statusCode}");
+      // debugPrint("UPDATE LOCATION RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);

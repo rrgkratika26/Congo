@@ -255,7 +255,7 @@ class _OrderPlanningScreen2State extends State<OrderPlanningScreen2> {
                     height: 50,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: C.appBar2,
+                        backgroundColor: C.warning.withOpacity(0.7),
                       ),
                       onPressed: _saveData,
                       icon: const Icon(Icons.save, color: Colors.white),

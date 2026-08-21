@@ -19,7 +19,6 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
   String orderComponent = "SINGLE";
   TextEditingController searchController = TextEditingController();
 
-
   List<OrderCompositionModel> filteredData = [];
   List<String> componentTypes = ["SINGLE", "CLUB"];
 
@@ -37,9 +36,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
   void selectAll(bool value) {
     setState(() {
-
       if (orderComponent == "SINGLE") {
-
         // SINGLE mode: select only one item
         for (var item in data) {
           item.selected = false;
@@ -48,15 +45,12 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
         if (value && data.isNotEmpty) {
           data[0].selected = true;
         }
-
       } else {
-
         // CLUB mode
         for (var item in data) {
           item.selected = value;
         }
       }
-
     });
   }
 
@@ -66,22 +60,20 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
     loadData();
   }
+
   void filterData(String value) {
     setState(() {
       if (value.trim().isEmpty) {
         filteredData = data;
       } else {
         filteredData = data.where((item) {
-          return item.woNumber
-              .toLowerCase()
-              .contains(value.toLowerCase()) ||
-              item.component
-                  .toLowerCase()
-                  .contains(value.toLowerCase());
+          return item.woNumber.toLowerCase().contains(value.toLowerCase()) ||
+              item.component.toLowerCase().contains(value.toLowerCase());
         }).toList();
       }
     });
   }
+
   Future loadData() async {
     try {
       setState(() {
@@ -97,7 +89,6 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
       });
     } catch (e) {
       setState(() {
-
         isLoading = false;
       });
 
@@ -120,7 +111,9 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
         title: const Text(
           "Order Composition",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),backgroundColor: C.appBar1,
+        ),
+        backgroundColor: C.appBar1,
+
         // flexibleSpace: Container(
         //   decoration: BoxDecoration(
         //     gradient: LinearGradient(
@@ -128,13 +121,12 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
         //     ),
         //   ),
         // ),
-
       ),
 
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: TextField(
               controller: searchController,
               onChanged: filterData,
@@ -143,12 +135,12 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: searchController.text.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    searchController.clear();
-                    filterData('');
-                  },
-                )
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          searchController.clear();
+                          filterData('');
+                        },
+                      )
                     : null,
                 filled: true,
                 fillColor: Colors.white,
@@ -160,11 +152,9 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
           ),
 
           Padding(
-            padding: const EdgeInsets.only(left: 10,right: 10),
+            padding: const EdgeInsets.only(left: 10, right: 10),
 
             child: Container(
-
-
               decoration: BoxDecoration(
                 color: Colors.white,
 
@@ -243,14 +233,15 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
                     child: Column(
                       children: [
                         SizedBox(
-
                           height: 28,
 
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: C.success,
 
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                             ),
 
                             onPressed: () {
@@ -265,7 +256,10 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
                             label: const Text(
                               "All",
-                              style: TextStyle(color: Colors.white, fontSize: 11),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                              ),
                             ),
                           ),
                         ),
@@ -279,7 +273,9 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: C.warning,
 
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                             ),
 
                             onPressed: () {
@@ -294,7 +290,10 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
                             label: const Text(
                               "Clear",
-                              style: TextStyle(color: Colors.white, fontSize: 11),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                              ),
                             ),
                           ),
                         ),
@@ -310,55 +309,54 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
 
-              decoration: BoxDecoration(
-                color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
 
-                borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
 
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(.04),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(.04),
 
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-
-              child: Scrollbar(
-                controller: horizontalCtrl,
-
-                thumbVisibility: true,
-
-                child: SingleChildScrollView(
-                  controller: horizontalCtrl,
-
-                  scrollDirection: Axis.horizontal,
-
-                  child: SizedBox(
-                    width: totalWidth < width ? width : totalWidth,
-
-                    child: Column(
-                      children: [
-                        header(),
-
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: filteredData.length,
-
-                            itemBuilder: (_, index) {
-                              return tableRow(filteredData[index], index);
-                            },
-                          ),
+                          blurRadius: 8,
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-            ),
 
+                    child: Scrollbar(
+                      controller: horizontalCtrl,
+
+                      thumbVisibility: true,
+
+                      child: SingleChildScrollView(
+                        controller: horizontalCtrl,
+
+                        scrollDirection: Axis.horizontal,
+
+                        child: SizedBox(
+                          width: totalWidth < width ? width : totalWidth,
+
+                          child: Column(
+                            children: [
+                              header(),
+
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: filteredData.length,
+
+                                  itemBuilder: (_, index) {
+                                    return tableRow(filteredData[index], index);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
           ),
 
           Padding(
@@ -371,7 +369,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: C.primaryDark,
+                  backgroundColor: C.warning.withOpacity(0.7),
 
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -772,9 +770,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
               onChanged: (bool? value) {
                 setState(() {
-
                   if (orderComponent == "SINGLE") {
-
                     // Clear all selections
                     for (var element in data) {
                       element.selected = false;
@@ -782,13 +778,10 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
                     // Select only clicked filtered item
                     item.selected = value ?? false;
-
                   } else {
-
                     // Multiple selection in CLUB
                     item.selected = value ?? false;
                   }
-
                 });
               },
             ),

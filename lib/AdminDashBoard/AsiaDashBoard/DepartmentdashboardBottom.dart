@@ -9,6 +9,18 @@ import 'GraphTab.dart';
 import 'HeaderView.dart';
 import 'Marketingtab.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+
+import '../../Color/Colorclass.dart';
+import '../../Login/ProfileSCreen.dart';
+import '../DepartmentDashboard.dart';
+
+import 'GraphTab.dart';
+import 'HeaderView.dart';
+import 'Marketingtab.dart';
+
 class DeptDashboard extends StatefulWidget {
   const DeptDashboard({super.key});
 
@@ -18,16 +30,14 @@ class DeptDashboard extends StatefulWidget {
 
 class _DeptDashboardState extends State<DeptDashboard> {
   int _navIndex = 0;
+
   late final DashboardController ctrl;
   late final String department;
-
-
-  static const double _navBarHeight = 68;
-  static const double _navBarBottomMargin = 28;
 
   @override
   void initState() {
     super.initState();
+
     ctrl = Get.isRegistered<DashboardController>()
         ? Get.find<DashboardController>()
         : Get.put(DashboardController());
@@ -42,56 +52,49 @@ class _DeptDashboardState extends State<DeptDashboard> {
     final mq = MediaQuery.of(context);
     final isMobile = mq.size.width < 600;
 
-    final navBottomMargin = isMobile ? 28.0 : 35.0;
-
-
-    final bottomReserved = _navBarHeight + navBottomMargin + 16;
-
     return Scaffold(
+      backgroundColor: Colors.white,
+
       body: SafeArea(
-        child: Stack(
+        bottom: false,
+        child: Column(
           children: [
-            Column(
-              children: [
-                Header(ctrl: ctrl, isMobile: isMobile),
+            Header(ctrl: ctrl, isMobile: isMobile),
 
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: bottomReserved),  // 👈 yahi fix hai
-                    child: IndexedStack(
-                      index: _navIndex,
-                      children: [
-                        NewAdminDashboard(),
-                        ProductionTab(),
-                        GraphTab(
-                          unit: ctrl.unit.value,
-                          department: department,
-                          isMobile: isMobile,
-                        ),
-                        ProfileScreen(),
-                      ],
-                    ),
+            Expanded(
+              child: IndexedStack(
+                index: _navIndex,
+                children: [
+                  NewAdminDashboard(),
+
+                  ProductionTab(),
+
+                  GraphTab(
+                    unit: ctrl.unit.value,
+                    department: department,
+                    isMobile: isMobile,
                   ),
-                ),
-              ],
-            ),
 
-            Positioned(
-              left: isMobile ? 16 : 80,
-              right: isMobile ? 16 : 80,
-              bottom: navBottomMargin,
-              child: _BottomNav(
-                selected: _navIndex,
-                onTap: (i) {
-                  HapticFeedback.selectionClick();
-                  setState(() {
-                    _navIndex = i;
-                  });
-                },
+                  ProfileScreen(),
+                ],
               ),
             ),
           ],
         ),
+      ),
+
+      // ─────────────────────────────────────────────
+      // NORMAL FIXED BOTTOM NAVIGATION
+      // ─────────────────────────────────────────────
+      bottomNavigationBar: _BottomNav(
+        selected: _navIndex,
+        onTap: (i) {
+          HapticFeedback.selectionClick();
+
+          setState(() {
+            _navIndex = i;
+          });
+        },
       ),
     );
   }
@@ -106,17 +109,12 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 5,
-      shadowColor: C.primary,
-      borderRadius: BorderRadius.circular(28),
-      color: Colors.orangeAccent.shade100,
       child: Container(
         height: 68,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
         decoration: BoxDecoration(
-          color: C.primary,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: Colors.grey.withOpacity(.08)),
+          color: Colors.white,
+          border: Border.all(color: C.brand200),
         ),
         child: Row(
           children: [
@@ -135,7 +133,7 @@ class _BottomNav extends StatelessWidget {
             ),
 
             _NavItem(
-              icon: Icons.analytics_rounded,
+              icon: Icons.auto_graph,
               label: 'Analytics',
               selected: selected == 2,
               onTap: () => onTap(2),
@@ -175,22 +173,16 @@ class _NavItem extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: 3,
-          ),
+
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             gradient: selected
                 ? LinearGradient(
-              colors: [
-                C.bg,
-                C.bg.withOpacity(0.85),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
+                    colors: [C.bg, C.bg.withOpacity(0.85)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
                 : null,
           ),
           child: Column(
@@ -198,30 +190,29 @@ class _NavItem extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: selected ? 21 : 22,
+                size: selected ? 25 : 32,
                 color: selected ? C.warning : C.textLow,
               ),
-
 
               AnimatedSize(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutCubic,
                 child: selected
                     ? Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: C.warning,
-                      fontSize: 10,
-                      height: 1.0,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                )
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: C.warning,
+                            fontSize: 12,
+                            height: 1.0,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      )
                     : const SizedBox.shrink(),
               ),
             ],

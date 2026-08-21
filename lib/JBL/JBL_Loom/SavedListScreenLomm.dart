@@ -725,6 +725,7 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:thermal_printer_plus/thermal_printer.dart';
 
 import '../../Color/Colorclass.dart';
+import '../../NARDANA/LoomReprts/LoomReports.dart';
 import 'LoomListSavedModel.dart';
 
 class SavedListScreen extends StatefulWidget {
@@ -874,6 +875,15 @@ class _SavedListScreenState extends State<SavedListScreen> {
       backgroundColor: C.bg,
       appBar: AppBar(
         title: const Text("Loom List", style: TextStyle(color: C.bg)),
+        leading: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: C.primaryLight),
+              onPressed: () => Navigator.pop(context),
+            ),
+
+          ],
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             // gradient: LinearGradient(
@@ -887,7 +897,7 @@ class _SavedListScreenState extends State<SavedListScreen> {
         ),
         // C.primary,
         elevation: 0,
-        iconTheme: IconThemeData(color: C.bg),
+        // iconTheme: IconThemeData(color: C.bg),
         actions: [
           // IconButton(
           //   icon: const Icon(Icons.bluetooth),
@@ -1506,7 +1516,8 @@ Get.back(result: true);
                     style: TextStyle(color: C.textHigh),
                   ),
                   onPressed: () async {
-                    Navigator.pop(context);
+                    // Navigator.pop(context);
+                    Get.offAll(() => const LoomReportScreen());
 
                     await _printBarcodeApi(item);
                   },
@@ -1526,8 +1537,8 @@ Get.back(result: true);
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
-                    Navigator.pop(context);
-
+                    // Get.back(result: true);
+                    Get.offAll(() => const LoomReportScreen());
                     await _issueWithoutPrint(item);
                   },
                 ),

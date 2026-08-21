@@ -286,7 +286,7 @@ PRINT 1
                         scrollDirection: Axis.horizontal,
                         child: DataTable(
                           headingRowColor: MaterialStateProperty.all(
-                            Colors.blue.shade100,
+                            C.brand200,
                           ),
 
                           border: TableBorder(
@@ -436,7 +436,7 @@ PRINT 1
 
       await Future.delayed(const Duration(seconds: 1));
 
-      Get.offAll(() => const NewAdminDashboard());
+      Get.back();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),

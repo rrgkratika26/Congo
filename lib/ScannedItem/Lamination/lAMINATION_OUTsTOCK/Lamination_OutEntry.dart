@@ -273,15 +273,15 @@ class _RollEntryFormState extends State<RollEntryForm> {
   void _populateForm(LaminationOutModel model) {
     final r = model.rollData;
 
-    // _machineCtrl.text = r.machine;
+    _machineCtrl.text = r.machine;
     // _partyCtrl.text = r.machineno;
-    // _partyCtrl.text = r.machineno ?? '';
+    _partyCtrl.text = r.machineno ?? '';
 
-    // debugPrint("PARTY CTRL => ${_partyCtrl.text}");
-    // debugPrint("MACHINE NO => ${r.machineno}");
-    // debugPrint("PARTY NAME => ${r.partyName}");
-    // debugPrint("OPName1 => $_selectedOperator");
-    // debugPrint("partyname as bom no =>${_model?.bomNo}");
+    debugPrint("PARTY CTRL => ${_partyCtrl.text}");
+    debugPrint("MACHINE NO => ${r.machineno}");
+    debugPrint("PARTY NAME => ${r.partyName}");
+    debugPrint("OPName1 => $_selectedOperator");
+    debugPrint("partyname as bom no =>${_model?.bomNo}");
     // _bomNoCtrl = r.bomNo;
     _poCtrl.text = r.workOrderNo;
     // ✅ Article Number (purchsE_ORDER)
@@ -452,7 +452,9 @@ class _RollEntryFormState extends State<RollEntryForm> {
           double.tryParse(_reqQtyMtrCtrl.text) ??
           double.tryParse(_model?.rollData.requiredqtymtr ?? "") ??
           0.0,
-      "articleno": _articleNoCtrl.text,
+      "Article_No": _articleNoCtrl.text,
+
+
       "batchNo": _batchNoCtrl.text,
       // "sHift": _selectedShift,
       // "purchseOrder": _articleNoCtrl.text,
@@ -473,17 +475,18 @@ class _RollEntryFormState extends State<RollEntryForm> {
       "remark": _remarkCtrl.text,
       "stateN": _avgMtrGmCtrl.text,
 
-      "purchseOrder": _model?.rollData.articleNo ?? "",
+      "PO_NO": _poCtrl.text,
 
       // "batchNo": _batchNoCtrl.text,
       "shift": _selectedShift ?? "",
     };
 
     debugPrint("══════════ SAVE PAYLOAD ══════════");
+    debugPrint("Response lamination Out :$payload");
 
-    payload.forEach((key, value) {
-      debugPrint("$key : $value");
-    });
+    // payload.forEach((key, value) {
+    //   debugPrint("$key : $value");
+    // });
 
     debugPrint("══════════════════════════════════");
 
@@ -493,6 +496,8 @@ class _RollEntryFormState extends State<RollEntryForm> {
 
       if (success) {
         setState(() => _isSaved = true);
+        debugPrint("Response lamination Out :$payload");
+
         Get.offAll(() => LamRollPrintScreennaradan(title: "Lamination Rolls"));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -738,7 +743,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
                 _field(
                   "Fabric GSM",
                   _fabricGsmCtrl,
-                  type: TextInputType.number,
+                  // type: TextInputType.k,
                 ),
               ),
               const SizedBox(height: 10),

@@ -57,7 +57,7 @@ class _RmdRollENtryScreenState extends State<RmdRollENtryScreen> {
   String? selectedRollFrom;
 
   final List<String> productionTypes = ["FIBC"];
-  final List<String> rollFromList = ["IPS", "OTHERS"];
+  final List<String> rollFromList = ["OTHERS"];
   // final List<String> rollFromList = ["UNIT-VISA", "OTHERS"]; //Visa_S small bag
 
   final supervisorController = TextEditingController();

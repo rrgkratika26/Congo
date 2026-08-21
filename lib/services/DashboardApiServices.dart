@@ -131,6 +131,7 @@ class DashboardService {
     throw Exception('Failed to load dropdown');
   }
 
+
   static Future<List<String>> fetchBomList() async {
     final response = await http.get(
       Uri.parse('${InStockService.baseUrl}/Webbing/bom'),
