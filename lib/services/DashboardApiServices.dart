@@ -3,9 +3,13 @@ import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
+import '../AdminDashBoard/AsiaDashBoard/BagTypesGraph.dart';
+import '../AdminDashBoard/AsiaDashBoard/TopCustomer.dart';
 import '../AdminDashBoard/Dashboard Summary.dart';
 import '../InquiryScreen/Marketing/MarketingModel.dart';
 import '../JBL/JBLWebbing/Reports_model/outReportModel.dart';
+import '../NARDANA/Marketing/ModelFIBCBag/BagComponent.dart';
+import '../NARDANA/Marketing/ModelFIBCBag/BagModel.dart';
 import '../ScannedItem/Webbing/ReportmodelClass/BomDetailModel.dart';
 import '../ScannedItem/Webbing/ReportmodelClass/ReportModelClass.dart';
 import '../ScannedItem/Webbing/ReportmodelClass/SaveWebbingEntry.dart';
@@ -27,7 +31,7 @@ class DashboardService {
     required String fromDate,
     required String toDate,
   }) async {
-    Future<Map<String, dynamic>> get(String unit,String api) async {
+    Future<Map<String, dynamic>> get(String unit, String api) async {
       final url = Uri.parse(
         "${InStockService.baseUrl}/Dashboard/$api"
         "?unit=$unit&fromDate=$fromDate&toDate=$toDate",
@@ -50,16 +54,18 @@ class DashboardService {
       throw Exception(response.body);
     }
 
-    Future<Map<String, dynamic>> getMarketing(String unit,String type) async {
+    Future<Map<String, dynamic>> getMarketing(String unit, String type) async {
       final url = Uri.parse(
         "${InStockService.baseUrl}/Dashboard/MarketingCount"
-        "?unit=$unit&type=$type&fromDate=$fromDate&toDate=$toDate",
+        "?unit=$unit"
+        "&type=$type"
+        "&fromDate=$fromDate"
+        "&toDate=$toDate",
       );
 
       print("========== MARKETING API ==========");
       print("TYPE : $type");
       print("UNITNAME : $unit");
-
       print("URL : $url");
 
       final response = await http.get(
@@ -68,31 +74,36 @@ class DashboardService {
       );
 
       print("STATUS : ${response.statusCode}");
-      print("TYPE : $type");
-      print("BODY : ${response.body}");
-      print("===============================");
+      print("RESPONSE BODY : ${response.body}");
+      print("===================================");
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
+        final decoded = jsonDecode(response.body);
+
+        print("DECODED $type : $decoded");
+
+        return decoded as Map<String, dynamic>;
       }
 
-      throw Exception("Marketing $type : ${response.body}");
+      throw Exception(
+        "Marketing $type : ${response.statusCode} : ${response.body}",
+      );
     }
 
     final result = await Future.wait([
-      get(unit,"planning"), // 0
-      get(unit,"cutting"), // 1
-      get(unit,"cutpcs"), // 2
-      get(unit,"totalbagproduction"), // 3
-      get(unit,"bailing"), // 4
-      get(unit,"tapeline"), //5
+      get(unit, "planning"), // 0
+      get(unit, "cutting"), // 1
+      get(unit, "cutpcs"), // 2
+      get(unit, "totalbagproduction"), // 3
+      get(unit, "bailing"), // 4
+      get(unit, "tapeline"), //5
 
-      getMarketing(unit,"WO"), // 6
-      getMarketing(unit,"RMD"), // 7
-      getMarketing(unit,"LAMINATION"), // 8
-      getMarketing(unit,"BOM"), // 9
-      getMarketing(unit,"INQUIRY"), // 10
-      get(unit,"GetLoomData"), // 6
+      getMarketing(unit, "WO"), // 6
+      getMarketing(unit, "RMD"), // 7
+      getMarketing(unit, "LAMINATION"), // 8
+      getMarketing(unit, "BOM"), // 9
+      getMarketing(unit, "INQUIRY"), // 10
+      get(unit, "GetLoomData"), // 6
     ]);
 
     final dashboard = DashboardSummary.fromJson(
@@ -109,10 +120,6 @@ class DashboardService {
       inquiryJson: result[10],
       loomJson: result[11],
     );
-
-    print("Inquiry Count = ${dashboard.inquiryCount}");
-
-    print("Inquiry Count = ${dashboard.bomCount}");
 
     return dashboard;
   }
@@ -131,7 +138,6 @@ class DashboardService {
     throw Exception('Failed to load dropdown');
   }
 
-
   static Future<List<String>> fetchBomList() async {
     final response = await http.get(
       Uri.parse('${InStockService.baseUrl}/Webbing/bom'),
@@ -139,7 +145,7 @@ class DashboardService {
     );
 
     if (response.statusCode == 200) {
-      print("RESPONSE Bom List : ${response.body}");
+      // print("RESPONSE Bom List : ${response.body}");
 
       final Map<String, dynamic> json = jsonDecode(response.body);
 
@@ -160,7 +166,7 @@ class DashboardService {
     );
 
     if (response.statusCode == 200) {
-      print("RESPONSE Bom  Details//////////List : ${response.body}");
+      // print("RESPONSE Bom  Details//////////List : ${response.body}");
 
       return WebbingBomDetailsModel.fromJson(jsonDecode(response.body));
     }
@@ -177,7 +183,7 @@ class DashboardService {
     );
 
     if (response.statusCode == 200) {
-      print("RESPONSE Production wt Details//////////List : ${response.body}");
+      // print("RESPONSE Production wt Details//////////List : ${response.body}");
       final json = jsonDecode(response.body);
 
       if (json["success"] == true) {
@@ -197,8 +203,8 @@ class DashboardService {
       body: jsonEncode(request.toJson()),
     );
 
-    debugPrint("SAVE REQUEST : ${jsonEncode(request.toJson())}");
-    debugPrint("SAVE RESPONSE : ${response.body}");
+    // debugPrint("SAVE REQUEST : ${jsonEncode(request.toJson())}");
+    // debugPrint("SAVE RESPONSE : ${response.body}");
 
     if (response.statusCode == 200) {
       return WebbingSaveResponse.fromJson(jsonDecode(response.body));
@@ -255,8 +261,8 @@ class DashboardService {
         body: jsonEncode({"barcode": barcode, "department": department}),
       );
 
-      debugPrint("Print Status : ${response.statusCode}");
-      debugPrint("Print Response : ${response.body}");
+      // debugPrint("Print Status : ${response.statusCode}");
+      // debugPrint("Print Response : ${response.body}");
 
       return jsonDecode(response.body);
     } catch (e) {
@@ -284,10 +290,10 @@ class DashboardService {
     );
 
     if (response.statusCode == 200) {
-      debugPrint("Print//////// URL : $uri");
-      debugPrint("TYPE : $type");
-      debugPrint("STATUS : ${response.statusCode}");
-      debugPrint("BODY : ${response.body}");
+      // debugPrint("Print//////// URL : $uri");
+      // debugPrint("TYPE : $type");
+      // debugPrint("STATUS : ${response.statusCode}");
+      // debugPrint("BODY : ${response.body}");
 
       return MarketingCountModel.fromJson(jsonDecode(response.body));
     }
@@ -299,15 +305,15 @@ class DashboardService {
     final url =
         '${InStockService.baseUrl}/Cutting/CuttingInScannedItem?date=$date';
 
-    print("URL : $url");
+    // print("URL : $url");
 
     final response = await http.get(
       Uri.parse(url),
       headers: await InStockService.authHeaders(),
     );
 
-    print("Status Code : ${response.statusCode}");
-    print("Response : ${response.body}");
+    // print("Status Code : ${response.statusCode}");
+    // print("Response : ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -366,4 +372,219 @@ class DashboardService {
       return 0;
     }
   }
+
+  Future<List<TopCustomer>> getTopCustomers({
+    required String unit,
+    required String fromDate,
+    required String toDate,
+  }) async {
+    final uri = Uri.parse('${InStockService.baseUrl}/Dashboard/top-customers')
+        .replace(
+          queryParameters: {
+            'unit': unit,
+            'fromDate': fromDate,
+            'toDate': toDate,
+          },
+        );
+
+    final response = await http.get(
+      uri,
+      headers: await InStockService.authHeaders(),
+    );
+
+    print("Top Customers URL: $uri");
+    print("Status Code: ${response.statusCode}");
+    print("Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final List<dynamic> body = jsonDecode(response.body);
+
+      return body.map((e) => TopCustomer.fromJson(e)).toList();
+    }
+
+    throw Exception('Failed to load top customers: ${response.statusCode}');
+  }
+
+  Future<List<TopBagType>> getTopBagTypes({
+    required String unit,
+    required String fromDate,
+    required String toDate,
+  }) async {
+    final uri = Uri.parse('${InStockService.baseUrl}/Dashboard/top-bag-types')
+        .replace(
+          queryParameters: {
+            'unit': unit,
+            'fromDate': fromDate,
+            'toDate': toDate,
+          },
+        );
+
+    final response = await http.get(
+      uri,
+      headers: await InStockService.authHeaders(),
+    );
+
+    print("Top Bag Types URL: $uri");
+    print("Status Code: ${response.statusCode}");
+    print("Response: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = jsonDecode(response.body);
+
+      return jsonData
+          .map((json) => TopBagType.fromJson(json as Map<String, dynamic>))
+          .toList();
+    }
+
+    throw Exception('Failed to load top bag types: ${response.statusCode}');
+  }
+  Future<DashboardBagSpecification?> getFibcBagSpecification({
+    required String inquiryNo,
+    String unit = 'UNIT-CONGO',
+  }) async {
+    try {
+      const endpoint = '/Dashboard/bag-dimentions';
+
+      final baseUrl = InStockService.baseUrl.trim();
+
+      final uri = Uri.parse(
+        '$baseUrl$endpoint',
+      ).replace(
+        queryParameters: {
+          'unit': unit.trim(),
+          'Inquiryno': inquiryNo.trim(),
+        },
+      );
+
+      print('');
+      print('==============================================');
+      print('FIBC BAG DIMENSION API');
+      print('BASE URL      : $baseUrl');
+      print('ENDPOINT      : $endpoint');
+      print('UNIT          : $unit');
+      print('INQUIRY NO    : $inquiryNo');
+      print('FINAL URL     : $uri');
+      print('==============================================');
+
+      final headers = await InStockService.authHeaders();
+
+      print('HEADERS: $headers');
+
+      final response = await http.get(
+        uri,
+        headers: headers,
+      );
+
+      print('');
+      print('==============================================');
+      print('FIBC API RESPONSE');
+      print('STATUS CODE   : ${response.statusCode}');
+      print('FINAL URL     : ${response.request?.url}');
+      print('BODY          : ${response.body}');
+      print('==============================================');
+
+      if (response.statusCode != 200) {
+        print(
+          'FIBC API ERROR: '
+              '${response.statusCode} - ${response.body}',
+        );
+
+        return null;
+      }
+
+      if (response.body.trim().isEmpty) {
+        print('FIBC API ERROR: Empty response');
+
+        return null;
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is! Map<String, dynamic>) {
+        print('FIBC API ERROR: Invalid JSON response');
+
+        return null;
+      }
+
+      // ========================================================
+      // BAG DETAILS
+      // ========================================================
+
+      final bagDetails = decoded['bagDetails'];
+
+      if (bagDetails == null) {
+        print('FIBC API ERROR: bagDetails is null');
+
+        return null;
+      }
+
+      if (bagDetails is! Map) {
+        print(
+          'FIBC API ERROR: bagDetails is not a Map',
+        );
+
+        return null;
+      }
+
+      // ========================================================
+      // COMPONENTS
+      // ========================================================
+
+      final components = decoded['components'];
+
+      final List<dynamic> componentList =
+      components is List ? components : <dynamic>[];
+
+      print(
+        'FIBC API: ${componentList.length} components received',
+      );
+
+      // ========================================================
+      // CREATE MODEL
+      // ========================================================
+
+      final specification =
+      DashboardBagSpecification.fromJson(
+        Map<String, dynamic>.from(bagDetails),
+        componentList,
+      );
+
+      print('');
+      print('==============================================');
+      print('FIBC SPECIFICATION PARSED');
+      print('LENGTH       : ${specification.length}');
+      print('WIDTH        : ${specification.width}');
+      print('HEIGHT       : ${specification.height}');
+      print('LOOP FREE    : ${specification.loopFreeHeight}');
+      print('LOOP LL      : ${specification.longLegHeight}');
+      print('LOOP SL      : ${specification.shortLegHeight}');
+      print('F/S DIA      : ${specification.fillingSpoutDiameter}');
+      print('F/S HEIGHT   : ${specification.fillingSpoutHeight}');
+      print('D/S DIA      : ${specification.dischargeSpoutDiameter}');
+      print('D/S HEIGHT   : ${specification.dischargeSpoutHeight}');
+      print('CONSTRUCTION : ${specification.construction}');
+      print('BAG TYPE     : ${specification.bagType}');
+      print('SWL          : ${specification.safeWorkingLoad}');
+      print('TOTAL        : ${specification.total}');
+      print('SF           : ${specification.safetyFactor}');
+      print('COMPONENTS   : ${specification.components.length}');
+      print('==============================================');
+
+      return specification;
+    } catch (e, stackTrace) {
+      print('');
+      print('==============================================');
+      print('FIBC API EXCEPTION');
+      print('$e');
+      print(stackTrace);
+      print('==============================================');
+
+      return null;
+    }
+
+  }
+
+
+
+
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../Color/Colorclass.dart';
+import '../../../NARDANA/CUTTING_Stock/Reports/RollWiseCuttingStockreport.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 import 'CutPcsIssueNardana.dart';
 import 'modelclass/CuttingAprrovalModelNardana.dart';
@@ -67,7 +68,7 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => CutPieceIssuedScreenNardana(),
+              builder: (context) => RollWiseCuttingStockReport(),
             ),
           );
           ScaffoldMessenger.of(context).showSnackBar(

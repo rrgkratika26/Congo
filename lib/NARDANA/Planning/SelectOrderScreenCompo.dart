@@ -223,7 +223,7 @@ class _SelectedOrderScreenState extends State<SelectedOrderScreen> {
                     // Navigator.pop(context);
 
                     final responseData = jsonDecode(response.body);
-                    Get.offAll(
+                    Get.to(
                             () =>CombineToLoomScreen()
                     );
                     ScaffoldMessenger.of(context).showSnackBar(

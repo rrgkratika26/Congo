@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
+import '../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../Color/Colorclass.dart';
 import '../../services/GlobalLoader/GloabalUnit.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
@@ -80,6 +82,18 @@ class _CombineToLoomScreenState extends State<CombineToLoomScreen> {
       appBar: AppBar(
         iconTheme: const IconThemeData(color: C.bg),
         backgroundColor: C.appBar1,
+        leading:  IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          color: C.bg,
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Get.to(() => const DeptBottomNavDashboard());
+
+          }
+          },
+        ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

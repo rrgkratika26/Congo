@@ -2286,6 +2286,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../Color/Colorclass.dart';
+import '../../../NARDANA/CUTTING_Stock/Reports/RollWiseCuttingStockreport.dart';
 import '../../../services/GlobalLoader/GloabalUnit.dart';
 import '../../../services/NardanaApis/NardanaApi.dart';
 import '../../../services/visa_apis/visa_api.dart';
@@ -3044,7 +3045,7 @@ class _CuttingOutStockFormNardanaState
       if (message.contains("Success") || message.contains("Successfully")) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => ReceiveCutPcsNardana()),
+          MaterialPageRoute(builder: (context) => RollWiseCuttingStockReport()),
         );
         _showSnack(message, Colors.green);
       } else {

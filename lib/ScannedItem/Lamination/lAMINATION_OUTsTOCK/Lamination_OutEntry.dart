@@ -498,7 +498,7 @@ class _RollEntryFormState extends State<RollEntryForm> {
         setState(() => _isSaved = true);
         debugPrint("Response lamination Out :$payload");
 
-        Get.offAll(() => LamRollPrintScreennaradan(title: "Lamination Rolls"));
+        Get.to(() => LamRollPrintScreennaradan(title: "Lamination Rolls"));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(

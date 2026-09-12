@@ -14,8 +14,8 @@ class LedgerApiService {
   // static const String _baseUrl =
   //     'http://190.92.175.47:80/api/api';
   //     'https://190.92.175.47:80/Nardana/api';
-  static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
-  // static const String _baseUrl ='https://192.168.29.39:44349/api';
+  // static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
+  static const String _baseUrl ='http://192.168.29.123:7165/api';
   // static const String _baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Innoweave/api';
 

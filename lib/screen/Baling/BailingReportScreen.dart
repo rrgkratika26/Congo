@@ -81,8 +81,6 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
       _colDate +
       _colTime;
 
-
-
   // ── Lifecycle ────────────────────────────────────────────────────────────────
   @override
   void initState() {
@@ -98,6 +96,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
     _searchController.dispose();
     super.dispose();
   }
+
   Future scanPrinters() async {
     setState(() {
       isScanning = true;
@@ -122,11 +121,12 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
         isScanning = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
+
   Future<void> showPrinterList() async {
     await scanPrinters();
 
@@ -140,24 +140,18 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
           height: 400,
           child: Column(
             children: [
-
               const SizedBox(height: 15),
 
               const Text(
                 "Select Printer",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
 
               const Divider(),
 
               if (isScanning)
                 const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: Center(child: CircularProgressIndicator()),
                 )
               else
                 Expanded(
@@ -167,25 +161,17 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
                       final p = printers[index];
 
                       return ListTile(
-                        leading: const Icon(
-                          Icons.print,
-                          color: Colors.blue,
-                        ),
+                        leading: const Icon(Icons.print, color: Colors.blue),
                         title: Text(p.name ?? "Unknown"),
                         subtitle: Text(p.macAdress ?? ""),
                         onTap: () async {
-
                           _storage.write("printer_name", p.name);
                           _storage.write("printer_address", p.macAdress);
 
                           Navigator.pop(context);
 
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                "Connected : ${p.name}",
-                              ),
-                            ),
+                            SnackBar(content: Text("Connected : ${p.name}")),
                           );
                         },
                       );
@@ -198,6 +184,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
       },
     );
   }
+
   // ── Helpers ──────────────────────────────────────────────────────────────────
   String _apiDate(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -302,7 +289,6 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: C.bg,
       appBar: AppBar(
         title: const Text("Baling Reports", style: TextStyle(color: C.bg)),
         flexibleSpace: Container(
@@ -311,23 +297,20 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
         // C.primary,
         iconTheme: IconThemeData(color: C.bg),
       ),
-      floatingActionButton:  _selectedBarcode == null
+      floatingActionButton: _selectedBarcode == null
           ? null
           : FloatingActionButton.extended(
-        backgroundColor: C.primary,
-        icon: const Icon(Icons.print, color: C.bg),
-        label: const Text(
-          "Print",
-          style: TextStyle(color: C.bg),
-        ),
-        onPressed: () async {
-          final item = _filteredReports.firstWhere(
-                (e) => e.barcode == _selectedBarcode,
-          );
+              backgroundColor: C.primary,
+              icon: const Icon(Icons.print, color: C.bg),
+              label: const Text("Print", style: TextStyle(color: C.bg)),
+              onPressed: () async {
+                final item = _filteredReports.firstWhere(
+                  (e) => e.barcode == _selectedBarcode,
+                );
 
-          await showPrintPreview(item);
-        },
-      ),
+                await showPrintPreview(item);
+              },
+            ),
       body: Column(
         children: [
           _buildFilterBar(),
@@ -340,53 +323,74 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   }
 
   Widget _summaryBar() {
+    final width = MediaQuery.of(context).size.width;
+    final isSmall = width < 360;
+
     return Container(
       color: C.bg,
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        children: [
-          _box("Total Records", "$_totalRecords", C.bg),
-          // _box("Bag Qty", "$_totalBagQty", C.bg),
-          _box("Bag Nwt(Kg)", _totalNet.toStringAsFixed(2), C.bg),
-          _box("Gross Wt(Kg)", _totalLength.toStringAsFixed(2), C.bg),
-        ],
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmall ? 6 : 10,
+        vertical: isSmall ? 8 : 10,
       ),
-    );
-  }
-
-  Widget _box(String title, String value, Color color) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: C.primary,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            _box("Total Records", "$_totalRecords", C.primary, isSmall),
+            _box("Bag Nwt(Kg)", _totalNet.toStringAsFixed(2), C.success, isSmall),
+            _box("Gross Wt(Kg)", _totalLength.toStringAsFixed(2), C.warning, isSmall),
           ],
         ),
       ),
     );
   }
+
+  Widget _box(String title, String value, Color color, bool isSmall) {
+    return Expanded(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: isSmall ? 2 : 4),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmall ? 6 : 10,
+          vertical: isSmall ? 8 : 10,
+        ),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          border: Border.all(color: color),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                style: TextStyle(
+                  color: color,
+                  fontSize: isSmall ? 10 : 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                maxLines: 1,
+                style: TextStyle(
+                  color: color,
+                  fontSize: isSmall ? 13 : 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
 
   // ── Filter Bar ───────────────────────────────────────────────────────────────
   Widget _buildFilterBar() {
@@ -554,16 +558,14 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
   // ── Table Header ─────────────────────────────────────────────────────────────
   Widget _buildTableHeader() {
     return Container(
-      color: C.primary,
+      color: C.brand200,
       child: Row(
         children: [
-          _headerCell("Select", _colCheck),
-
+          _headerCell("Print", _colCheck),
           _headerCell('BARCODE', _colBarcode),
           _headerCell('SR No', _colSrNo),
           _headerCell('BOM No', _colBom),
           _headerCell('PARTY NAME', _colParty),
-
           _headerCell('ARTICLE NO', _colArticle),
           _headerCell('PRINT STATUS', _colPrintStatus),
           _headerCell('BAG TYPE', _colBagType),
@@ -572,7 +574,6 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
           _headerCell('BAG QTY\n(IN PCS)', _colBagQty),
           _headerCell('BAG NWT', _colBagNwt),
           _headerCell('GROSS WT', _colGrossWt),
-
           // _headerCell('Pallet', _colGrossWt),
           _headerCell('Date', _colDate),
           _headerCell('Time', _colTime),
@@ -592,7 +593,7 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
         text,
         textAlign: TextAlign.center,
         style: const TextStyle(
-          color: C.bg,
+          color: C.textHigh,
           fontWeight: FontWeight.w700,
           fontSize: 12,
           height: 1.3,
@@ -703,14 +704,16 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
       ),
     );
   }
+
   Future<void> showPrintPreview(BailingReportModel data) async {
+    final screenSize = MediaQuery.of(context).size;
+
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-
             String printerName =
                 _storage.read<String>('printer_name') ?? "No Printer Selected";
 
@@ -718,51 +721,56 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: SizedBox(
-                width: 430,
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 24,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: screenSize.width < 460
+                      ? screenSize.width - 40
+                      : 430,
+                  maxHeight: screenSize.height * 0.85,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-
-                      /// Bluetooth Button
-                      Row(
-                        children: [
-
-                          Expanded(
-                            child: Text(
-                              printerName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        /// Bluetooth Button
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                printerName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
 
-                          IconButton(
-                            icon: const Icon(
-                              Icons.bluetooth,
-                              color: Colors.blue,
-                              size: 28,
+                            IconButton(
+                              icon: const Icon(
+                                Icons.bluetooth,
+                                color: Colors.blue,
+                                size: 28,
+                              ),
+                              onPressed: () async {
+                                await showPrinterList();
+                                setDialogState(() {});
+                              },
                             ),
-                            onPressed: () async {
+                          ],
+                        ),
 
-                              await showPrinterList();
+                        const Divider(),
 
-                              setDialogState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-
-                      const Divider(),
-
-                      /// Preview
-                      BailingLabelPreview(data: data),
-
-
-                    ],
+                        /// Preview
+                        BailingLabelPreview(data: data),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -798,7 +806,8 @@ class _BailingReportScreenState extends State<BailingReportScreen> {
       return;
     }
 
-    String tspl = '''
+    String tspl =
+        '''
 SIZE 100 mm,100 mm
 GAP 3 mm,0 mm
 CLS
@@ -823,13 +832,11 @@ TEXT 70,520,"3",0,2,2,"${data.barcode}"
 PRINT 1
 ''';
 
-    await PrintBluetoothThermal.writeBytes(
-      utf8.encode(tspl),
-    );
+    await PrintBluetoothThermal.writeBytes(utf8.encode(tspl));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Printed Successfully")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Printed Successfully")));
   }
 
   String _formatOnlyDate(String value) {

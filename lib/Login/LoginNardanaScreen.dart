@@ -1314,7 +1314,7 @@ void navigateByRedirect(LoginModel model) {
 
   // PADMIN
   if (department == "PADMIN") {
-    Get.offAllNamed(AppRoutes.dashboard);
+    Get.toNamed(AppRoutes.dashboard);
     return;
   }
 
@@ -1329,8 +1329,14 @@ void navigateByRedirect(LoginModel model) {
     case "PLANNING":
     case "TAPELINE":
     case "INQUIRY":
-      Get.offAllNamed(AppRoutes.dashboard);
-      return;
+    Get.toNamed(
+      AppRoutes.dashboard,
+      arguments: {
+        'department': department,
+        'isDepartmentUser': true,
+      },
+    );
+    return;
   }
 
   // fallback using redirect
@@ -1343,7 +1349,7 @@ void navigateByRedirect(LoginModel model) {
     'webbing': AppRoutes.webbingIn,
   };
 
-  Get.offAllNamed(routeMap[redirect] ?? AppRoutes.dashboard);
+  Get.toNamed(routeMap[redirect] ?? AppRoutes.dashboard);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1946,8 +1952,8 @@ class _LoginPageState extends State<LoginPage>
                 ),
               ),
               // ── Update this list for your deployed units ───────────────
-              items: ['UNIT-CONGO'].map((String value) {
-              //   items: ['UNIT-NARDANA'].map((String value) {
+              // items: ['UNIT-CONGO'].map((String value) {
+                items: ['UNIT-NARDANA'].map((String value) {
 
 
               // items: ['UNIT-SILVASSA'].map((String value) {

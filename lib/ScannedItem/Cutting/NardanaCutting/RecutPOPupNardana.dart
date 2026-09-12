@@ -5,22 +5,27 @@ import '../../../services/getSupervisors/getSupervisors.dart';
 class AddRecutPcsPopupNardana {
   static Future<void> show(
       BuildContext context, {
-        required int iid,
         String? partyName,
         double? width,
         double? cutLength,
         double? perPcsWt,
-        VoidCallback? onSaved,
+        String? bomNo,
+        String? component,
+        VoidCallback?
+
+
+        onSaved,
       }) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => _AddRecutPcsScreen(
-          iid: iid,
           partyName: partyName,
           width: width,
           cutLength: cutLength,
           perPcsWt: perPcsWt,
+          bomNo: bomNo,
+          component: component,
           onSaved: onSaved,
         ),
       ),
@@ -29,19 +34,21 @@ class AddRecutPcsPopupNardana {
 }
 
 class _AddRecutPcsScreen extends StatefulWidget {
-  final int iid;
   final String? partyName;
   final double? width;
   final double? cutLength;
   final double? perPcsWt;
+  final String? bomNo;
+  final String? component;
   final VoidCallback? onSaved;
 
   const _AddRecutPcsScreen({
-    required this.iid,
     this.partyName,
     this.width,
     this.cutLength,
     this.perPcsWt,
+    this.bomNo,
+    this.component,
     this.onSaved,
   });
 
@@ -50,20 +57,28 @@ class _AddRecutPcsScreen extends StatefulWidget {
 }
 
 class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
-  late final cutWidthCtrl =
-  TextEditingController(text: widget.width?.toStringAsFixed(2) ?? '');
-  late final cutLengthCtrl =
-  TextEditingController(text: widget.cutLength?.toStringAsFixed(2) ?? '');
+  late final cutWidthCtrl = TextEditingController(
+    text: widget.width?.toStringAsFixed(2) ?? '',
+  );
+  late final cutLengthCtrl = TextEditingController(
+    text: widget.cutLength?.toStringAsFixed(2) ?? '',
+  );
   final issuePcsCtrl = TextEditingController();
   final issueKgCtrl = TextEditingController();
 
+  // ---- Work Order (BOM) ----
   List<String> woNumbers = [];
   String? selectedWo;
-  bool isLoadingWo = true;
+  bool isLoadingWo = true; // background refresh indicator (small)
 
+  // ---- Component ----
   List<String> components = [];
   String? selectedComponent;
   bool isLoadingComp = false;
+
+  // ---- Department (Issue To) ----
+  static const List<String> departmentOptions = ['FIBC', 'PRINTING'];
+  String? selectedDepartment;
 
   bool isSaving = false;
   bool _submitAttempted = false;
@@ -71,6 +86,21 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Pichli screen se aayi value turant dikhao (dropdown me placeholder ke sath)
+    final incomingWo = widget.bomNo?.trim();
+    if (incomingWo != null && incomingWo.isNotEmpty) {
+      selectedWo = incomingWo;
+      woNumbers = [incomingWo];
+    }
+
+    final incomingComponent = widget.component?.trim();
+    if (incomingComponent != null && incomingComponent.isNotEmpty) {
+      selectedComponent = incomingComponent;
+      components = [incomingComponent];
+      _calculateIssueKg();
+    }
+
     _fetchWorkOrders();
   }
 
@@ -91,27 +121,53 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
   }
 
   Future<void> _fetchWorkOrders() async {
+    setState(() => isLoadingWo = true);
+
     final data = await InStockService.getWoNumbers();
     if (!mounted) return;
+
+    // Real list aa gayi — usme prefilled value ko bhi shamil karo (agar missing hai)
+    final merged = List<String>.from(data);
+    if (selectedWo != null && !merged.contains(selectedWo)) {
+      merged.insert(0, selectedWo!);
+    }
+
     setState(() {
-      woNumbers = data;
+      woNumbers = merged;
       isLoadingWo = false;
     });
+
+    // Agar BOM already selected hai (prefilled ya list se) to uske components fetch karo
+    if (selectedWo != null && components.length <= 1) {
+      await _fetchComponents(selectedWo!);
+    }
   }
 
   Future<void> _fetchComponents(String wo) async {
     setState(() => isLoadingComp = true);
+
     final data = await InStockService.getComponentsInCuttingIssued(wo);
     if (!mounted) return;
+
+    final merged = List<String>.from(data);
+    if (selectedComponent != null && !merged.contains(selectedComponent)) {
+      merged.insert(0, selectedComponent!);
+    }
+
     setState(() {
-      components = data;
+      components = merged;
       isLoadingComp = false;
     });
+
+    if (selectedComponent != null) {
+      _calculateIssueKg();
+    }
   }
 
   bool get _isFormValid =>
       selectedWo != null &&
           selectedComponent != null &&
+          selectedDepartment != null &&
           issuePcsCtrl.text.trim().isNotEmpty;
 
   Future<void> _onSave() async {
@@ -131,21 +187,26 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
     setState(() => isSaving = true);
 
     final result = await InStockService.saveCuttingIssue(
-      iid: widget.iid,
-      issueToWorkOrder: selectedWo!,
-      issueToComponent: selectedComponent!,
-      noOfPcs: int.tryParse(issuePcsCtrl.text) ?? 0,
-      kg: double.tryParse(issueKgCtrl.text) ?? 0,
+      workOrderNo: selectedWo!,
+      componentName: selectedComponent!,
+      cutWidth: double.tryParse(cutWidthCtrl.text) ?? 0,
+      cutLength: double.tryParse(cutLengthCtrl.text) ?? 0,
+      singlePcsWt: widget.perPcsWt ?? 0,
+      issueTo: selectedDepartment!,
+      issuePcs: int.tryParse(issuePcsCtrl.text) ?? 0,
+      issueKg: double.tryParse(issueKgCtrl.text) ?? 0,
+      partyName: widget.partyName ?? '',
     );
 
     if (!mounted) return;
     setState(() => isSaving = false);
 
-    final success = result == "Data Saved Successfully";
+    final success = result['success'] == true;
+    final message = result['message'] as String;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(result),
+        content: Text(message),
         backgroundColor: success ? Colors.green : Colors.redAccent,
         behavior: SnackBarBehavior.floating,
       ),
@@ -188,7 +249,6 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
                       title: "Item Details",
                       icon: Icons.inventory_2_outlined,
                       children: [
-                        _infoRow("IID", widget.iid.toString()),
                         if (widget.partyName != null)
                           _infoRow("Party Name", widget.partyName!),
                         if (widget.perPcsWt != null)
@@ -205,10 +265,22 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
                       title: "Work Order & Component",
                       icon: Icons.assignment_outlined,
                       children: [
-                        _label("Work Order", required: true),
-                        isLoadingWo
-                            ? _loadingField()
-                            : DropdownButtonFormField<String>(
+                        Row(
+                          children: [
+                            _label("Work Order", required: true),
+                            if (isLoadingWo) ...[
+                              const SizedBox(width: 8),
+                              const SizedBox(
+                                height: 12,
+                                width: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        DropdownButtonFormField<String>(
                           value: selectedWo,
                           items: woNumbers
                               .map((e) => DropdownMenuItem(
@@ -224,17 +296,28 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
                           },
                           decoration: _inputDecoration(
                             hint: "Select work order",
-                            showError:
-                            _submitAttempted && selectedWo == null,
+                            showError: _submitAttempted && selectedWo == null,
                           ),
                         ),
 
                         const SizedBox(height: 14),
 
-                        _label("Component", required: true),
-                        isLoadingComp
-                            ? _loadingField()
-                            : DropdownButtonFormField<String>(
+                        Row(
+                          children: [
+                            _label("Component", required: true),
+                            if (isLoadingComp) ...[
+                              const SizedBox(width: 8),
+                              const SizedBox(
+                                height: 12,
+                                width: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        DropdownButtonFormField<String>(
                           value: selectedComponent,
                           items: components
                               .map((e) => DropdownMenuItem(
@@ -290,9 +373,27 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
                     const SizedBox(height: 14),
 
                     _sectionCard(
-                      title: "Issue Quantity",
+                      title: "Issue Details",
                       icon: Icons.local_shipping_outlined,
                       children: [
+                        _label("Issue To (Department)", required: true),
+                        DropdownButtonFormField<String>(
+                          value: selectedDepartment,
+                          items: departmentOptions
+                              .map((e) => DropdownMenuItem(
+                              value: e, child: Text(e)))
+                              .toList(),
+                          onChanged: (v) =>
+                              setState(() => selectedDepartment = v),
+                          decoration: _inputDecoration(
+                            hint: "Select department",
+                            showError:
+                            _submitAttempted && selectedDepartment == null,
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -356,7 +457,7 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
                     ),
                   )
                       : const Text(
-                    "Save",
+                    "Issue",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -402,10 +503,8 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
+                style:
+                const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -431,10 +530,7 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
           ),
         ],
@@ -456,28 +552,10 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
           children: required
               ? const [
             TextSpan(
-              text: " *",
-              style: TextStyle(color: Colors.redAccent),
-            ),
+                text: " *", style: TextStyle(color: Colors.redAccent)),
           ]
               : [],
         ),
-      ),
-    );
-  }
-
-  Widget _loadingField() {
-    return Container(
-      height: 48,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(strokeWidth: 2.5),
       ),
     );
   }
@@ -515,10 +593,8 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
           controller: controller,
           readOnly: true,
           style: const TextStyle(fontWeight: FontWeight.bold),
-          decoration: _inputDecoration(hint: "0.000").copyWith(
-            fillColor: Colors.grey.shade100,
-            filled: true,
-          ),
+          decoration: _inputDecoration(hint: "0.000")
+              .copyWith(fillColor: Colors.grey.shade100, filled: true),
         ),
       ],
     );

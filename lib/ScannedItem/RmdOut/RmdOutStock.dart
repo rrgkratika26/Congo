@@ -40,7 +40,7 @@ class _OutReportScreenState extends State<OutReportScreen> {
   }
 
   // ---------------- STATIC ISSUE TO ----------------
-  final List<String> issueToList = ['LAMINATION', 'CUTTING', 'FOLDING','PRINTING','SLITTING','OTHERS'];
+  final List<String> issueToList = ['LAMINATION', 'CUTTING', 'FOLDING','OTHERS'];
   // final List<String> issueToList = [
   //   'LAMINATION',
   //   'CUTTING',

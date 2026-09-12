@@ -343,9 +343,9 @@ class _RollWiseReportScreenState
   Widget _summaryBar() {
     return Row(
       children: [
-        _box("Records", totalRecords.toString(), C.bg),
+        _box("Records", totalRecords.toString(), C.primary),
         // _box("Total MTR", totalMtr.toStringAsFixed(0), Colors.orange),
-        _box("Total Wt", totalWt.toStringAsFixed(2), C.bg),
+        _box("Total Wt", totalWt.toStringAsFixed(2), C.warning),
       ],
     );
   }
@@ -356,7 +356,8 @@ class _RollWiseReportScreenState
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color:C.primary,
+          color: color.withOpacity(0.12),
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

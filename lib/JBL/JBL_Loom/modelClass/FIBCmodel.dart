@@ -5,6 +5,7 @@ class ProductionModel {
   final String bomNo;
   final String partyName;
   final String fabricCode;
+  final int unique_No;
 
   final double actualRequiredKg;
   final double actualRequiredMtr;
@@ -55,7 +56,7 @@ class ProductionModel {
     required this.balanceKgInt,
     required this.balanceMtrInt,
     required this.woNo,
-    required this.status, required this.bomNo,
+    required this.status, required this.bomNo, required this.unique_No,
   });
 
   factory ProductionModel.fromJson(Map<String, dynamic> json) {
@@ -90,6 +91,7 @@ class ProductionModel {
 
       woNo: json['woNo'] ?? "",
       status: json['status'] ?? '',
+      unique_No: json['unique_No'] ?? 0,
     );
   }
 }
@@ -133,6 +135,7 @@ ProductionModel convertToProduction(LoomOrder order) {
 
     woNo: order.woNo,
     status: order.status,
-
+    unique_No: order.unique_No,
   );
 }
+

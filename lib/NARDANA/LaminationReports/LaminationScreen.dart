@@ -247,11 +247,11 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
-          _box("Records", "$_totalRecords", C.bg),
+          _box("Records", "$_totalRecords", C.primary),
 
-          _box("Net Wt(Kg)", _totalNet.toStringAsFixed(2), C.bg),
+          _box("Net Wt(Kg)", _totalNet.toStringAsFixed(2), C.success),
 
-          _box("Roll Len(Mtr)", _totalLength.toStringAsFixed(2), C.bg),
+          _box("Roll Len(Mtr)", _totalLength.toStringAsFixed(2), C.warning),
         ],
       ),
     );
@@ -264,8 +264,8 @@ class _LamInReportScreenState extends State<LamInReportScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: C.primary,
-          // color: color.withOpacity(.08),
+          color: color.withOpacity(0.12),
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

@@ -84,8 +84,10 @@ class _TapeOutReportsState extends State<TapeOutReports> {
   @override
   void initState() {
     super.initState();
-    _from = DateTime.now();
-    _to = DateTime.now();
+
+    final today = DateTime.now();
+    _to = DateTime(today.year, today.month, today.day);
+    _from = _to!.subtract(const Duration(days: 6));
     _fetchData();
   }
 
@@ -147,7 +149,7 @@ class _TapeOutReportsState extends State<TapeOutReports> {
     }
   }
 
-  // String _fmt(DateTime d) => DateFormat('dd MMM yy').format(d);
+  String _fmt(DateTime d) => DateFormat('dd MMM yy').format(d);
 
   @override
   void dispose() {

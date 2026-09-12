@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -81,12 +82,33 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
     required String department,
   }) async {
     try {
+      final cleanBarcode = barcode.trim();
+
+      if (cleanBarcode.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Barcode cannot be empty"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      debugPrint("================================");
+      debugPrint("📦 BARCODE: [$cleanBarcode]");
+      debugPrint("👤 OPERATOR: $operator");
+      debugPrint("👨‍💼 SUPERVISOR: $supervisor");
+      debugPrint("📍 LOCATION: $location");
+      debugPrint("🏭 PLANT: $location");
+      debugPrint("🏢 DEPARTMENT: $department");
+      debugPrint("================================");
+
       final url = Uri.parse(
         "${JblApiService.baseUrlJBL}/Lamination/SubmitBarcode",
       );
 
       final body = {
-        "barcode": barcode.trim(),
+        "barcode": cleanBarcode,
         "rollEntry": "LAMINATION",
         "operator": operator,
         "supervisor": supervisor,
@@ -95,9 +117,12 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
         "plant": location,
       };
 
+      debugPrint("📡 URL: $url");
+      debugPrint("📡 REQUEST: ${jsonEncode(body)}");
+
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: await InStockService.authHeaders(),
         body: jsonEncode(body),
       );
 
@@ -109,39 +134,51 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       try {
         res = jsonDecode(response.body);
       } catch (e) {
-        res = {"status": false, "message": "Invalid server response"};
+        debugPrint("❌ JSON ERROR: $e");
+
+        res = {
+          "status": false,
+          "message": "Invalid server response",
+        };
       }
 
       final bool isSuccess =
           response.statusCode == 200 &&
-          (res['status'] == true || res['status'] == 'ok');
+              (res["status"] == true ||
+                  res["status"] == "ok");
 
-      final message = res['message'] ?? "No message";
+      final String message =
+          res["message"]?.toString() ??
+              "No message from server";
+
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: isSuccess
               ? Colors.green
-              : (res['status'] == 'exists' ? Colors.orange : Colors.green),
+              : Colors.red,
         ),
       );
 
-      // ✅ reload only if success
       if (isSuccess) {
         await _loadScannedData();
       }
-    } catch (e) {
-      debugPrint("API ERROR: $e");
+    } catch (e, stackTrace) {
+      debugPrint("❌ API ERROR: $e");
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Something went wrong"),
+        SnackBar(
+          content: Text("Something went wrong: $e"),
           backgroundColor: Colors.red,
         ),
       );
     }
   }
-
   // ===================== OPEN SCANNER =====================
   Future<void> _openScanner() async {
     if (!controller.isFormValid()) {
@@ -155,7 +192,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
         builder: (_) => JBl_laminationQrScanScreen(
           operator: controller.selectedOperator!,
           supervisor: controller.selectedSupervisor!,
-          location: unitTitle,
+          location: 'L-1',
           department: department,
           plant: unitTitle,
           onSubmitBarcode: (barcode) async {
@@ -188,6 +225,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       builder: (_) => AlertDialog(
         title: const Text("Manual Entry"),
         content: TextField(
+          textCapitalization: TextCapitalization.characters,
           controller: ctrl,
           decoration: const InputDecoration(labelText: "Enter Barcode"),
         ),
@@ -233,45 +271,43 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: C.b,
+      backgroundColor: C.bg,
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _dropdown(
-                  "Select Supervisor",
-                  controller.supervisors,
-                  controller.selectedSupervisor,
-                  (v) {
-                    setState(() => controller.selectedSupervisor = v);
-                    _loadScannedData();
-                  },
-                  Icons.supervisor_account,
-                ),
-                const SizedBox(height: 12),
-                _dropdown(
-                  "Select Operator",
-                  controller.operators,
-                  controller.selectedOperator,
-                  (v) {
-                    setState(() => controller.selectedOperator = v);
-                    _loadScannedData();
-                  },
-                  Icons.person,
-                ),
-                const SizedBox(height: 12),
-                _locationBox(),
-                const SizedBox(height: 12),
-                _departmentBox(),
-                const SizedBox(height: 20),
-                _scanCard(),
-                const SizedBox(height: 20),
-                _buttons(),
-              ],
-            ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16,right: 16),
+          child: Column(
+            children: [
+              _dropdown(
+                "Select Supervisor",
+                controller.supervisors,
+                controller.selectedSupervisor,
+                (v) {
+                  setState(() => controller.selectedSupervisor = v);
+                  _loadScannedData();
+                },
+                Icons.supervisor_account,
+              ),
+              const SizedBox(height: 12),
+              _dropdown(
+                "Select Operator",
+                controller.operators,
+                controller.selectedOperator,
+                (v) {
+                  setState(() => controller.selectedOperator = v);
+                  _loadScannedData();
+                },
+                Icons.person,
+              ),
+              const SizedBox(height: 12),
+              _locationBox(),
+              const SizedBox(height: 12),
+              _departmentBox(),
+              const SizedBox(height: 20),
+              _scanCard(),
+              const SizedBox(height: 20),
+              _buttons(),
+            ],
           ),
         ),
       ),
@@ -287,7 +323,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
   ) {
     return Container(
       decoration: _box(),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       child: Row(
         children: [
           Icon(icon, color: C.warning),
@@ -317,7 +353,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       children: [
         const Icon(Icons.location_on, color: C.warning),
         const SizedBox(width: 10),
-        Text(unitTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text('L-1', style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     ),
   );
@@ -329,7 +365,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       children: [
         const Icon(Icons.business, color: C.warning),
         const SizedBox(width: 10),
-        Text(department, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(department, style: const TextStyle(color:C.textMid,fontWeight: FontWeight.bold)),
       ],
     ),
   );
@@ -338,11 +374,11 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
     onTap: _openReportDetail, // ✅ new function
     child: Container(
       decoration: _box(),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(15),
       child: Column(
         children: [
           const Text("Total Items Scanned", style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,)),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           // isLoading
           // ? const CircularProgressIndicator()
           // :
@@ -396,25 +432,21 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       );
 
       debugPrint("📊 REPORT DATA: $scannedItems");
-
       setState(() => isLoading = false);
-
       // ✅ ALWAYS navigate (even if empty)
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (_) => Jbl_ReportDetailScreen(
-      //       title: "$unitTitle Lamination Report",
-      //       date: date,
-      //       data: scannedItems,
-      //     ),
-      //   ),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Jbl_ReportDetailScreen(
+            title: "Lamination InStock",
+            date: date,
+            data: scannedItems,
+          ),
+        ),
+      );
     } catch (e) {
       setState(() => isLoading = false);
-
       debugPrint("❌ REPORT ERROR: $e");
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Failed to fetch report"),
@@ -428,7 +460,7 @@ class _LaminationInStockScreenState extends State<LaminationInStockScreen> {
       InkWell(
         onTap: onTap,
         child: Container(
-          height: 120,
+          height: 100,
           decoration: _box(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -34,13 +34,11 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class InStockService {
-
-  // static const String baseUrl = 'https://192.168.29.39:44349/api';
+  static const String baseUrl = 'http://192.168.29.123:7165/api';
   // static const String baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String baseUrl = 'http://190.92.175.47/Qualipack/api';
   // http://190.92.175.47/CONGO_API/
-  static const String baseUrl = 'http://190.92.175.47/CONGO_API/api';
-
+  // static const String baseUrl = 'http://190.92.175.47/CONGO_API/api';
   // static const String baseUrl = 'http://190.92.175.47:80/api/api';
   // static const String baseUrl = 'http://190.92.175.47/ShriShakti/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JblAPI/api';
@@ -49,7 +47,6 @@ class InStockService {
   // static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String baseUrl ='http://190.92.175.47:80/API/api';
-
   // static const String baseUrl = 'http://fibcsoftware.in:4430/Visa/api';
   // static const String baseUrl = 'http://190.92.175.47:80/Innoweave/api';
 
@@ -58,8 +55,6 @@ class InStockService {
       throw AuthException("SESSION_EXPIRED");
     }
   }
-
-
 
   // COMMON HEADERS
   static Future<Map<String, String>> _jsonHeaders({
@@ -93,7 +88,6 @@ class InStockService {
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
   }
-
 
   static Future<bool> logout() async {
     final prefs = await SharedPreferences.getInstance();
@@ -1431,7 +1425,7 @@ class InStockService {
     required String viewType,
     required String unit,
     int pageNumber = 1,
-    int pageSize = 20,
+    int pageSize = 500,
   }) async {
     final uri = Uri.parse('$baseUrl/LoomForward/get').replace(
       queryParameters: {
@@ -1444,18 +1438,18 @@ class InStockService {
 
     final response = await http.get(uri, headers: await authHeaders());
     debugPrint("Loom LOist Resposne Body ::::::${uri}");
-    // debugPrint("STATUS LOOM dropdown CODE: ${response.statusCode}");
-    // debugPrint("Loom LOist Resposne Body ::::::${response.body}");
-    // print("Status Code: ${response.statusCode}");
-    // print("Headers: ${response.headers}");
-    // print("Body: ${response.body}");
+    debugPrint("STATUS LOOM dropdown CODE: ${response.statusCode}");
+    debugPrint("Loom LOist Resposne Body ::::::${response.body}");
+    print("Status Code: ${response.statusCode}");
+    print("Headers: ${response.headers}");
+    print("Body: ${response.body}");
 
     if (response.statusCode != 200) {
       throw Exception("API Error ${response.statusCode}: ${response.body}");
     }
 
     if (response.statusCode == 200) {
-      // debugPrint("Loom LOist Resposne Body ::::::${response.body}");
+      // debugPrint("Loom List Resposne Body ::::::${response.body}");
       final jsonData = json.decode(response.body);
 
       if (jsonData['status'] == 'success') {
@@ -1628,45 +1622,199 @@ class InStockService {
     }
   }
 
-  static Future<String> saveCuttingIssue({
-    required int iid,
-    required String issueToWorkOrder,
-    required String issueToComponent,
-    required int noOfPcs,
-    required double kg,
-  }) async {
-    try {
-      final url = Uri.parse("$baseUrl/Cutting/SaveCuttingIssue");
+  // static Future<String> saveCuttingIssue({
+  //   required int iid,
+  //   required String issueToWorkOrder,
+  //   required String issueToComponent,
+  //   required int noOfPcs,
+  //   required double kg,
+  // }) async {
+  //   try {
+  //     final url = Uri.parse("$baseUrl/Cutting/SaveCuttingIssue");
+  //
+  //     final body = {
+  //       "iid": iid,
+  //       "issueToWorkOrder": issueToWorkOrder,
+  //       "issueToComponent": issueToComponent,
+  //       "noOfPcs": noOfPcs,
+  //       "kg": kg,
+  //     };
+  //
+  //     final response = await http.post(
+  //       url,
+  //       headers: await authHeaders(),
+  //       body: jsonEncode(body),
+  //     );
+  //
+  //     print("REQUEST SaveCuttingIssue URL: $url");
+  //     // print("STATUS CODE: ${response.statusCode}");
+  //     // print("RESPONSE: ${response.body}");
+  //
+  //     if (response.statusCode == 200) {
+  //       return "Data Saved Successfully";
+  //     } else {
+  //       throw Exception("Failed to save data");
+  //     }
+  //   } catch (e) {
+  //     print("ERROR: $e");
+  //     throw Exception("Error saving cutting issue");
+  //   }
+  // }
 
-      final body = {
-        "iid": iid,
-        "issueToWorkOrder": issueToWorkOrder,
-        "issueToComponent": issueToComponent,
-        "noOfPcs": noOfPcs,
-        "kg": kg,
-      };
+  /// Returns a Map: {success: bool, message: String}
+  static Future<Map<String, dynamic>> saveCuttingIssue({
+    required String workOrderNo,
+    required String componentName,
+    required double cutWidth,
+    required double cutLength,
+    required double singlePcsWt,
+    required String issueTo,
+    required int issuePcs,
+    required double issueKg,
+    required String partyName,
+  }) async {
+    final uri = Uri.parse('$baseUrl/Cutting/cutting-issue');
+
+    final requestBody = {
+      "workOrderNo": workOrderNo,
+      "componentName": componentName,
+      "cutWidth": cutWidth,
+      "cutLength": cutLength,
+      "singlePcsWt": singlePcsWt,
+      "issueTo": issueTo,
+      "issuePcs": issuePcs,
+      "issueKg": issueKg,
+      "partyName": partyName,
+    };
+
+    try {
+      final headers = await authHeaders();
+
+      // ================= REQUEST DEBUG =================
+
+      print("================================================");
+      print("CUTTING ISSUE API");
+      print("================================================");
+      print("URL          : $uri");
+      print("METHOD       : POST");
+      print("HEADERS      : $headers");
+      print("REQUEST BODY :");
+      print(const JsonEncoder.withIndent('  ').convert(requestBody));
+      print("================================================");
 
       final response = await http.post(
-        url,
-        headers: await authHeaders(),
-        body: jsonEncode(body),
+        uri,
+        headers: headers,
+        body: jsonEncode(requestBody),
       );
 
-      print("REQUEST SaveCuttingIssue URL: $url");
-      // print("STATUS CODE: ${response.statusCode}");
-      // print("RESPONSE: ${response.body}");
+      // ================= RESPONSE DEBUG =================
 
-      if (response.statusCode == 200) {
-        return "Data Saved Successfully";
-      } else {
-        throw Exception("Failed to save data");
+      print("================================================");
+      print("CUTTING ISSUE RESPONSE");
+      print("================================================");
+      print("STATUS CODE  : ${response.statusCode}");
+      print("REASON       : ${response.reasonPhrase}");
+      print("BODY         : ${response.body}");
+      print("BODY LENGTH  : ${response.body.length}");
+      print("================================================");
+
+      // ==================================================
+      // EMPTY RESPONSE
+      // ==================================================
+
+      if (response.body.trim().isEmpty) {
+        print("WARNING: Server returned EMPTY response body");
+
+        return {
+          "success": response.statusCode >= 200 &&
+              response.statusCode < 300,
+          "message": response.statusCode >= 200 &&
+              response.statusCode < 300
+              ? "Cutting issue saved successfully"
+              : "Server returned ${response.statusCode} ${response.reasonPhrase ?? ''}",
+        };
       }
-    } catch (e) {
-      print("ERROR: $e");
-      throw Exception("Error saving cutting issue");
+
+      // ==================================================
+      // JSON RESPONSE
+      // ==================================================
+
+      Map<String, dynamic> decoded;
+
+      try {
+        decoded = jsonDecode(response.body) as Map<String, dynamic>;
+
+        print("DECODED RESPONSE:");
+        print(const JsonEncoder.withIndent('  ').convert(decoded));
+      } catch (e) {
+        print("================================================");
+        print("JSON DECODE ERROR");
+        print("ERROR: $e");
+        print("RAW BODY: ${response.body}");
+        print("================================================");
+
+        return {
+          "success": false,
+          "message":
+          "Invalid server response (${response.statusCode}): ${response.body}",
+        };
+      }
+
+      // ==================================================
+      // SUCCESS
+      // ==================================================
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final success = decoded['success'] == true;
+
+        final message =
+            decoded['message']?.toString() ??
+                "Cutting issue saved successfully";
+
+        print("SUCCESS: $success");
+        print("MESSAGE: $message");
+
+        return {
+          "success": success,
+          "message": message,
+        };
+      }
+
+      // ==================================================
+      // SERVER ERROR
+      // ==================================================
+
+      final errorMessage =
+          decoded['message']?.toString() ??
+              decoded['error']?.toString() ??
+              "Server error (${response.statusCode})";
+
+      print("================================================");
+      print("API ERROR");
+      print("STATUS : ${response.statusCode}");
+      print("ERROR  : $errorMessage");
+      print("================================================");
+
+      return {
+        "success": false,
+        "message": errorMessage,
+      };
+    } catch (e, stackTrace) {
+      print("================================================");
+      print("CUTTING ISSUE EXCEPTION");
+      print("================================================");
+      print("ERROR       : $e");
+      print("STACK TRACE :");
+      print(stackTrace);
+      print("================================================");
+
+      return {
+        "success": false,
+        "message": "Network error: $e",
+      };
     }
   }
-
   static void _logApi({
     required String method,
     required Uri url,
@@ -2001,13 +2149,13 @@ class InStockService {
     );
 
     /// 🔹 PRINT URL
-    // debugPrint("REQUEST URL: $url");
+    debugPrint("REQUEST URL: $url");
 
     final response = await http.get(url, headers: await authHeaders());
 
     /// 🔹 PRINT STATUS + RESPONSE
-    // debugPrint("STATUS CODE: ${response.statusCode}");
-    // debugPrint("RESPONSE BODY: ${response.body}");
+    debugPrint("STATUS CODE: ${response.statusCode}");
+    debugPrint("RESPONSE BODY: ${response.body}");
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);
@@ -2196,10 +2344,10 @@ class InStockService {
     }
   }
 
-  Future<List<LoomListModel>> fetchLoomList(
-      int page,
-      int pageSize,) async {
-    final url = Uri.parse("${baseUrl}/LoomForward/GetLoomList?pageNumber=$page&pageSize=$pageSize");
+  Future<List<LoomListModel>> fetchLoomList(int page, int pageSize) async {
+    final url = Uri.parse(
+      "${baseUrl}/LoomForward/GetLoomList?pageNumber=$page&pageSize=$pageSize",
+    );
 
     final res = await http.get(
       url,
@@ -2464,22 +2612,13 @@ class InStockService {
     try {
       final url = Uri.parse("$baseUrl/Rmd/UpdateLocation");
 
-      final body = {
-        "barcode": barcode,
-        "location": location,
-        "plant": plant,
-      };
+      final body = {"barcode": barcode, "location": location, "plant": plant};
 
       final response = await http.post(
         url,
         headers: await authHeaders(),
         body: jsonEncode(body),
       );
-
-      // debugPrint("UPDATE LOCATION URL: $url");
-      // debugPrint("UPDATE LOCATION REQUEST: ${jsonEncode(body)}");
-      // debugPrint("UPDATE LOCATION STATUS: ${response.statusCode}");
-      // debugPrint("UPDATE LOCATION RESPONSE: ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -2492,10 +2631,7 @@ class InStockService {
     } catch (e) {
       debugPrint("UPDATE LOCATION ERROR: $e");
 
-      return {
-        "success": false,
-        "message": e.toString(),
-      };
+      return {"success": false, "message": e.toString()};
     }
   }
 }

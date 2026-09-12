@@ -3,6 +3,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 
+import '../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../AdminDashBoard/DepartmentDashboard.dart';
 import '../../Color/Colorclass.dart';
 import '../../services/GlobalLoader/GloabalUnit.dart';
@@ -281,8 +282,8 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
           backgroundColor: Colors.green,
         ),
       );
-      Get.back(result: true);
-      // Get.to(() => NewAdminDashboard());
+      // Get.back(result: true);
+      Get.to(() => DeptBottomNavDashboard());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

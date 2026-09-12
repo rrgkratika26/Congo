@@ -47,15 +47,15 @@ class _JBl_laminationQrScanScreenState
 
     setState(() => isProcessing = true);
 
-    // Pause immediately so the camera doesn't keep firing scan events
-    // for the same code while the request is in flight.
+    // Stop camera immediately
     await controller?.pauseCamera();
 
     try {
       final url = Uri.parse(
         "${JblApiService.baseUrlJBL}/Lamination/SubmitBarcode",
       );
-      print("Lamination scanned url ::::: $url");
+
+      debugPrint("Lamination scanned URL ::::: $url");
 
       final body = {
         "barcode": barcode,
@@ -64,10 +64,12 @@ class _JBl_laminationQrScanScreenState
         "supervisor": widget.supervisor,
         "department": widget.department,
         "location": widget.location,
-        "plant": widget.location,
+
+        // ⚠️ If API expects plant, use widget.plant here
+        "plant": widget.plant,
       };
 
-      print("Request Body: $body");
+      debugPrint("Request Body: $body");
 
       final response = await http.post(
         url,
@@ -75,58 +77,191 @@ class _JBl_laminationQrScanScreenState
         body: jsonEncode(body),
       );
 
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response: ${response.body}");
+
       dynamic res;
+
       try {
         res = jsonDecode(response.body);
       } catch (e) {
-        debugPrint("❌ Failed to decode JSON: ${response.body}");
+        debugPrint("❌ JSON Decode Error: ${response.body}");
+
         res = {
           "status": "error",
-          "message": "Server returned invalid response",
+          "message": "Invalid response from server",
         };
       }
 
-      final status = res['status'] ?? 'error';
-      final message = res['message'] ?? 'No message';
+      final String status =
+          res['status']?.toString().toLowerCase() ?? 'error';
 
-      if (mounted) {
-        // Clear any currently-showing snackbar before showing the new one,
-        // so repeated statuses don't stack up on screen.
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      final String message =
+          res['message']?.toString() ?? 'No message from server';
+
+      debugPrint("API STATUS: $status");
+      debugPrint("API MESSAGE: $message");
+
+      if (!mounted) return;
+
+      // Hide previous snackbar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      // =========================================================
+      // SUCCESS
+      // =========================================================
+      if (status == "ok") {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(message),
-            backgroundColor: status == 'ok'
-                ? Colors.green
-                : (status == 'exists' ? Colors.orange : Colors.red),
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
           ),
         );
-      }
 
-      if (status == 'ok') {
-        if (mounted) Navigator.pop(context, true); // success
+        // Give Snackbar time to appear
+        await Future.delayed(
+          const Duration(milliseconds: 500),
+        );
+
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+
         return;
       }
 
-      // For 'exists' or 'error', wait briefly before resuming so the same
-      // QR code (still under the camera) isn't picked up again instantly.
-      await Future.delayed(_rescanCooldown);
-      await controller?.resumeCamera();
-    } catch (e) {
-      debugPrint("❌ API ERROR: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      // =========================================================
+      // ALREADY EXISTS
+      // =========================================================
+      if (status == "exists") {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Something went wrong"),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
           ),
         );
+
+        // Wait before allowing camera to scan again
+        await Future.delayed(_rescanCooldown);
+
+        if (mounted) {
+          await controller?.resumeCamera();
+        }
+
+        return;
       }
+
+      // =========================================================
+      // ERROR
+      // =========================================================
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Resume scanner after error
       await Future.delayed(_rescanCooldown);
-      await controller?.resumeCamera();
+
+      if (mounted) {
+        await controller?.resumeCamera();
+      }
+    } catch (e) {
+      debugPrint("❌ API ERROR: $e");
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    "Something went wrong: $e",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        await Future.delayed(_rescanCooldown);
+
+        if (mounted) {
+          await controller?.resumeCamera();
+        }
+      }
     } finally {
-      if (mounted) setState(() => isProcessing = false);
+      if (mounted) {
+        setState(() => isProcessing = false);
+      }
     }
   }
 
@@ -140,9 +275,7 @@ class _JBl_laminationQrScanScreenState
 
       final now = DateTime.now();
 
-      // Ignore the same barcode if it was just scanned within the
-      // cooldown window — this is what was causing repeated
-      // "already exists" snackbars for a single physical scan.
+
       if (_lastScannedCode == code &&
           _lastScanTime != null &&
           now.difference(_lastScanTime!) < _rescanCooldown) {

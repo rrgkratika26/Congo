@@ -226,9 +226,9 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
-          _box("Total Records", '$_totalRecords', C.bg),
-          _box("Roll Wt(Kg)", _totalNet.toStringAsFixed(2), C.bg),
-          _box("Roll Len(mtr)", _totalLength.toStringAsFixed(2), C.bg),
+          _box("Total Records", '$_totalRecords', C.primary),
+          _box("Roll Wt(Kg)", _totalNet.toStringAsFixed(2), C.success),
+          _box("Roll Len(mtr)", _totalLength.toStringAsFixed(2), C.warning),
         ],
       ),
     );
@@ -240,7 +240,8 @@ class _RmdOutReportScreenState extends State<RmdOutReportScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: C.primary,
+          color: color.withOpacity(0.12),
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

@@ -53,7 +53,7 @@ void navigate(BuildContext ctx, String dept, MenuAction action) {
   switch (dept.toUpperCase()) {
     case 'MARKETING':
       if (action == MenuAction.Inquirey_Report)
-        Get.toNamed(AppRoutes.InquiryMarketingReport);
+        Get.toNamed(AppRoutes.InquiryMarketingList);
       if (action == MenuAction.Bom_Report) Get.toNamed(AppRoutes.bomReport);
 
       if (action == MenuAction.Bom_List_remain) {
@@ -121,8 +121,8 @@ void navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.nardanaCutOutList);
       else if (action == MenuAction.rollWise)
         Get.toNamed(AppRoutes.rollWiseReport);
-      else if (action == MenuAction.component_Wise)
-        Get.toNamed(AppRoutes.componentWiseReport);
+      else if (action == MenuAction.roll_Cutting_Report)
+        Get.toNamed(AppRoutes.rolCuttingReport);
       else if (action == MenuAction.cutting_Wise)
         Get.toNamed(AppRoutes.cuttingWiseReport);
       else if (action == MenuAction.stock)

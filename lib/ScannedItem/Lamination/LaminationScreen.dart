@@ -1,8 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../Color/Colorclass.dart';
 import '../../JBL/Lamination/lamination_Instock_screen.dart';
 import 'LaminationIn/LaminationInScreen.dart';
@@ -48,7 +51,18 @@ class _LaminationScreenState extends State<LaminationScreen> {
         backgroundColor: C.appBar1,
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
-        iconTheme: IconThemeData(color: C.bg),
+        leading:  IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          color: C.bg,
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Get.to(() => const DeptBottomNavDashboard());
+
+            }
+          },
+        ),
         title: Row(
           children: [
 

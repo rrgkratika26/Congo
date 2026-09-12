@@ -626,7 +626,7 @@ class _RmdRollSavedListState extends State<RmdRollSavedList> {
       await Future.delayed(const Duration(milliseconds: 100));
 
       // Navigate to Dashboar
-      Get.offAll(() => const NewAdminDashboard());
+      Get.to(() => const NewAdminDashboard());
 
       /// Navigate to Dashboard
     } catch (e) {

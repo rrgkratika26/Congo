@@ -38,8 +38,8 @@ import '../auth_exception.dart';
 class NaradanaApiService {
   // static const String _baseUrl = 'http://190.92.175.47:80/api/api';
   // static const String _baseUrl ='http://190.92.175.47/Qualipack/api';
-  static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
-  // static const String _baseUrl = 'https://192.168.29.39:44349/api';
+  // static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
+  static const String _baseUrl = 'http://192.168.29.123:7165/api';
   // static const String _baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String _baseUrl = 'http://190.92.175.47/ShriShakti/api';
   //static const String _baseUrl = 'http://192.168.29.39:44349/api/api';
@@ -684,13 +684,12 @@ class NaradanaApiService {
 
     final res = await http.get(url, headers: await authHeaders());
     print("🌐 GET => $url");
-    // print("📡 Status => ${res.statusCode}");
+    print("📡 Status => ${res.statusCode}");
     debugPrint("📦 Response => ${res.body}");
     print("======================================");
     if (res.statusCode == 200) {
       final jsonData = jsonDecode(res.body);
 
-      // assuming API returns: List directly OR inside "data"
       final List list = jsonData is List ? jsonData : jsonData['data'] ?? [];
 
       return list.map((e) => CuttingOutstockNaradana.fromJson(e)).toList();
@@ -864,8 +863,8 @@ class NaradanaApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        debugPrint("Status Code: ${response.statusCode}");
-        debugPrint("Response Body: ${response.body}");
+        // debugPrint("Status Code: ${response.statusCode}");
+        // debugPrint("Response Body: ${response.body}");
         return {
           "laminations": List<String>.from(data["laminations"] ?? []),
           "buffles": List<String>.from(data["buffles"] ?? []),
@@ -896,10 +895,6 @@ class NaradanaApiService {
         headers: headers,
         body: encodedBody,
       );
-
-      // 🔥 PRINT RESPONSE
-      debugPrint("📥 Status Code → ${response.statusCode}");
-      debugPrint("📥 Response Body → ${response.body}");
 
       if (response.statusCode == 200) {
         final res = jsonDecode(response.body);
@@ -960,8 +955,8 @@ class NaradanaApiService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
 
-        print("📡 Status Code 👉 ${response.statusCode}");
-        print("📦 Response Body 👉 ${response.body}");
+        // print("📡 Status Code 👉 ${response.statusCode}");
+        // print("📦 Response Body 👉 ${response.body}");
         return LaminationOutModel.fromJson(
           jsonData['data'], // ✅ FULL DATA
         );
@@ -1018,9 +1013,6 @@ class NaradanaApiService {
         }),
       );
 
-      // debugPrint("PRINT API STATUS : ${response.statusCode}");
-      // debugPrint("PRINT API BODY : ${response.body}");
-
       return response.statusCode == 200;
     } catch (e) {
       // debugPrint("PRINT API ERROR : $e");
@@ -1047,8 +1039,7 @@ class NaradanaApiService {
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
-      // debugPrint("PRINT API STATUS : ${response.statusCode}");
-      // debugPrint("PRINT API BODY : ${response.body}");
+
       return data.map((e) => OpenQtyDetailsModel.fromJson(e)).toList();
     } else {
       throw Exception("Failed to fetch data");
@@ -1105,13 +1096,11 @@ class NaradanaApiService {
       Uri.parse(url),
       headers: await authHeaders(),
     );
-    debugPrint("PRINT API STATUS : ${response.statusCode}");
+
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      debugPrint("PRINT API STATUS : ${response.statusCode}");
-      debugPrint("PRINT API BODY : ${response.body}");
-
+      debugPrint("Inquiry report : ${response.body}");
       return List<Map<String, dynamic>>.from(data);
     } else {
       throw Exception("Failed to load Inquiry Report");
@@ -1128,9 +1117,7 @@ class NaradanaApiService {
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
-        debugPrint("PRINT API STATUS : ${response.statusCode}");
-        debugPrint("PRINT API BODY : ${response.body}");
-        return data
+              return data
             .map<String>((e) => e["customeR_NAME"].toString().trim())
             .where((e) => e.isNotEmpty)
             .toSet()
@@ -1293,9 +1280,6 @@ class NaradanaApiService {
       if (response.statusCode == 200) {
         debugPrint("url : ${url}");
 
-        debugPrint("PRINT API STATUS : ${response.statusCode}");
-        debugPrint("PRINT BODY : ${response.body}");
-
         final List data = jsonDecode(response.body);
 
         return data.map((e) => PlanningModel.fromJson(e)).toList();
@@ -1386,10 +1370,6 @@ class NaradanaApiService {
       body: jsonEncode(body),
     );
 
-    debugPrint("Response Status => ${response.statusCode}");
-
-    debugPrint("Response Body => ${response.body}");
-
     return response;
   }
 
@@ -1399,10 +1379,6 @@ class NaradanaApiService {
       headers: await authHeaders(),
     );
 
-    debugPrint("Order Composition Status => ${response.statusCode}");
-
-    debugPrint("Order Composition Body => ${response.body}");
-
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
 
@@ -1411,6 +1387,48 @@ class NaradanaApiService {
 
     throw Exception("Failed to load order composition");
   }
+
+
+  Future<http.Response> updateComponentStatus({
+    required String wo,
+    required int id,
+  }) async {
+    final url = Uri.parse(
+      '$_baseUrl/Planning/update-component-status',
+    );
+
+    final body = {
+      "wo": wo,
+      "id": id,
+    };
+
+    debugPrint('');
+    debugPrint('================ UPDATE COMPONENT STATUS ================');
+    debugPrint('URL => $url');
+    debugPrint('METHOD => POST');
+    debugPrint('REQUEST BODY => ${jsonEncode(body)}');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: await authHeaders(),
+        body: jsonEncode(body),
+      );
+
+      debugPrint('STATUS CODE => ${response.statusCode}');
+      debugPrint('HEADERS => ${response.headers}');
+      debugPrint('RESPONSE => ${response.body}');
+      debugPrint('==========================================================');
+      debugPrint('');
+
+      return response;
+    } catch (e, stackTrace) {
+      debugPrint('UPDATE COMPONENT STATUS ERROR => $e');
+      debugPrint('STACK TRACE => $stackTrace');
+      rethrow;
+    }
+  }
+
 
   Future singleSave(List<OrderCompositionModel> items) async {
     final body = {
@@ -1432,9 +1450,6 @@ class NaradanaApiService {
 
     final url = "$_baseUrl/Planning/SingleSave";
 
-    debugPrint("URL => $url");
-    debugPrint("Single Body => ${jsonEncode(body)}");
-
     final response = await http.post(
       Uri.parse(url),
 
@@ -1442,11 +1457,6 @@ class NaradanaApiService {
 
       body: jsonEncode(body),
     );
-
-    debugPrint("Status => ${response.statusCode}");
-
-    debugPrint("Response => ${response.body}");
-
     return response;
   }
 
@@ -1469,9 +1479,6 @@ class NaradanaApiService {
     };
 
     final url = "$_baseUrl/Planning/ClubSave";
-
-    debugPrint("========== CLUB REQUEST ==========");
-
     debugPrint("URL => $url");
 
     debugPrint("Club Body => ${jsonEncode(body)}");
@@ -1483,15 +1490,6 @@ class NaradanaApiService {
 
       body: jsonEncode(body),
     );
-
-    debugPrint("Status Code => ${response.statusCode}");
-
-    debugPrint("Headers => ${response.headers}");
-
-    debugPrint("Response Body => ${response.body}");
-
-    debugPrint("==================================");
-
     return response;
   }
 
@@ -1502,11 +1500,7 @@ class NaradanaApiService {
         Uri.parse("$_baseUrl/Planning/CombineToLoomList?unit=$unit"),
         headers: await authHeaders(),
       );
-      debugPrint("Response Body => $url");
 
-      debugPrint("Response Body => ${response.body}");
-
-      debugPrint("==================================");
       if (response.statusCode == 200) {
         List data = jsonDecode(response.body);
 
@@ -1532,15 +1526,6 @@ class NaradanaApiService {
           "Status Code /Planning/AllFabricDropdowns?unit=$unit => ${response.statusCode}",
         );
 
-        debugPrint("Headers => ${response.headers}");
-
-        debugPrint("Response Body => ${response.body}");
-
-        debugPrint("==================================");
-
-        debugPrint("Response Body => ${response.body}");
-
-        debugPrint("==================================");
         return data.map((e) => FabricCategoryModel.fromJson(e)).toList();
       }
 
@@ -1639,11 +1624,6 @@ class NaradanaApiService {
     debugPrint("Party API URL : $url");
 
     final response = await http.get(url, headers: await authHeaders());
-
-    debugPrint("Party API Status : ${response.statusCode}");
-
-    debugPrint("Party API Response : ${response.body}");
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
@@ -1669,10 +1649,6 @@ class NaradanaApiService {
         headers: await authHeaders(),
         body: jsonEncode(body),
       );
-
-      debugPrint("Status => ${response.statusCode}");
-      debugPrint("Response => ${response.body}");
-
       return response.statusCode == 200;
     } catch (e) {
       debugPrint("Forward Error => $e");
@@ -1699,20 +1675,9 @@ class NaradanaApiService {
         headers: await authHeaders(),
       );
 
-      debugPrint("=================================");
-      debugPrint("URL => $url");
-      debugPrint("STATUS => ${response.statusCode}");
-      debugPrint("BODY => ${response.body}");
-      debugPrint("=================================");
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-
-        debugPrint("Total Inquiry => ${json['totalInquiryCount']}");
-        debugPrint("Net Weight => ${json['netWeight']}");
-        debugPrint("Roll Length => ${json['rollLength']}");
-        debugPrint("No Of Roll => ${json['noOfRoll']}");
-
         return MarketingCountModel.fromJson(json);
       }
     } catch (e, s) {

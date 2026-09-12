@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:http/http.dart' as http;
+import '../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../Color/Colorclass.dart';
 import '../../util/sharedpreference/shared_preference.dart';
 import 'BarcodeLabel.dart';
@@ -234,8 +237,17 @@ class _BailingFormScreenState extends State<BailingFormScreen> {
           "Bailing Form",
           style: TextStyle(color: C.primary, fontWeight: FontWeight.bold),
         ),
-        iconTheme: IconThemeData(
-          color: C.primary, // 👈 Back arrow color white
+        leading:  IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          color: C.bg,
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Get.to(() => const DeptBottomNavDashboard());
+
+            }
+          },
         ),
       ),
       body: SingleChildScrollView(

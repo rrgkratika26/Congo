@@ -169,7 +169,7 @@ class _BarcodeEntryScreenState extends State<BarcodeEntryScreen> {
 
         if (!mounted) return;
 
-        Get.offAll(() => const TapelineOutStockScreen());
+        Get.to(() => const TapelineOutStockScreen());
       }
     } catch (e) {
       if (!mounted) return;

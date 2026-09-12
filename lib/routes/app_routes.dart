@@ -1,4 +1,4 @@
-import 'package:IMS/AdminDashBoard/DepartmentDashboard.dart';
+import 'package:IMS/AdminDashBoard/DepartmentDashboard.dart' hide DeptDashboard;
 import 'package:IMS/JBL/JBLDispatch/DispatchDetailScreen.dart';
 import 'package:IMS/JBL/JBL_BailingReport/JBLBailingReportScreen.dart';
 import 'package:IMS/NARDANA/LoomReprts/ManualLoomReports.dart';
@@ -48,6 +48,8 @@ import '../NARDANA/CUTTING_Stock/Reports/ComponetReportScreen.dart';
 import '../NARDANA/CUTTING_Stock/Reports/Cut_InReports.dart';
 import '../NARDANA/CUTTING_Stock/Reports/Cutting_InReportScreen.dart';
 import '../NARDANA/CUTTING_Stock/Reports/ReportSliderScreen.dart';
+import '../NARDANA/CUTTING_Stock/Reports/RollCuttingReport/RollCuttingreport.dart';
+import '../NARDANA/CUTTING_Stock/Reports/RollWiseCuttingStockreport.dart';
 import '../NARDANA/CUTTING_Stock/Reports/RollWiseReportScreen.dart';
 import '../NARDANA/CUTTING_Stock/Stockreports.dart';
 import '../NARDANA/LaminationReports/LamOutScreen.dart';
@@ -56,6 +58,7 @@ import '../NARDANA/LaminationReports/LaminationScreen.dart';
 import '../NARDANA/LoomReprts/LoomReports.dart';
 import '../NARDANA/Marketing/BomListScreen.dart';
 import '../NARDANA/Marketing/BomReportscreen.dart';
+import '../NARDANA/Marketing/InquiryListScreen.dart';
 import '../NARDANA/Marketing/InquiryReportScreen.dart';
 import '../NARDANA/Marketing/IssueToQCScreen.dart';
 
@@ -96,6 +99,7 @@ import '../ScannedItem/TAPELINE/Reports/TapeOutReports.dart';
 import '../ScannedItem/TAPELINE/Reports/TapeStockReport.dart';
 import '../ScannedItem/TAPELINE/TApeline_IN.dart';
 import '../ScannedItem/TAPELINE/TapeInEnrtyList.dart';
+import '../ScannedItem/Wastage/WastageEntryScreen.dart';
 import '../ScannedItem/Webbing/WebSaveEntries.dart';
 import '../ScannedItem/Webbing/WebbingInStock.dart';
 import '../ScannedItem/Webbing/WebbingOutStock.dart';
@@ -109,6 +113,7 @@ import '../screen/Baling/BailingSliderScreen.dart';
 import '../screen/Baling/BailingDispatchScreen.dart';
 import '../JBL/JBLDispatch/DispatchEntry.dart';
 import '../screen/Baling/BaleSliderScreen.dart';
+import '../screen/Baling/BalingManualEntry.dart';
 import '../screen/Baling/StockReportScreen.dart';
 import '../screen/Baling/dispatch/DispatchEntryScreen.dart';
 import '../screen/MachineDepartment/MachineDepartmment.dart';
@@ -327,12 +332,11 @@ class AppRoutes {
   static const String cuttingIn = '/cuttingIn';
   static const String foldingIn = '/foldingIn';
   static const String tapelineIn = '/tapelineIn';
+  static const String wastageEntry = '/wastage-entry';
   static const String printingIn = '/printingIn';
   static const String printingInReport = '/printingInReport';
-
   static const String printingOutReport = '/printingOutReport';
   static const String printingOut = '/printingOut';
-
   static const String slittingIn = '/slittingIn';
   static const String tapelineOut = '/tapelineOut';
   static const String tapelineRecentEntries = '/tapelineRecentEntries';
@@ -349,15 +353,14 @@ class AppRoutes {
   static const String webbingOut = '/webbing-out';
   static const String webEntryScreen = '/webEntryScreen';
   static const String webSaveEntryScreen = '/webSaveEntryScreen';
-
   static const String rollWiseReport = '/rollWiseReport';
   static const String componentWiseReport = '/componentWiseReport';
+  static const String rolCuttingReport = '/rolCuttingReport';
   static const String cuttingWiseReport = '/cuttingWiseReport';
   static const String bagEntry = '/bag-entry';
   static const String bagReport = '/bag-report';
   static const String baleEntry = '/bale-entry';
   static const String baleStockReport = '/baleStockReport';
-
   static const String balingReport = '/balingReport';
   // static const String baleStockReport = '/bale-report';
   static const String baleDispatch = '/bale-dispatch';
@@ -384,7 +387,7 @@ class AppRoutes {
   static const String lamReportScreen = '/lamReportScreen';
   static const String cutGroupStock = '/cutGroupStock';
   static const String stockLedger = '/stockLedger';
-  static const String InquiryMarketingReport = '/InquireyPannel';
+  static const String InquiryMarketingList = '/InquireyPannel';
   static const String bomReport = '/bomReport';
   static const String bomList = '/bomList';
   static const String Issue_to_QC = '/Issue_to_QC';
@@ -425,10 +428,7 @@ class AppRoutes {
       page: () => const RmdScreen(screenType: 'IN'),
     ),
 
-    GetPage(
-      name: rmdOut,
-      page: () => const RmdOutScreen(),
-    ),
+    GetPage(name: rmdOut, page: () => const RmdOutScreen()),
 
     GetPage(name: rmdtransfer, page: () => const RmdTransferScreen()),
     GetPage(name: rollEntry, page: () => const RmdRollENtryScreen()),
@@ -444,12 +444,12 @@ class AppRoutes {
     GetPage(name: printingIn, page: () => PrintingInStockScreen()),
     GetPage(name: printingOutReport, page: () => PrintingOutReportScreen()),
 
-    GetPage(name: printingInReport, page: () => const PrintingInReportScreen(),
-    ),
+    GetPage(name: printingInReport, page: () => const PrintingInReportScreen()),
     GetPage(name: printingOut, page: () => PrintingRollList()),
     GetPage(name: slittingIn, page: () => SlittingInScreen()),
 
     GetPage(name: tapelineIn, page: () => TapeInEnrtyList()),
+    GetPage(name: wastageEntry, page: () => const WastageEntryScreen()),
     GetPage(name: tapelineOut, page: () => const TapelineOutStockScreen()),
 
     GetPage(
@@ -468,7 +468,7 @@ class AppRoutes {
 
     GetPage(
       name: cuttingIssuenardana,
-      page: () => const CutPieceIssuedScreenNardana(),
+      page: () => const RollWiseCuttingStockReport(),
     ),
 
     GetPage(name: cuttingIssue, page: () => const CutPieceIssuedScreen()),
@@ -488,7 +488,7 @@ class AppRoutes {
     ),
 
     GetPage(name: rollWiseReport, page: () => RollWiseReportScreen()),
-
+    GetPage(name: rolCuttingReport, page: () => RollCuttingReport()),
     GetPage(name: componentWiseReport, page: () => ComponentReportScreen()),
     GetPage(name: cuttingWiseReport, page: () => Cutting_InReportSCreen()),
 
@@ -497,7 +497,7 @@ class AppRoutes {
     GetPage(name: bagReport, page: () => BagReportScreen()),
 
     GetPage(name: baleEntry, page: () => BaleInReportsScreen()),
-
+    // GetPage(name:baleEntry, page:  () => BaleEntryManualForm()),
     GetPage(name: baleStockReport, page: () => StockReportScreen()),
     // StockReportScreen(), BailingReportScreen()
     GetPage(name: balingReport, page: () => BailingReportScreen()),
@@ -508,9 +508,12 @@ class AppRoutes {
     GetPage(name: dispatchReport, page: () => DispatchScreen()),
 
     GetPage(name: login, page: () => LoginPage()),
-    // GetPage(name: dashboard, page: () => NewAdminDashboard()),
 
-    GetPage(name: AppRoutes.dashboard, page: () => const DeptDashboard()),
+    // GetPage(name: dashboard, page: () => NewAdminDashboard()),
+    GetPage(
+      name: AppRoutes.dashboard,
+      page: () => const DeptBottomNavDashboard(),
+    ),
     GetPage(name: inStock, page: () => RMDStockIn()),
 
     GetPage(
@@ -546,15 +549,18 @@ class AppRoutes {
 
     GetPage(name: lamReportScreen, page: () => const LaminationSliderScreen()),
 
-    GetPage(name: cutGroupStock, page: () => const CuttingStockScreen()),
-
-    GetPage(name: stockLedger, page: () => const StockLedgerScreen()),
-
     GetPage(
-      name: InquiryMarketingReport,
-      page: () => const InquiryMarketingReportScreen(),
+      name: cutGroupStock,
+      page: () => const RollWiseCuttingStockReport(),
     ),
 
+    GetPage(name: stockLedger, page: () => const StockLedgerScreen()),
+    GetPage(name: InquiryMarketingList, page: () => const InquiryListScreen()),
+
+    // GetPage(
+    //   name: InquiryMarketingReport,
+    //   page: () => const InquiryMarketingReportScreen(),
+    // ),
     GetPage(name: bomReport, page: () => const BomReportScreen()),
 
     GetPage(name: bomList, page: () => const BomListScreen()),

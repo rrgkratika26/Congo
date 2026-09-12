@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:intl/intl.dart';
 
 import '../../Color/Colorclass.dart';
@@ -6,6 +10,17 @@ import '../../services/NardanaApis/NardanaApi.dart';
 import '../../util/widget/CountRecords/CountRecords.dart';
 import 'LoomReportModelClass.dart';
 
+class LoomReportStreamState {
+  final List<LoomReport> reports;
+  final bool isRefreshing;
+  final Object? error;
+
+  const LoomReportStreamState({
+    required this.reports,
+    this.isRefreshing = false,
+    this.error,
+  });
+}
 
 class LoomReportScreen extends StatefulWidget {
   const LoomReportScreen({super.key});
@@ -20,7 +35,21 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
   DateTime? _from;
   DateTime? _to;
   List<LoomReport> _allReports = [];
+
+// Cached successful result
+  List<LoomReport> _cachedReports = [];
+
+  final StreamController<LoomReportStreamState>
+  _reportStreamController =
+  StreamController<LoomReportStreamState>.broadcast();
+
+  Stream<LoomReportStreamState> get reportStream =>
+      _reportStreamController.stream;
+
+  Timer? _searchDebounce;
+
   bool _isLoading = false;
+  bool _hasLoadedOnce = false;
 
   List<LoomReport> get _filtered => _allReports.where((r) {
     final q = _query.toLowerCase();
@@ -58,14 +87,34 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
   double get _totalRollLength {
     return _filtered.fold(0.0, (sum, item) => sum + (item.rollLength ?? 0));
   }
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 300),
+          () {
+        if (!mounted) return;
+
+        setState(() {
+          _query = value.trim();
+        });
+      },
+    );
+  }
   @override
+
   void initState() {
     super.initState();
 
-
-
     _to = DateTime.now();
-    _from = _to!.subtract(const Duration(days: 6)); // Last 7 days (today included)
+
+    _from = DateTime(
+      _to!.year,
+      _to!.month,
+      _to!.day,
+    ).subtract(
+      const Duration(days: 6),
+    );
 
     _fetchData();
   }
@@ -73,13 +122,14 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
   Future<void> _pickDateRange() async {
     final picked = await showDateRangePicker(
       context: context,
-
-      // ✅ Allow wide range (almost any date)
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
-
-      initialDateRange: (_from != null && _to != null)
-          ? DateTimeRange(start: _from!, end: _to!)
+      initialDateRange:
+      (_from != null && _to != null)
+          ? DateTimeRange(
+        start: _from!,
+        end: _to!,
+      )
           : null,
     );
 
@@ -89,12 +139,24 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
         _to = picked.end;
       });
 
-      _fetchData();
+      await _fetchData();
     }
   }
 
-  Future<void> _fetchData() async {
-    setState(() => _isLoading = true);
+  Future<void> _fetchData({
+    bool showLoading = true,
+  }) async {
+    if (_isLoading) return;
+
+    _isLoading = true;
+
+    // Show cached data while refreshing
+    _reportStreamController.add(
+      LoomReportStreamState(
+        reports: _cachedReports,
+        isRefreshing: showLoading && _hasLoadedOnce,
+      ),
+    );
 
     try {
       final data = await NaradanaApiService().fetchLoomData(
@@ -102,60 +164,104 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
         to: _to,
       );
 
-      setState(() {
-        _allReports = data;
-      });
+      // Update actual data
+      _allReports = List<LoomReport>.from(data);
+
+      // Update cache
+      _cachedReports = List<LoomReport>.from(data);
+
+      _hasLoadedOnce = true;
+
+      // Push new data to stream
+      if (!_reportStreamController.isClosed) {
+        _reportStreamController.add(
+          LoomReportStreamState(
+            reports: _allReports,
+            isRefreshing: false,
+          ),
+        );
+      }
     } catch (e) {
       debugPrint("UI ERROR: $e");
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Failed to load data")));
+      // Keep cached data visible if API fails
+      if (!_reportStreamController.isClosed) {
+        _reportStreamController.add(
+          LoomReportStreamState(
+            reports: _cachedReports,
+            isRefreshing: false,
+            error: e,
+          ),
+        );
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Failed to load data"),
+          ),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      _isLoading = false;
     }
   }
 
-  void _clear() {
+  Future<void> _clear() async {
     final now = DateTime.now();
 
     setState(() {
       _query = '';
       _searchCtrl.clear();
 
-      _from = DateTime(now.year, now.month, now.day);
-      _to   = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      _from = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      );
+
+      _to = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        23,
+        59,
+        59,
+      );
     });
 
-    _fetchData(); // 🔥 IMPORTANT
+    await _fetchData();
   }
 
-  String _fmt(DateTime d) => DateFormat('dd MMM yy').format(d);
+
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+
     _searchCtrl.dispose();
+
+    _reportStreamController.close();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final data = _filtered;
+
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+
       appBar: AppBar(
        backgroundColor: C.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        leading: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: C.primaryLight),
-              onPressed: () => Navigator.pop(context),
-            ),
-          
-          ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          color: C.bg,
+          onPressed: () {
+            Get.back();
+          },
         ),
         title: const Text(
           'Loom Report',
@@ -194,7 +300,7 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: TextField(
               controller: _searchCtrl,
-              onChanged: (v) => setState(() => _query = v),
+              onChanged: _onSearchChanged,
               style: const TextStyle(fontSize: 14, color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search barcode, operator, fabric…',
@@ -229,25 +335,129 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
           ),
         ),
       ),
-      body:  (!_isLoading && _filtered.isEmpty)
-          ? _emptyState()
-          : Column(children: [
+      body: StreamBuilder<LoomReportStreamState>(
+        stream: reportStream,
+        initialData: _cachedReports.isNotEmpty
+            ? LoomReportStreamState(
+          reports: _cachedReports,
+        )
+            : null,
+        builder: (context, snapshot) {
+          // First load
+          if (!snapshot.hasData &&
+              snapshot.connectionState ==
+                  ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: C.warning,
+              ),
+            );
+          }
 
-            _summaryBar(),
+          final state = snapshot.data;
 
-            Expanded(child: _table(_filtered))]),
+          if (state == null) {
+            return _emptyState();
+          }
+
+          // Update local data from stream
+          if (_allReports != state.reports) {
+            _allReports = state.reports;
+          }
+
+          // No records
+          if (_filtered.isEmpty &&
+              !state.isRefreshing) {
+            return _emptyState();
+          }
+
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  _summaryBar(),
+
+                  Expanded(
+                    child: RefreshIndicator(
+                      color: C.warning,
+                      onRefresh: () async {
+                        await _fetchData(
+                          showLoading: false,
+                        );
+                      },
+                      child: _table(_filtered),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Small refresh indicator while old data remains visible
+              if (state.isRefreshing)
+                Positioned(
+                  top: 8,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 6,
+                          color: Colors.black26,
+                        ),
+                      ],
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: C.primary,
+                          ),
+                        ),
+                        SizedBox(width: 7),
+                        Text(
+                          "Refreshing...",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
   // ── Paginated Table ────────────────────────────────────────────────────────
 
   Widget _table(List<LoomReport> data) {
+    if (data.isEmpty) {
+      return const Center(
+        child: Text("No records found"),
+      );
+    }
+
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(12),
       child: Theme(
         data: Theme.of(context).copyWith(
           dataTableTheme: DataTableThemeData(
-            headingRowColor: WidgetStateProperty.all(C.cardOrange),
+            headingRowColor:
+            WidgetStateProperty.all(C.cardOrange),
             headingTextStyle: const TextStyle(
               color: C.textHigh,
               fontWeight: FontWeight.w700,
@@ -261,7 +471,11 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
         ),
         child: PaginatedDataTable(
           rowsPerPage: 10,
-          availableRowsPerPage: const [6, 10, 20],
+          availableRowsPerPage: const [
+            6,
+            10,
+            20,
+          ],
           columnSpacing: 16,
           horizontalMargin: 14,
           columns: const [
@@ -335,9 +549,9 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
-          _box("Records", '$_totalRecords', C.bg),
-          _box("Roll Weight(Kg)", _totalNetWeight.toStringAsFixed(2), C.bg),
-          _box("Roll Length(mtr)", _totalRollLength.toStringAsFixed(2), C.bg),
+          _box("Records", '$_totalRecords', C.primary),
+          _box("Roll Weight(Kg)", _totalNetWeight.toStringAsFixed(2), C.success),
+          _box("Roll Length(mtr)", _totalRollLength.toStringAsFixed(2), C.warning),
         ],
       ),
     );
@@ -347,9 +561,10 @@ class _LoomReportScreenState extends State<LoomReportScreen> {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: C.primary,
+          color: color.withOpacity(0.12),
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

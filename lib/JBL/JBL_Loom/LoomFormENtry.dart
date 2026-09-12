@@ -57,6 +57,7 @@ class _LoomFormState extends State<LoomForm> {
   late TextEditingController qtyMtrController;
   late TextEditingController fabricWidthCtrl;
   late TextEditingController cutTypeCtrl;
+  late TextEditingController unique_NoCtrl;
   late TextEditingController fabricTypeCtrl;
   late TextEditingController gsmCtrl;
   late TextEditingController laminationCtrl;
@@ -84,6 +85,12 @@ class _LoomFormState extends State<LoomForm> {
     _initializeData();
     final data = widget.production;
     _batchController = TextEditingController();
+    unique_NoCtrl = TextEditingController(
+      text: data.unique_No.toString(),
+    );
+
+    print("✅ Previous Screen Unique No = ${data.unique_No}");
+    print("✅ unique_NoCtrl = ${unique_NoCtrl.text}");
     _generatedCodeController = TextEditingController();
     partyController = TextEditingController(text: data.partyName);
     loomOrderController = TextEditingController(text: data.orderNo.toString());
@@ -94,7 +101,6 @@ class _LoomFormState extends State<LoomForm> {
     reqQntyMtrController = TextEditingController(
       text: data.balanceMtrInt.toString(),
     );
-
     poNoController = TextEditingController(text: data.poNumber.toString());
     fabricController = TextEditingController(text: data.fabricCode);
     loomNoController = TextEditingController();
@@ -102,7 +108,6 @@ class _LoomFormState extends State<LoomForm> {
     qtyKgController = TextEditingController(
       text: data.actualRequiredKg.toString(),
     );
-
     qtyMtrController = TextEditingController(
       text: data.actualRequiredMtr.toString(),
     );
@@ -357,6 +362,7 @@ class _LoomFormState extends State<LoomForm> {
       "gsm": gsmCtrl.text,
       "sid": sidCtrl.text,
       "cutType": cutTypeCtrl.text,
+      "unique_No":unique_NoCtrl.text,
 
       // "netWeight": double.tryParse(qtyKgController.text) ?? 0,
       "netWeight": double.tryParse(netWeightCtrl.text) ?? 0,

@@ -34,6 +34,356 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
   double get totalWidth => selectW + bomW + componentW + fabricW + (w * 5);
 
+  bool _isCompleting = false;
+
+  Future<void> completeSelectedItems() async {
+    if (_isCompleting) return;
+
+    final selectedItems = data.where((e) => e.selected).toList();
+
+    if (selectedItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Select item first'),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // CONFIRMATION
+    // ------------------------------------------------------------
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.help_outline_rounded,
+                color: Colors.orange.shade700,
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Confirm Complete',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            selectedItems.length == 1
+                ? 'Are you sure you want to complete this item?'
+                : 'Are you sure you want to complete these '
+                '${selectedItems.length} items?',
+            style: const TextStyle(
+              fontSize: 15,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: const Text(
+                'CANCEL',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade400,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(
+
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) {
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // START API
+    // ------------------------------------------------------------
+
+    setState(() {
+      _isCompleting = true;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return const PopScope(
+          canPop: false,
+          child: Center(
+            child: Card(
+              margin: EdgeInsets.all(30),
+              child: Padding(
+                padding: EdgeInsets.all(22),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: C.primary,),
+                    SizedBox(height: 10),
+                    Text(
+                      'Completing component...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      int successCount = 0;
+      int failedCount = 0;
+
+      String? lastMessage;
+
+      // ----------------------------------------------------------
+      // COMPLETE EACH SELECTED COMPONENT
+      // ----------------------------------------------------------
+
+      for (final item in selectedItems) {
+        if (!mounted) return;
+
+
+
+        final String wo = item.woNumber.trim();
+        final int? id = int.tryParse(item.idForWo.toString());
+
+        debugPrint('');
+        debugPrint('--------------------------------------------------');
+        debugPrint('COMPLETING COMPONENT');
+        debugPrint('WO => $wo');
+        debugPrint('ID => $id');
+        debugPrint('--------------------------------------------------');
+
+        if (wo.isEmpty || id == null) {
+          debugPrint(
+            'SKIPPED => Invalid WO or ID',
+          );
+
+          failedCount++;
+          continue;
+        }
+
+        try {
+          final response =
+          await NaradanaApiService().updateComponentStatus(
+            wo: wo,
+            id: id,
+          );
+
+          debugPrint(
+            'COMPLETE RESPONSE STATUS => ${response.statusCode}',
+          );
+          debugPrint(
+            'COMPLETE RESPONSE BODY => ${response.body}',
+          );
+
+          Map<String, dynamic>? responseData;
+
+          try {
+            responseData = jsonDecode(response.body)
+            as Map<String, dynamic>;
+          } catch (e) {
+            debugPrint(
+              'JSON PARSE ERROR => $e',
+            );
+          }
+
+          final bool apiSuccess =
+              response.statusCode >= 200 &&
+                  response.statusCode < 300 &&
+                  responseData?['success'] == true;
+
+          if (apiSuccess) {
+            successCount++;
+
+            lastMessage =
+                responseData?['message']?.toString();
+
+            debugPrint(
+              'COMPLETE SUCCESS => WO: $wo | ID: $id',
+            );
+          } else {
+            failedCount++;
+
+            debugPrint(
+              'COMPLETE FAILED => WO: $wo | ID: $id',
+            );
+          }
+        } catch (e) {
+          failedCount++;
+
+          debugPrint(
+            'COMPLETE API ERROR => WO: $wo | ID: $id | ERROR: $e',
+          );
+        }
+      }
+
+      // ----------------------------------------------------------
+      // CLOSE LOADING
+      // ----------------------------------------------------------
+
+      if (!mounted) return;
+
+      Navigator.of(context, rootNavigator: true).pop();
+
+      // ----------------------------------------------------------
+      // REFRESH PAGE
+      // ----------------------------------------------------------
+
+      if (successCount > 0) {
+        debugPrint('');
+        debugPrint('REFRESHING ORDER COMPOSITION DATA...');
+        debugPrint('');
+
+        await loadData();
+
+        // Make sure old selected flags are removed.
+        if (mounted) {
+          setState(() {
+            for (final item in data) {
+              item.selected = false;
+            }
+
+            for (final item in filteredData) {
+              item.selected = false;
+            }
+          });
+        }
+      }
+
+      if (!mounted) return;
+
+      // ----------------------------------------------------------
+      // RESULT MESSAGE
+      // ----------------------------------------------------------
+
+      if (successCount > 0 && failedCount == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              successCount == 1
+                  ? (lastMessage ??
+                  'Component completed successfully.')
+                  : '$successCount components completed successfully.',
+            ),
+            backgroundColor: Colors.green.shade700,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(12),
+            duration: const Duration(seconds: 3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else if (successCount > 0 && failedCount > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '$successCount completed, $failedCount failed.',
+            ),
+            backgroundColor: Colors.orange.shade800,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(12),
+            duration: const Duration(seconds: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Failed to complete component.',
+            ),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(12),
+            duration: const Duration(seconds: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      debugPrint('');
+      debugPrint('================ COMPLETE ERROR ================');
+      debugPrint('ERROR => $e');
+      debugPrint('STACK => $stackTrace');
+      debugPrint('=================================================');
+
+      if (!mounted) return;
+
+      Navigator.of(context, rootNavigator: true).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to complete component\n$e',
+          ),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(12),
+          duration: const Duration(seconds: 5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCompleting = false;
+        });
+      }
+    }
+  }
+
   void selectAll(bool value) {
     setState(() {
       if (orderComponent == "SINGLE") {
@@ -105,9 +455,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
 
       appBar: AppBar(
         elevation: 0,
-
         iconTheme: const IconThemeData(color: Colors.white),
-
         title: const Text(
           "Order Composition",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -126,7 +474,7 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0.5),
             child: TextField(
               controller: searchController,
               onChanged: filterData,
@@ -234,11 +582,9 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
                       children: [
                         SizedBox(
                           height: 28,
-
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: C.success,
-
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
                               ),
@@ -358,351 +704,484 @@ class _OrderCompositionScreenState extends State<OrderCompositionScreen> {
                     ),
                   ),
           ),
+          SizedBox(height: 5,),
 
+          // Padding(
+          //   padding: const EdgeInsets.all(18),
+          //
+          //   child: SizedBox(
+          //     width: double.infinity,
+          //
+          //     height: 50,
+          //
+          //     child: ElevatedButton(
+          //       style: ElevatedButton.styleFrom(
+          //         backgroundColor: C.warning.withOpacity(0.7),
+          //
+          //         shape: RoundedRectangleBorder(
+          //           borderRadius: BorderRadius.circular(12),
+          //         ),
+          //       ),
+          //
+          //       // onPressed: () async {
+          //       //
+          //       //   List<OrderCompositionModel> selectedItems =
+          //       //   data.where((e) => e.selected).toList();
+          //       //
+          //       //   /// No item selected
+          //       //   if (selectedItems.isEmpty) {
+          //       //
+          //       //     ScaffoldMessenger.of(context).showSnackBar(
+          //       //
+          //       //       SnackBar(
+          //       //         behavior: SnackBarBehavior.floating,
+          //       //         backgroundColor: Colors.red.shade600,
+          //       //
+          //       //         shape: RoundedRectangleBorder(
+          //       //           borderRadius: BorderRadius.circular(15),
+          //       //         ),
+          //       //
+          //       //         content: const Row(
+          //       //           children: [
+          //       //
+          //       //             Icon(
+          //       //               Icons.warning_amber_rounded,
+          //       //               color: Colors.white,
+          //       //             ),
+          //       //
+          //       //             SizedBox(width: 10),
+          //       //
+          //       //             Text(
+          //       //               "Select item first",
+          //       //               style: TextStyle(
+          //       //                 color: Colors.white,
+          //       //                 fontWeight: FontWeight.w600,
+          //       //               ),
+          //       //             )
+          //       //           ],
+          //       //         ),
+          //       //       ),
+          //       //     );
+          //       //
+          //       //     return;
+          //       //   }
+          //       //
+          //       //   /// SINGLE validation
+          //       //   if (orderComponent == "SINGLE" &&
+          //       //       selectedItems.length > 1) {
+          //       //
+          //       //     ScaffoldMessenger.of(context).showSnackBar(
+          //       //
+          //       //       SnackBar(
+          //       //         behavior: SnackBarBehavior.floating,
+          //       //         backgroundColor: Colors.orange.shade700,
+          //       //
+          //       //         shape: RoundedRectangleBorder(
+          //       //           borderRadius: BorderRadius.circular(15),
+          //       //         ),
+          //       //
+          //       //         content: const Row(
+          //       //           children: [
+          //       //
+          //       //             Icon(
+          //       //               Icons.info_outline,
+          //       //               color: Colors.white,
+          //       //             ),
+          //       //
+          //       //             SizedBox(width: 10),
+          //       //
+          //       //             Expanded(
+          //       //               child: Text(
+          //       //                 "Single allows only one item",
+          //       //                 style: TextStyle(
+          //       //                   color: Colors.white,
+          //       //                   fontWeight: FontWeight.w600,
+          //       //                 ),
+          //       //               ),
+          //       //             )
+          //       //
+          //       //           ],
+          //       //         ),
+          //       //       ),
+          //       //     );
+          //       //
+          //       //     return;
+          //       //   }
+          //       //
+          //       //   /// Loading
+          //       //   showDialog(
+          //       //     context: context,
+          //       //     barrierDismissible: false,
+          //       //     builder: (_) => const Center(
+          //       //       child: CircularProgressIndicator(),
+          //       //     ),
+          //       //   );
+          //       //
+          //       //   try {
+          //       //
+          //       //     dynamic response;
+          //       //
+          //       //     if (orderComponent == "SINGLE") {
+          //       //
+          //       //       response =
+          //       //       await NaradanaApiService()
+          //       //           .singleSave(selectedItems);
+          //       //
+          //       //     } else {
+          //       //
+          //       //       response =
+          //       //       await NaradanaApiService()
+          //       //           .clubSave(selectedItems);
+          //       //     }
+          //       //
+          //       //
+          //       //     /// DEBUG LOGS
+          //       //     debugPrint(
+          //       //         "=========== API RESPONSE ===========");
+          //       //
+          //       //     debugPrint(
+          //       //         "Status Code => ${response.statusCode}");
+          //       //
+          //       //     debugPrint(
+          //       //         "Headers => ${response.headers}");
+          //       //
+          //       //     debugPrint(
+          //       //         "Response Body => ${response.body}");
+          //       //
+          //       //     debugPrint(
+          //       //         "====================================");
+          //       //
+          //       //
+          //       //     /// CLOSE LOADING
+          //       //     Navigator.pop(context);
+          //       //
+          //       //
+          //       //     /// SUCCESS
+          //       //     if (response.statusCode == 200 ||
+          //       //         response.statusCode == 201) {
+          //       //
+          //       //       final responseData =
+          //       //       jsonDecode(response.body);
+          //       //
+          //       //       String message =
+          //       //           responseData["message"] ??
+          //       //               "Saved Successfully";
+          //       //
+          //       //
+          //       //       ScaffoldMessenger.of(context)
+          //       //           .showSnackBar(
+          //       //
+          //       //         SnackBar(
+          //       //           behavior:
+          //       //           SnackBarBehavior.floating,
+          //       //
+          //       //           backgroundColor:
+          //       //           Colors.green.shade600,
+          //       //
+          //       //           margin:
+          //       //           const EdgeInsets.all(15),
+          //       //
+          //       //           duration:
+          //       //           const Duration(seconds: 3),
+          //       //
+          //       //           shape:
+          //       //           RoundedRectangleBorder(
+          //       //             borderRadius:
+          //       //             BorderRadius.circular(15),
+          //       //           ),
+          //       //
+          //       //           content: Row(
+          //       //             children: [
+          //       //
+          //       //               const Icon(
+          //       //                 Icons.check_circle,
+          //       //                 color: Colors.white,
+          //       //               ),
+          //       //
+          //       //               const SizedBox(width: 10),
+          //       //
+          //       //               Expanded(
+          //       //                 child: Text(
+          //       //                   message,
+          //       //                   style: const TextStyle(
+          //       //                     color: Colors.white,
+          //       //                     fontWeight:
+          //       //                     FontWeight.bold,
+          //       //                     fontSize: 14,
+          //       //                   ),
+          //       //                 ),
+          //       //               ),
+          //       //
+          //       //             ],
+          //       //           ),
+          //       //         ),
+          //       //       );
+          //       //
+          //       //       /// Optional clear selection after success
+          //       //       setState(() {
+          //       //
+          //       //         for (var item in data) {
+          //       //           item.selected = false;
+          //       //         }
+          //       //
+          //       //       });
+          //       //
+          //       //     }
+          //       //
+          //       //     /// ERROR RESPONSE
+          //       //     else {
+          //       //
+          //       //       ScaffoldMessenger.of(context)
+          //       //           .showSnackBar(
+          //       //
+          //       //         SnackBar(
+          //       //           behavior:
+          //       //           SnackBarBehavior.floating,
+          //       //
+          //       //           backgroundColor:
+          //       //           Colors.red.shade600,
+          //       //
+          //       //           margin:
+          //       //           const EdgeInsets.all(15),
+          //       //
+          //       //           shape:
+          //       //           RoundedRectangleBorder(
+          //       //             borderRadius:
+          //       //             BorderRadius.circular(15),
+          //       //           ),
+          //       //
+          //       //           content: Text(
+          //       //             "Error ${response.statusCode}\n${response.body}",
+          //       //             style: const TextStyle(
+          //       //               color: Colors.white,
+          //       //             ),
+          //       //           ),
+          //       //         ),
+          //       //       );
+          //       //     }
+          //       //
+          //       //   } catch (e) {
+          //       //
+          //       //     Navigator.pop(context);
+          //       //
+          //       //     debugPrint(
+          //       //         "EXCEPTION => $e");
+          //       //
+          //       //     ScaffoldMessenger.of(context)
+          //       //         .showSnackBar(
+          //       //
+          //       //       SnackBar(
+          //       //         behavior:
+          //       //         SnackBarBehavior.floating,
+          //       //
+          //       //         backgroundColor:
+          //       //         Colors.red.shade600,
+          //       //
+          //       //         margin:
+          //       //         const EdgeInsets.all(15),
+          //       //
+          //       //         shape:
+          //       //         RoundedRectangleBorder(
+          //       //           borderRadius:
+          //       //           BorderRadius.circular(15),
+          //       //         ),
+          //       //
+          //       //         content: Row(
+          //       //           children: [
+          //       //
+          //       //             const Icon(
+          //       //               Icons.error_outline,
+          //       //               color: Colors.white,
+          //       //             ),
+          //       //
+          //       //             const SizedBox(width: 10),
+          //       //
+          //       //             Expanded(
+          //       //               child: Text(
+          //       //                 e.toString(),
+          //       //                 style: const TextStyle(
+          //       //                   color: Colors.white,
+          //       //                 ),
+          //       //               ),
+          //       //             )
+          //       //
+          //       //           ],
+          //       //         ),
+          //       //       ),
+          //       //     );
+          //       //   }
+          //       // },
+          //       onPressed: () {
+          //         List<OrderCompositionModel> selectedItems = data
+          //             .where((e) => e.selected)
+          //             .toList();
+          //
+          //         if (selectedItems.isEmpty) {
+          //           ScaffoldMessenger.of(context).showSnackBar(
+          //             SnackBar(
+          //               backgroundColor: Colors.red,
+          //               content: Text("Select item first"),
+          //             ),
+          //           );
+          //
+          //           return;
+          //         }
+          //
+          //         Navigator.push(
+          //           context,
+          //
+          //           MaterialPageRoute(
+          //             builder: (_) => SelectedOrderScreen(
+          //               orderType: orderComponent,
+          //               selectedItems: selectedItems,
+          //             ),
+          //           ),
+          //         );
+          //       },
+          //       child: const Text(
+          //         "NEXT →",
+          //
+          //         style: TextStyle(
+          //           color: Colors.white,
+          //
+          //           fontWeight: FontWeight.bold,
+          //
+          //           letterSpacing: 1,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           Padding(
-            padding: const EdgeInsets.all(18),
-
-            child: SizedBox(
-              width: double.infinity,
-
-              height: 50,
-
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: C.warning.withOpacity(0.7),
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-
-                // onPressed: () async {
-                //
-                //   List<OrderCompositionModel> selectedItems =
-                //   data.where((e) => e.selected).toList();
-                //
-                //   /// No item selected
-                //   if (selectedItems.isEmpty) {
-                //
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //
-                //       SnackBar(
-                //         behavior: SnackBarBehavior.floating,
-                //         backgroundColor: Colors.red.shade600,
-                //
-                //         shape: RoundedRectangleBorder(
-                //           borderRadius: BorderRadius.circular(15),
-                //         ),
-                //
-                //         content: const Row(
-                //           children: [
-                //
-                //             Icon(
-                //               Icons.warning_amber_rounded,
-                //               color: Colors.white,
-                //             ),
-                //
-                //             SizedBox(width: 10),
-                //
-                //             Text(
-                //               "Select item first",
-                //               style: TextStyle(
-                //                 color: Colors.white,
-                //                 fontWeight: FontWeight.w600,
-                //               ),
-                //             )
-                //           ],
-                //         ),
-                //       ),
-                //     );
-                //
-                //     return;
-                //   }
-                //
-                //   /// SINGLE validation
-                //   if (orderComponent == "SINGLE" &&
-                //       selectedItems.length > 1) {
-                //
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //
-                //       SnackBar(
-                //         behavior: SnackBarBehavior.floating,
-                //         backgroundColor: Colors.orange.shade700,
-                //
-                //         shape: RoundedRectangleBorder(
-                //           borderRadius: BorderRadius.circular(15),
-                //         ),
-                //
-                //         content: const Row(
-                //           children: [
-                //
-                //             Icon(
-                //               Icons.info_outline,
-                //               color: Colors.white,
-                //             ),
-                //
-                //             SizedBox(width: 10),
-                //
-                //             Expanded(
-                //               child: Text(
-                //                 "Single allows only one item",
-                //                 style: TextStyle(
-                //                   color: Colors.white,
-                //                   fontWeight: FontWeight.w600,
-                //                 ),
-                //               ),
-                //             )
-                //
-                //           ],
-                //         ),
-                //       ),
-                //     );
-                //
-                //     return;
-                //   }
-                //
-                //   /// Loading
-                //   showDialog(
-                //     context: context,
-                //     barrierDismissible: false,
-                //     builder: (_) => const Center(
-                //       child: CircularProgressIndicator(),
-                //     ),
-                //   );
-                //
-                //   try {
-                //
-                //     dynamic response;
-                //
-                //     if (orderComponent == "SINGLE") {
-                //
-                //       response =
-                //       await NaradanaApiService()
-                //           .singleSave(selectedItems);
-                //
-                //     } else {
-                //
-                //       response =
-                //       await NaradanaApiService()
-                //           .clubSave(selectedItems);
-                //     }
-                //
-                //
-                //     /// DEBUG LOGS
-                //     debugPrint(
-                //         "=========== API RESPONSE ===========");
-                //
-                //     debugPrint(
-                //         "Status Code => ${response.statusCode}");
-                //
-                //     debugPrint(
-                //         "Headers => ${response.headers}");
-                //
-                //     debugPrint(
-                //         "Response Body => ${response.body}");
-                //
-                //     debugPrint(
-                //         "====================================");
-                //
-                //
-                //     /// CLOSE LOADING
-                //     Navigator.pop(context);
-                //
-                //
-                //     /// SUCCESS
-                //     if (response.statusCode == 200 ||
-                //         response.statusCode == 201) {
-                //
-                //       final responseData =
-                //       jsonDecode(response.body);
-                //
-                //       String message =
-                //           responseData["message"] ??
-                //               "Saved Successfully";
-                //
-                //
-                //       ScaffoldMessenger.of(context)
-                //           .showSnackBar(
-                //
-                //         SnackBar(
-                //           behavior:
-                //           SnackBarBehavior.floating,
-                //
-                //           backgroundColor:
-                //           Colors.green.shade600,
-                //
-                //           margin:
-                //           const EdgeInsets.all(15),
-                //
-                //           duration:
-                //           const Duration(seconds: 3),
-                //
-                //           shape:
-                //           RoundedRectangleBorder(
-                //             borderRadius:
-                //             BorderRadius.circular(15),
-                //           ),
-                //
-                //           content: Row(
-                //             children: [
-                //
-                //               const Icon(
-                //                 Icons.check_circle,
-                //                 color: Colors.white,
-                //               ),
-                //
-                //               const SizedBox(width: 10),
-                //
-                //               Expanded(
-                //                 child: Text(
-                //                   message,
-                //                   style: const TextStyle(
-                //                     color: Colors.white,
-                //                     fontWeight:
-                //                     FontWeight.bold,
-                //                     fontSize: 14,
-                //                   ),
-                //                 ),
-                //               ),
-                //
-                //             ],
-                //           ),
-                //         ),
-                //       );
-                //
-                //       /// Optional clear selection after success
-                //       setState(() {
-                //
-                //         for (var item in data) {
-                //           item.selected = false;
-                //         }
-                //
-                //       });
-                //
-                //     }
-                //
-                //     /// ERROR RESPONSE
-                //     else {
-                //
-                //       ScaffoldMessenger.of(context)
-                //           .showSnackBar(
-                //
-                //         SnackBar(
-                //           behavior:
-                //           SnackBarBehavior.floating,
-                //
-                //           backgroundColor:
-                //           Colors.red.shade600,
-                //
-                //           margin:
-                //           const EdgeInsets.all(15),
-                //
-                //           shape:
-                //           RoundedRectangleBorder(
-                //             borderRadius:
-                //             BorderRadius.circular(15),
-                //           ),
-                //
-                //           content: Text(
-                //             "Error ${response.statusCode}\n${response.body}",
-                //             style: const TextStyle(
-                //               color: Colors.white,
-                //             ),
-                //           ),
-                //         ),
-                //       );
-                //     }
-                //
-                //   } catch (e) {
-                //
-                //     Navigator.pop(context);
-                //
-                //     debugPrint(
-                //         "EXCEPTION => $e");
-                //
-                //     ScaffoldMessenger.of(context)
-                //         .showSnackBar(
-                //
-                //       SnackBar(
-                //         behavior:
-                //         SnackBarBehavior.floating,
-                //
-                //         backgroundColor:
-                //         Colors.red.shade600,
-                //
-                //         margin:
-                //         const EdgeInsets.all(15),
-                //
-                //         shape:
-                //         RoundedRectangleBorder(
-                //           borderRadius:
-                //           BorderRadius.circular(15),
-                //         ),
-                //
-                //         content: Row(
-                //           children: [
-                //
-                //             const Icon(
-                //               Icons.error_outline,
-                //               color: Colors.white,
-                //             ),
-                //
-                //             const SizedBox(width: 10),
-                //
-                //             Expanded(
-                //               child: Text(
-                //                 e.toString(),
-                //                 style: const TextStyle(
-                //                   color: Colors.white,
-                //                 ),
-                //               ),
-                //             )
-                //
-                //           ],
-                //         ),
-                //       ),
-                //     );
-                //   }
-                // },
-                onPressed: () {
-                  List<OrderCompositionModel> selectedItems = data
-                      .where((e) => e.selected)
-                      .toList();
-
-                  if (selectedItems.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: Colors.red,
-                        content: Text("Select item first"),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+            child: Row(
+              children: [
+                // =========================
+                // COMPLETE
+                // =========================
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: ElevatedButton.icon(
+                      onPressed: completeSelectedItems,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xffE8F5E9),
+                        foregroundColor: const Color(0xff2E7D32),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(
+                            color: Color(0xffA5D6A7),
+                            width: 1,
+                          ),
+                        ),
                       ),
-                    );
-
-                    return;
-                  }
-
-                  Navigator.push(
-                    context,
-
-                    MaterialPageRoute(
-                      builder: (_) => SelectedOrderScreen(
-                        orderType: orderComponent,
-                        selectedItems: selectedItems,
+                      icon: const Icon(
+                        Icons.check_circle_outline_rounded,
+                        size: 19,
+                      ),
+                      label: const Text(
+                        "COMPLETE",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: .5,
+                        ),
                       ),
                     ),
-                  );
-                },
-                child: const Text(
-                  "NEXT →",
-
-                  style: TextStyle(
-                    color: Colors.white,
-
-                    fontWeight: FontWeight.bold,
-
-                    letterSpacing: 1,
                   ),
                 ),
-              ),
+
+                const SizedBox(width: 8),
+
+                // =========================
+                // NEXT
+                // =========================
+                Expanded(
+                  child: SizedBox(
+                    height: 42,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        final selectedItems = data
+                            .where((e) => e.selected)
+                            .toList();
+
+                        if (selectedItems.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.blue.shade500,
+                              margin: const EdgeInsets.all(12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              content: const Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.white,
+                                    size: 19,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Select item first",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SelectedOrderScreen(
+                              orderType: orderComponent,
+                              selectedItems: selectedItems,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xffFFF3E0),
+                        foregroundColor: const Color(0xffE65100),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: const BorderSide(
+                            color: Color(0xffFFCC80),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 19,
+                      ),
+                      label: const Text(
+                        "NEXT",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: .5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

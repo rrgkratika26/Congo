@@ -13,6 +13,7 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../ActionButtonWidget.dart';
 import '../DashBoard.dart';
 import '../DepartmentDashboard.dart';
+import 'HeaderView.dart';
 
 class _DeptItem {
   final String title;
@@ -25,9 +26,6 @@ class _DeptItem {
   });
 }
 
-// ─────────────────────────────────────────────
-//  DESIGN TOKENS (kept local so Colorclass.dart doesn't need edits)
-// ─────────────────────────────────────────────
 class _Palette {
   // Neutral surface tones
   static const bg = Color(0xFFF5F7FB);
@@ -35,9 +33,6 @@ class _Palette {
   static const textPrimary = Color(0xFF1A1A2E);
   static const textSecondary = Color(0xFF6B7280);
   static const border = Color(0xFFEDF0F6);
-
-  // Department accent colors — one distinct hue per department so the
-  // grid reads as a color-coded map, not a wall of identical tiles.
   static const marketing = Color(0xFFFF7A59);
   static const planning = Color(0xFF6C5CE7);
   static const loom = Color(0xFF3D8EF7);
@@ -135,8 +130,8 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.OUT,
         MenuAction.In_Report,
         MenuAction.rollWise,
-        MenuAction.component_Wise,
-        MenuAction.cutting_Wise,
+        MenuAction.roll_Cutting_Report,
+        // MenuAction.cutting_Wise,
         MenuAction.stock,
         MenuAction.Approval,
         MenuAction.Pcs_Issue,
@@ -176,6 +171,22 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.Out_Report,
         MenuAction.Stock_Report,
       ];
+    case 'WASTAGE':
+      return [
+        MenuAction.LOOM,
+        MenuAction.Webbing,
+        MenuAction.RMD,
+        MenuAction.Tapeline,
+        MenuAction.Lamination,
+        MenuAction.FIBC,
+        MenuAction.Cutting,
+        MenuAction.Quality,
+        MenuAction.Cutting_Report,
+        MenuAction.Printing,
+        MenuAction.Report,
+        MenuAction.Receipt_Department,
+
+        MenuAction.Daily_Wastage_Report,      ];
     case 'MARKETING':
       return [
         MenuAction.Inquirey_Report,
@@ -215,7 +226,7 @@ class ProductionTab extends StatelessWidget {
         return AdminDashboard(ctrl: ctrl);
       } else {
         final dept = forceDepartment ?? ctrl.department.value;
-        return _DeptDashboard(ctrl: ctrl, department: dept);
+        return DeptDashboard(ctrl: ctrl, department: dept);
       }
     });
   }
@@ -277,6 +288,8 @@ class AdminDashboard extends StatelessWidget {
       icon: Icons.dashboard_rounded,
       color: _Palette.tapeline,
     ),
+    // _DeptItem(title: 'WASTAGE', icon: Icons.transfer_within_a_station, color: _Palette.webbing),
+
   ];
 
   @override
@@ -317,13 +330,14 @@ class AdminDashboard extends StatelessWidget {
   }
 }
 
-class _DeptDashboard extends StatelessWidget {
+class DeptDashboard extends StatelessWidget {
   final DashboardController ctrl;
   final String department;
-  const _DeptDashboard({required this.ctrl, required this.department});
+  const DeptDashboard({required this.ctrl, required this.department});
 
   @override
   Widget build(BuildContext context) {
+
     final mq = MediaQuery.of(context);
     final isMobile = mq.size.width < 600;
     final actions = getActionsForMenu(department);
@@ -332,134 +346,64 @@ class _DeptDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _Palette.bg,
+
       body: SafeArea(
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Top bar ──────────────────────────────
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 8 : 32,
-                vertical: isMobile ? 18 : 24,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [C.appBar1, C.appBar1.withOpacity(.85)],
-                ),
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(28),
-                ),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      Get.offAllNamed(AppRoutes.login);
-                      Get.back();
-                    },
-                  ),
-                  SizedBox(width: isMobile ? 8 : 16),
-                  Expanded(
-                    child: Obx(
-                      () => Text(
-                        ctrl.user.value,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: isMobile ? 19 : 24,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Obx(
-                    () => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(.16),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withOpacity(.3)),
-                      ),
-                      child: Text(
-                        ctrl.unit.value,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            Header(
+              ctrl: ctrl,
+              isMobile: isMobile,
             ),
-
-            // ── Dept title ───────────────────────────
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                isMobile ? 20 : 32,
-                isMobile ? 20 : 26,
-                isMobile ? 20 : 32,
-                4,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 6,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+            Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    borderRadius: BorderRadius.circular(3),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          department.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: isMobile ? 22 : 28,
-                            fontWeight: FontWeight.w800,
-                            color: _Palette.textPrimary,
-                            letterSpacing: .4,
-                          ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        department.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: isMobile ? 22 : 28,
+                          fontWeight: FontWeight.w800,
+                          color: _Palette.textPrimary,
+                          letterSpacing: .4,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${actions.length} actions available',
-                          style: TextStyle(
-                            fontSize: isMobile ? 12.5 : 14,
-                            color: _Palette.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${actions.length} actions available',
+                        style: TextStyle(
+                          fontSize: isMobile ? 12.5 : 14,
+                          color: _Palette.textSecondary,
+                          fontWeight: FontWeight.w500,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
 
             // ── Actions grid ─────────────────────────
             Expanded(
               child: GridView.builder(
-                padding: EdgeInsets.all(isMobile ? 16 : 24),
+                padding: EdgeInsets.all(isMobile ? 10 : 18),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossCount,
-                  crossAxisSpacing: 14,
+                  crossAxisSpacing: 18,
                   mainAxisSpacing: 14,
-                  childAspectRatio: 1.05,
+                  childAspectRatio: 1.1,
                 ),
                 itemCount: actions.length,
                 itemBuilder: (ctx, i) => _ActionCard(
@@ -470,76 +414,6 @@ class _DeptDashboard extends StatelessWidget {
                 ),
               ),
             ),
-
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24, top: 4),
-              child: Center(
-                child: TextButton.icon(
-                  onPressed: () async {
-                    final confirm = await Get.dialog(
-                      AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        title: const Text(
-                          "Logout",
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                        content: const Text("Are you sure you want to logout?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Get.back(result: false),
-                            child: const Text(
-                              "Cancel",
-                              style: TextStyle(color: C.textHigh),
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Get.back(result: true),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: C.danger,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: const Text("Logout"),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (confirm == true) {
-                      ctrl.logout();
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.logout_rounded,
-                    size: 18,
-                    color: C.danger,
-                  ),
-                  label: Text(
-                    "Logout",
-                    style: TextStyle(
-                      fontSize: isMobile ? 15 : 17,
-                      fontWeight: FontWeight.w700,
-                      color: C.danger,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: C.danger.withOpacity(.08),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 28,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -547,9 +421,6 @@ class _DeptDashboard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  DEPT CARD (PADMIN grid)
-// ─────────────────────────────────────────────
 class _DeptCard extends StatelessWidget {
   final _DeptItem item;
   final DashboardController ctrl;
@@ -566,7 +437,7 @@ class _DeptCard extends StatelessWidget {
       onTap: () {
         HapticFeedback.lightImpact();
         Get.to(
-          () => _DeptDashboard(ctrl: ctrl, department: item.title),
+          () => DeptDashboard(ctrl: ctrl, department: item.title),
           transition: Transition.cupertino,
         );
       },
@@ -622,9 +493,6 @@ class _DeptCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  ACTION CARD (Dept grid)
-// ─────────────────────────────────────────────
 class _ActionCard extends StatelessWidget {
   final MenuAction action;
   final bool isMobile;
@@ -637,8 +505,6 @@ class _ActionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  // Icon chosen by the semantic *type* of action, so every department
-  // still gets a recognizable glyph instead of a generic arrow.
   IconData get _icon {
     switch (action) {
       case MenuAction.IN:
@@ -704,10 +570,6 @@ class _ActionCard extends StatelessWidget {
     }
   }
 
-  // Color is grouped by the *function* of the action (inbound, outbound,
-  // reporting, stock, workflow) rather than tied 1:1 to the icon, so a
-  // user can tell at a glance "green = report" across every department,
-  // while `accent` (the department color) still tints the tap ripple.
   Color get _color {
     switch (action) {
       case MenuAction.IN:
@@ -804,9 +666,6 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  DRAWER  (PADMIN only)
-// ─────────────────────────────────────────────
 class _AppDrawer extends StatelessWidget {
   final DashboardController ctrl;
   final List<_DeptItem> items;
@@ -950,7 +809,7 @@ class _AppDrawer extends StatelessWidget {
                       Navigator.pop(ctx);
                       Get.to(
                         () =>
-                            _DeptDashboard(ctrl: ctrl, department: item.title),
+                            DeptDashboard(ctrl: ctrl, department: item.title),
                         transition: Transition.cupertino,
                       );
                     },
@@ -1036,7 +895,7 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
   switch (dept.toUpperCase()) {
     case 'MARKETING':
       if (action == MenuAction.Inquirey_Report)
-        Get.toNamed(AppRoutes.InquiryMarketingReport);
+        Get.toNamed(AppRoutes.InquiryMarketingList);
       if (action == MenuAction.Bom_Report) Get.toNamed(AppRoutes.bomReport);
       if (action == MenuAction.Bom_List_remain) {
         Get.toNamed(AppRoutes.bomList);
@@ -1100,8 +959,8 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.nardanaCutOutList);
       else if (action == MenuAction.rollWise)
         Get.toNamed(AppRoutes.rollWiseReport);
-      else if (action == MenuAction.component_Wise)
-        Get.toNamed(AppRoutes.componentWiseReport);
+      else if (action == MenuAction.roll_Cutting_Report)
+        Get.toNamed(AppRoutes.rolCuttingReport);
       else if (action == MenuAction.cutting_Wise)
         Get.toNamed(AppRoutes.cuttingWiseReport);
       else if (action == MenuAction.stock)
@@ -1171,5 +1030,41 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
       else if (action == MenuAction.Stock_Report)
         Get.toNamed(AppRoutes.tapeStockReport);
       break;
+    // case 'WASTAGE':
+    //   if (action == MenuAction.LOOM)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'LOOM'});
+    //   else if (action == MenuAction.Webbing)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'Webbing'});
+    //   else if (action == MenuAction.RMD)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'RMD'});
+    //   else if (action == MenuAction.Tapeline)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'Tapeline'});
+    //   else if (action == MenuAction.Lamination)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'Wastage'});
+    //   else if (action == MenuAction.FIBC)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'FIBC'});
+    //   else if (action == MenuAction.Cutting)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'Cutting'});
+    //   else if (action == MenuAction.Quality)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'Quality'});
+    //   else if (action == MenuAction.Cutting_Report)
+    //     Get.toNamed(
+    //       AppRoutes.wastageEntry,
+    //       arguments: {'department': 'Cutting Report'},
+    //     );
+    //   else if (action == MenuAction.Printing)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'Printing'});
+    //   else if (action == MenuAction.Report)
+    //     Get.toNamed(AppRoutes.wastageEntry, arguments: {'department': 'Report'});
+    //   else if (action == MenuAction.Receipt_Department)
+    //     Get.toNamed(
+    //       AppRoutes.wastageEntry,
+    //       arguments: {'department': 'Receipt Department'},
+    //     );
+    //   else if (action == MenuAction.Daily_Wastage)
+    //     Get.toNamed(
+    //       AppRoutes.wastageEntry,
+    //       arguments: {'department': 'Daily Wastage'},
+    //     );
   }
 }

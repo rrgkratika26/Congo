@@ -1,421 +1,25 @@
-// import 'dart:async';
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-//
-// import '../../Color/Colorclass.dart';
-// import '../../InquiryScreen/Marketing/MarketingModel.dart';
-// import '../../services/DashboardApiServices.dart';
-// import 'Dashboard Summary.dart';
-// import 'ListMenuItems/DashboardTopBarAnimated.dart';
-// import 'ListMenuItems/dashBoardMapper.dart';
-//
-// // ─────────────────────────────────────────────
-// //  MAIN GRID WIDGET (replaces DashboardTopBarAnimated)
-// // ─────────────────────────────────────────────
-// class DashboardMetricsGrid extends StatefulWidget {
-//   final String unit;
-//
-//   final void Function(DateTime from, DateTime to)? onDateRangeChanged;
-//
-//   const DashboardMetricsGrid({
-//     super.key,
-//     required this.unit,
-//     this.onDateRangeChanged,
-//   });
-//
-//   @override
-//   State<DashboardMetricsGrid> createState() => _DashboardMetricsGridState();
-// }
-//
-// class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
-//   DateTime fromDate = DateTime.now().subtract(const Duration(days: 6));
-//   DateTime toDate = DateTime.now();
-//
-//   DashboardSummary? dashboardSummary;
-//   List<DeptCountItem> deptCounts = [];
-//   bool isLoading = true;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     loadDashboard();
-//   }
-//
-//   @override
-//   void didUpdateWidget(covariant DashboardMetricsGrid old) {
-//     super.didUpdateWidget(old);
-//     if (old.unit != widget.unit) loadDashboard();
-//   }
-//
-//   String get _fromStr => DateFormat('yyyy-MM-dd').format(fromDate);
-//   String get _toStr => DateFormat('yyyy-MM-dd').format(toDate);
-//
-//   // ── DATA LOAD ─────────────────────────────
-//   Future<void> loadDashboard() async {
-//     if (!mounted) return;
-//     setState(() => isLoading = true);
-//
-//     try {
-//       dashboardSummary = await DashboardService().getDashboard(
-//         unit: widget.unit,
-//         fromDate: _fromStr,
-//         toDate: _toStr,
-//       );
-//
-//       final marketing = await loadDepartmentCounts();
-//       final rawList = createDepartments(dashboardSummary!);
-//
-//       final seenTitles = <String>{};
-//       final baseList = rawList.where((item) {
-//         if (seenTitles.contains(item.title)) return false;
-//         seenTitles.add(item.title);
-//         return true;
-//       }).toList();
-//
-//       final Map<String, DeptCountItem> overrides = {
-//         "RMD": DeptCountItem(
-//           title: "RMD",
-//           icon: Icons.settings,
-//           color: Colors.indigo.shade300,
-//           metrics: [
-//             MetricItem("KG", marketing["RMD"]?.netWeight ?? 0),
-//             MetricItem("MTR", marketing["RMD"]?.rollLength ?? 0),
-//             MetricItem("Roll", marketing["RMD"]?.noOfRoll ?? 0),
-//           ],
-//         ),
-//         "INQUIRY": DeptCountItem(
-//           title: "INQUIRY",
-//           icon: Icons.query_stats,
-//           color: Colors.amber.shade700,
-//           metrics: [
-//             MetricItem("Total", marketing["INQUIRY"]?.totalInquiryCount ?? 0),
-//           ],
-//         ),
-//         "Inquiry": DeptCountItem(
-//           title: "Quotation",
-//           icon: Icons.request_quote,
-//           color: Colors.teal,
-//           metrics: [
-//             MetricItem("Count", marketing["INQUIRY"]?.totalInquiryCount ?? 0),
-//             MetricItem("Net Wt", marketing["INQUIRY"]?.netWeight ?? 0),
-//             MetricItem("ROLL", marketing["INQUIRY"]?.noOfRoll ?? 0),
-//           ],
-//         ),
-//       };
-//
-//       deptCounts = baseList
-//           .map((item) => overrides[item.title] ?? item)
-//           .toList();
-//
-//       widget.onDateRangeChanged?.call(fromDate, toDate);
-//     } catch (e, s) {
-//       debugPrint("DashboardMetricsGrid load error: $e");
-//       debugPrintStack(stackTrace: s);
-//     } finally {
-//       if (mounted) setState(() => isLoading = false);
-//     }
-//   }
-//
-//   Future<Map<String, MarketingCountModel>> loadDepartmentCounts() async {
-//     final service = DashboardService();
-//     final departments = [
-//       "PLANNING",
-//       "INQUIRY",
-//       "QUOTATION",
-//       "WO",
-//       "BOM",
-//       "RMD",
-//       "LAMINATION",
-//     ];
-//     final Map<String, MarketingCountModel> result = {};
-//
-//     await Future.wait(
-//       departments.map((dept) async {
-//         try {
-//           result[dept] = await service.getMarketingCount(
-//             unit: widget.unit,
-//             type: dept,
-//             fromDate: _fromStr,
-//             toDate: _toStr,
-//           );
-//         } catch (e) {
-//           debugPrint("$dept Failed: $e");
-//         }
-//       }),
-//     );
-//     return result;
-//   }
-//
-//   // ── DATE FILTER ACTIONS ───────────────────
-//   Future<void> _pickDate({required bool isFrom}) async {
-//     final picked = await showDatePicker(
-//       context: context,
-//       initialDate: isFrom ? fromDate : toDate,
-//       firstDate: DateTime(2022),
-//       lastDate: DateTime.now(),
-//     );
-//     if (picked == null) return;
-//
-//     setState(() {
-//       if (isFrom) {
-//         fromDate = picked;
-//         if (fromDate.isAfter(toDate)) toDate = fromDate;
-//       } else {
-//         toDate = picked;
-//         if (toDate.isBefore(fromDate)) fromDate = toDate;
-//       }
-//     });
-//     loadDashboard();
-//   }
-//
-//   void _quickRange(int days) {
-//     setState(() {
-//       toDate = DateTime.now();
-//       fromDate = days == 0
-//           ? DateTime(toDate.year, toDate.month, toDate.day)
-//           : toDate.subtract(Duration(days: days));
-//     });
-//     loadDashboard();
-//   }
-//
-//   Future<void> _pickDateRange() async {
-//     final picked = await showDateRangePicker(
-//       context: context,
-//       firstDate: DateTime(2022),
-//       lastDate: DateTime.now(),
-//       initialDateRange: DateTimeRange(start: fromDate, end: toDate),
-//     );
-//
-//     if (picked != null) {
-//       setState(() {
-//         fromDate = picked.start;
-//         toDate = picked.end;
-//       });
-//
-//       loadDashboard();
-//     }
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final mq = MediaQuery.of(context);
-//     final isMobile = mq.size.width < 600;
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.center,
-//       children: [
-//         Text(
-//           "Dashboard",
-//           style: TextStyle(
-//             color: C.primary,
-//             fontSize: 18,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//         const SizedBox(width: 5),
-//         _dateFilterBar(isMobile),
-//         const SizedBox(height: 10),
-//         isLoading ? _loadingGrid(isMobile) : _metricsGrid(isMobile),
-//       ],
-//     );
-//   }
-//
-//   // ── DATE FILTER BAR ────────────────────────
-//   Widget _dateFilterBar(bool isMobile) {
-//     return Padding(
-//       padding: EdgeInsets.symmetric(horizontal: isMobile ? 15 : 24),
-//       child: Row(
-//         children: [
-//           Expanded(
-//             child: OutlinedButton.icon(
-//               onPressed: _pickDateRange,
-//               icon: const Icon(Icons.calendar_month_rounded),
-//               label: Text(
-//                 "${DateFormat('dd MMM yyyy').format(fromDate)}"
-//                 " - "
-//                 "${DateFormat('dd MMM yyyy').format(toDate)}",
-//                 overflow: TextOverflow.ellipsis,
-//               ),
-//               style: OutlinedButton.styleFrom(
-//                 foregroundColor: C.primary,
-//                 side: BorderSide(color: C.primary.withOpacity(.3)),
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(10),
-//                 ),
-//                 padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 5),
-//               ),
-//             ),
-//           ),
-//           const SizedBox(width: 8),
-//           _quickChip("Today", () => _quickRange(0)),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _quickChip(String label, VoidCallback onTap) {
-//     return Padding(
-//       padding: const EdgeInsets.only(right: 6),
-//       child: ActionChip(
-//         label: Text(
-//           label,
-//           style: const TextStyle(
-//             color: C.primary,
-//             fontSize: 11,
-//             fontWeight: FontWeight.w600,
-//           ),
-//         ),
-//         backgroundColor: C.bg,
-//         onPressed: onTap,
-//       ),
-//     );
-//   }
-//
-//   // ── METRICS GRID ───────────────────────────
-//   Widget _metricsGrid(bool isMobile) {
-//     if (deptCounts.isEmpty) {
-//       return const Padding(
-//         padding: EdgeInsets.symmetric(vertical: 24),
-//         child: Center(
-//           child: Text("No Data", style: TextStyle(color: Colors.grey)),
-//         ),
-//       );
-//     }
-//
-//     final crossCount = isMobile
-//         ? 2
-//         : (MediaQuery.of(context).size.width < 1000 ? 3 : 4);
-//
-//     return GridView.builder(
-//       shrinkWrap: true,
-//       physics: const NeverScrollableScrollPhysics(),
-//       padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 24),
-//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//         crossAxisCount: crossCount,
-//         crossAxisSpacing: 10,
-//         mainAxisSpacing: 12,
-//         childAspectRatio: isMobile ? 1 : 1.2,
-//       ),
-//       itemCount: deptCounts.length,
-//       itemBuilder: (_, i) => _metricCard(deptCounts[i], isMobile),
-//     );
-//   }
-//
-//   Widget _loadingGrid(bool isMobile) {
-//     final crossCount = isMobile ? 2 : 4;
-//     return GridView.builder(
-//       shrinkWrap: true,
-//       physics: const NeverScrollableScrollPhysics(),
-//       padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
-//       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//         crossAxisCount: crossCount,
-//         crossAxisSpacing: 12,
-//         mainAxisSpacing: 12,
-//         childAspectRatio: isMobile ? 1 : 1.2,
-//       ),
-//       itemCount: crossCount * 2,
-//       itemBuilder: (_, __) => Container(
-//         decoration: BoxDecoration(
-//           color: Colors.grey.shade200,
-//           borderRadius: BorderRadius.circular(14),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _metricCard(DeptCountItem item, bool isMobile) {
-//     return Container(
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(8),
-//         border: Border(left: BorderSide(color: item.color, width: 4)),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withOpacity(.05),
-//             blurRadius: 8,
-//             offset: const Offset(0, 5),
-//           ),
-//         ],
-//       ),
-//       padding: const EdgeInsets.only(left: 5, right: 5, top: 8, bottom: 8),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.center,
-//         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//         children: [
-//           Icon(item.icon, color: item.color, size: isMobile ? 28 : 38),
-//           const SizedBox(height: 4),
-//           Expanded(
-//             child: Text(
-//               item.title.toUpperCase(),
-//               maxLines: 1,
-//               overflow: TextOverflow.ellipsis,
-//               style: TextStyle(
-//                 fontWeight: FontWeight.w700,
-//                 fontSize: isMobile ? 15 : 20,
-//                 color: C.textHigh,
-//                 letterSpacing: .3,
-//               ),
-//             ),
-//           ),
-//           // const SizedBox(height: 2),
-//           for (final m in item.metrics) _metricValue(m, isMobile),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _metricValue(MetricItem m, bool isMobile) {
-//     return Row(
-//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//       // crossAxisAlignment: CrossAxisAlignment.center,
-//       children: [
-//         Text(
-//           m.label,
-//           style: TextStyle(
-//             fontSize: isMobile ? 15 : 20,
-//             color: C.textHigh,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//         Flexible(
-//           child: FittedBox(
-//             fit: BoxFit.scaleDown,
-//             alignment: Alignment.centerRight,
-//             child: Text(
-//               _fmt(m.value),
-//               maxLines: 1,
-//               style: TextStyle(
-//                 fontWeight: FontWeight.bold,
-//                 fontSize: isMobile ? 15 : 20,
-//                 color: C.textHigh,
-//               ),
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-//
-//   String _fmt(num v) {
-//     if (v == v.roundToDouble()) return v.toInt().toString();
-//     return v.toStringAsFixed(2);
-//   }
-// }
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_navigation/src/routes/transitions_type.dart';
+import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:intl/intl.dart';
 
 import '../../Color/Colorclass.dart';
 import '../../InquiryScreen/Marketing/MarketingModel.dart';
 import '../../services/DashboardApiServices.dart';
+import '../ScannedItem/Cutting/CuttinIN/CuttingScreen.dart';
+import '../routes/app_routes.dart';
+import 'AsiaDashBoard/DepartmentdashboardBottom.dart';
 import 'Dashboard Summary.dart';
+import 'DepartmentDashboard.dart';
 import 'ListMenuItems/DashboardTopBarAnimated.dart';
 import 'ListMenuItems/dashBoardMapper.dart';
 
-// ─────────────────────────────────────────────
-//  MAIN GRID WIDGET (replaces DashboardTopBarAnimated)
-// ─────────────────────────────────────────────
 class DashboardMetricsGrid extends StatefulWidget {
   final String unit;
 
@@ -560,28 +164,6 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
     return result;
   }
 
-  // ── DATE FILTER ACTIONS ───────────────────
-  Future<void> _pickDate({required bool isFrom}) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: isFrom ? fromDate : toDate,
-      firstDate: DateTime(2022),
-      lastDate: DateTime.now(),
-    );
-    if (picked == null) return;
-
-    setState(() {
-      if (isFrom) {
-        fromDate = picked;
-        if (fromDate.isAfter(toDate)) toDate = fromDate;
-      } else {
-        toDate = picked;
-        if (toDate.isBefore(fromDate)) fromDate = toDate;
-      }
-    });
-    loadDashboard();
-  }
-
   void _quickRange(int days) {
     setState(() {
       toDate = DateTime.now();
@@ -622,22 +204,12 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            "Dashboard",
-            style: TextStyle(
-              color: C.primary,
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
-              letterSpacing: .2,
-            ),
-          ),
-          const SizedBox(height: 10),
           _dateFilterBar(isMobile),
-          const SizedBox(height: 16),
-          isLoading ? _loadingGrid(isMobile) : _metricsGrid(isMobile),
+          const SizedBox(height: 10),
+          _dashboardContent(isMobile),
 
           const SizedBox(height: 12),
         ],
@@ -645,10 +217,10 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
     );
   }
 
-  // ── DATE FILTER BAR ────────────────────────
+  // ── DATE FILTER BAR ─────────────────────────
   Widget _dateFilterBar(bool isMobile) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 15 : 24),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 25 : 24),
       child: Row(
         children: [
           Expanded(
@@ -661,9 +233,10 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
               ),
               label: Text(
                 "${DateFormat('dd MMM yyyy').format(fromDate)}"
-                " - "
-                "${DateFormat('dd MMM yyyy').format(toDate)}",
+                    " - "
+                    "${DateFormat('dd MMM yyyy').format(toDate)}",
                 overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 12.5,
@@ -673,25 +246,29 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
                 foregroundColor: C.primary,
                 backgroundColor: C.primary.withOpacity(.05),
                 side: BorderSide(color: C.primary.withOpacity(.25)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 11,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 12,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+
+          const SizedBox(width: 5),
+
           _quickChip("Today", () => _quickRange(0)),
         ],
       ),
     );
   }
 
+  // ── QUICK DATE CHIP ─────────────────────────
   Widget _quickChip(String label, VoidCallback onTap) {
     return ActionChip(
+      onPressed: onTap,
       label: Text(
         label,
         style: TextStyle(
@@ -700,10 +277,10 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
           fontWeight: FontWeight.w700,
         ),
       ),
-      backgroundColor: C.primary.withOpacity(.08),
+      backgroundColor: C.primary.withOpacity(.05),
       side: BorderSide(color: C.primary.withOpacity(.25)),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onPressed: onTap,
     );
   }
 
@@ -759,7 +336,7 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           SizedBox(
             height: isMobile ? 190 : 230,
             child: BarChart(
@@ -790,10 +367,7 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
                       interval: chartMax / 4 == 0 ? 1 : chartMax / 4,
                       getTitlesWidget: (value, meta) => Text(
                         _fmt(value),
-                        style: TextStyle(
-                          fontSize: 9.2,
-                          color: C.textHigh ?? C.brand600,
-                        ),
+                        style: TextStyle(fontSize: 9.2, color: C.textHigh),
                       ),
                     ),
                   ),
@@ -877,205 +451,95 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
     );
   }
 
-  Widget _loadingChart(bool isMobile) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
-      height: isMobile ? 230 : 270,
-      decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.circular(16),
-      ),
-    );
-  }
-
-  // ── METRICS GRID — vertical scroll, fully responsive ──
-  Widget _metricsGrid(bool isMobile) {
-    if (deptCounts.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 50),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.inbox_outlined, color: Colors.black26, size: 30),
-              const SizedBox(height: 8),
-              Text(
-                "No Data",
-                style: TextStyle(
-                  color: C.textHigh,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+  Widget _dashboardContent(bool isMobile) {
+    if (isLoading) {
+      return _loadingDashboard(isMobile);
     }
 
-    final horizontalPad = isMobile ? 16.0 : 24.0;
+    if (deptCounts.isEmpty) {
+      return _emptyDashboard();
+    }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth - horizontalPad * 2;
-
-        const crossCount = 2; // always 2 cards per row, any screen size
-
-        const crossSpacing = 12.0;
-        const mainSpacing = 12.0;
-
-        final cardWidth =
-            (availableWidth - crossSpacing * (crossCount - 1)) / crossCount;
-
-        // Tallest card in the current data set (most metric rows) sets the
-        // cell height, so every card — regardless of metric count — fits
-        // without overflowing.
-        final maxMetrics = deptCounts
-            .map((e) => e.metrics.length)
-            .fold<int>(1, (a, b) => a > b ? a : b);
-        final metricRowH = isMobile ? 26.0 : 29.0; // row height + spacing
-        const headerH = 40.0; // icon chip + title row
-        const dividerH = 19.0; // divider + surrounding spacing
-        const verticalPad = 26.0; // card top+bottom padding
-        final cardHeight =
-            headerH + dividerH + verticalPad + maxMetrics * metricRowH;
-
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: horizontalPad),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossCount,
-            crossAxisSpacing: crossSpacing,
-            mainAxisSpacing: mainSpacing,
-            childAspectRatio: cardWidth / cardHeight,
-          ),
-          itemCount: deptCounts.length,
-          itemBuilder: (_, i) => _metricCard(deptCounts[i], isMobile),
-        );
-      },
-    );
-  }
-
-  Widget _loadingGrid(bool isMobile) {
-    const crossCount = 2;
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossCount,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: isMobile ? 0.95 : 1.15,
-      ),
-      itemCount: crossCount * 2,
-      itemBuilder: (_, __) => Container(
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(14),
-        ),
-      ),
-    );
-  }
-
-  // ── CARD: icon chip + title tight together, then metric rows ──
-  Widget _metricCard(DeptCountItem item, bool isMobile) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border(left: BorderSide(color: item.color, width: 4)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: item.color.withOpacity(.14),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  item.icon,
-                  color: item.color,
-                  size: isMobile ? 18 : 20,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  item.title.toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: isMobile ? 11.5 : 12.5,
-                    color: C.textHigh,
-                    letterSpacing: .4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-          Container(height: 1, color: item.color.withOpacity(.14)),
-          const SizedBox(height: 8),
-
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (int i = 0; i < item.metrics.length; i++) ...[
-                if (i > 0) const SizedBox(height: 6),
-                _metricValue(item.metrics[i], item.color, isMobile),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _metricValue(MetricItem m, Color accent, bool isMobile) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        Text(
-          m.label,
-          style: TextStyle(
-            fontSize: isMobile ? 11.5 : 12.5,
-            color: C.textMid ?? Colors.black54,
-            fontWeight: FontWeight.w600,
+        _departmentList(isMobile),
+
+        const SizedBox(height: 14),
+
+        _barChartSection(isMobile),
+
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _loadingDashboard(bool isMobile) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
+      child: Column(
+        children: [
+          Container(
+            height: 82,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(18),
+            ),
           ),
-        ),
-        Flexible(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerRight,
-            child: Text(
-              _fmt(m.value),
-              maxLines: 1,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: isMobile ? 14.5 : 16,
-                color: ColorShade(accent).darken(0.1),
+
+          const SizedBox(height: 14),
+
+          ...List.generate(
+            5,
+                (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 7),
+              child: Container(
+                height: isMobile ? 65 : 70,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+
+  Widget _emptyDashboard() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: C.primary.withOpacity(.07),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.analytics_outlined, color: C.primary, size: 30),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            "No Dashboard Data",
+            style: TextStyle(
+              color: C.textHigh,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            "Try selecting a different date range.",
+            style: TextStyle(color: C.textLow ?? Colors.black45, fontSize: 11),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1085,10 +549,346 @@ class _DashboardMetricsGridState extends State<DashboardMetricsGrid> {
     }
     return NumberFormat('#,##0.##').format(v);
   }
+
+  void _openDepartment(String department) {
+    final dept = department.trim().toUpperCase();
+
+    debugPrint('======================================');
+    debugPrint('Dashboard Department Clicked: $department');
+    debugPrint('Normalized Department: $dept');
+    debugPrint('======================================');
+
+    HapticFeedback.lightImpact();
+
+    try {
+      final ctrl = Get.find<DashboardController>();
+
+      Get.to(
+            () => DeptDashboard(ctrl: ctrl, department: dept),
+        transition: Transition.cupertino,
+      );
+    } catch (e, s) {
+      debugPrint('❌ Department navigation error: $e');
+      debugPrintStack(stackTrace: s);
+
+      _showNotAvailable(dept);
+    }
+  }
+
+  Widget _departmentList(bool isMobile) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: C.primary,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              Text(
+                "Department Activity",
+                style: TextStyle(
+                  color: C.textHigh,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+
+              const Spacer(),
+
+              Text(
+                "${deptCounts.length} Departments",
+                style: TextStyle(
+                  color: C.textLow ?? Colors.black45,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 9),
+
+          ...List.generate(deptCounts.length, (index) {
+            final item = deptCounts[index];
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 7),
+              child: _departmentRow(item, isMobile, index),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _departmentRow(DeptCountItem item, bool isMobile, int index) {
+    final primary = _primaryValue(item);
+
+    final chartItems = deptCounts
+        .where((e) => _chartDepts.contains(e.title.toUpperCase()))
+        .toList();
+
+    num maxValue = 0;
+
+    for (final element in chartItems) {
+      final value = _primaryValue(element);
+
+      if (value > maxValue) {
+        maxValue = value;
+      }
+    }
+
+    final progress = maxValue <= 0
+        ? 0.0
+        : (primary / maxValue).clamp(0.0, 1.0).toDouble();
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _openDepartment(item.title),
+        borderRadius: BorderRadius.circular(14),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: item.color.withOpacity(.10),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Icon(item.icon, color: item.color, size: 18),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: C.textHigh,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 4,
+                        backgroundColor: item.color.withOpacity(.07),
+                        valueColor: AlwaysStoppedAnimation<Color>(item.color),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Text(
+                  _fmt(primary),
+                  style: TextStyle(
+                    color: item.color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+
+                const SizedBox(width: 4),
+
+                Icon(Icons.chevron_right_rounded, size: 20, color: item.color),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            Align(
+              alignment: Alignment.centerLeft,
+              child: _mobileMetrics(item.metrics, item.color),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _mobileMetrics(List<MetricItem> metrics, Color accent) {
+    return Wrap(
+      spacing: 5,
+      runSpacing: 4,
+      children: metrics.map((metric) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+          decoration: BoxDecoration(
+            color: accent.withOpacity(.05),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: "${metric.label}: ",
+                  style: TextStyle(
+                    color: C.textMid ?? Colors.black54,
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextSpan(
+                  text: _fmt(metric.value),
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  void _navigateFromMetricsDashboard(String department) {
+    final dept = department.trim().toUpperCase();
+
+    debugPrint('>>> Navigating Department: $dept');
+
+    switch (dept) {
+
+      case 'MARKETING':
+        Get.to(
+              () => DeptDashboard(
+            ctrl: Get.find<DashboardController>(),
+            department: department,
+          ),
+          transition: Transition.cupertino,
+        );
+        break;
+
+      case 'INQUIRY':
+        Get.to(
+              () => DeptDashboard(
+            ctrl: Get.find<DashboardController>(),
+            department: department,
+          ),
+          transition: Transition.cupertino,
+        );
+        break;
+
+      case 'PLANNING':
+        Get.to(
+              () => DeptDashboard(
+            ctrl: Get.find<DashboardController>(),
+            department: department,
+          ),
+          transition: Transition.cupertino,
+        );
+        break;
+
+      case 'LOOM':
+        Get.toNamed(AppRoutes.loomIn);
+        break;
+
+      case 'RMD':
+        Get.toNamed(AppRoutes.rmdIn);
+        break;
+
+      case 'LAMINATION':
+        Get.toNamed(AppRoutes.lamination);
+        break;
+
+      case 'CUTTING':
+        Get.to(() => CuttingScreen(), transition: Transition.cupertino);
+        break;
+
+      case 'BAG':
+        Get.toNamed(AppRoutes.bagEntry);
+        break;
+
+      case 'BALING':
+        Get.toNamed(AppRoutes.baleEntry);
+        break;
+
+      case 'WEBBING':
+        Get.toNamed(AppRoutes.webEntryScreen);
+        break;
+
+      case 'TAPELINE':
+        Get.toNamed(AppRoutes.tapelineIn);
+        break;
+
+      case 'JBL LOOM':
+        Get.toNamed(AppRoutes.loomList);
+        break;
+
+      case 'JBL RMD':
+        Get.toNamed(AppRoutes.jblRmdIn);
+        break;
+
+      case 'JBL LAMINATION':
+        Get.toNamed(AppRoutes.jblLamination);
+        break;
+
+      case 'JBL CUTTING':
+        Get.toNamed(AppRoutes.jblCuttingIn);
+        break;
+
+      case 'JBL BAG':
+        Get.toNamed(AppRoutes.jblBagStoreIssue);
+        break;
+
+      case 'JBL BALING':
+        Get.toNamed(AppRoutes.jblBailing);
+        break;
+
+      case 'JBL DISPATCH':
+        Get.toNamed(AppRoutes.jblScan);
+        break;
+
+      case 'JBL WEBBING':
+        Get.toNamed(AppRoutes.jblWebbIn);
+        break;
+
+      default:
+        _showNotAvailable(dept);
+        break;
+    }
+  }
+
+  void _showNotAvailable(String department) {
+    Get.snackbar(
+      'Not available',
+      '$department is not available for navigation',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.black87,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(12),
+      borderRadius: 12,
+      duration: const Duration(seconds: 2),
+      icon: const Icon(Icons.info_outline_rounded, color: Colors.white),
+    );
+  }
 }
 
-// helper — matches item.color.darken() used earlier in DashboardTopBarAnimated.
-// Skip this if a ColorShade extension already exists somewhere globally imported.
 extension _ColorShade on Color {
   Color darken([double amount = .1]) {
     final hsl = HSLColor.fromColor(this);

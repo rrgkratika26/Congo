@@ -249,7 +249,7 @@ class _LamRollPrintScreennaradanState extends State<LamRollPrintScreennaradan> {
 
     _setStatus("✅ Roll Issued");
     // Navigator.pop(context);
-    Get.offAll(() => const LamOutScreen());
+    Get.to(() => const LamOutScreen());
     return true;
   }
 

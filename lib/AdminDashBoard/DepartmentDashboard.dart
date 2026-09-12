@@ -17,9 +17,6 @@ import 'DashBoard.dart';
 import 'ListMenuItems/DashboardTopBarAnimated.dart';
 import 'ListMenuItems/dashBoardMapper.dart';
 
-// ─────────────────────────────────────────────
-//  CONTROLLER
-// ─────────────────────────────────────────────
 class DashboardController extends GetxController {
   final RxString unit = ''.obs;
   final RxString user = ''.obs;
@@ -49,7 +46,7 @@ class DashboardController extends GetxController {
 
   Future<void> logout() async {
     await AppSession.clearSession();
-    Get.offAllNamed(AppRoutes.login);
+    Get.toNamed(AppRoutes.login);
   }
 }
 
@@ -198,15 +195,12 @@ class NewAdminDashboard extends StatelessWidget {
         return AdminDashboard(ctrl: ctrl);
       } else {
         final dept = forceDepartment ?? ctrl.department.value;
-        return _DeptDashboard(ctrl: ctrl, department: dept);
+        return DeptDashboard(ctrl: ctrl, department: dept);
       }
     });
   }
 }
 
-// ─────────────────────────────────────────────
-//  PADMIN DASHBOARD
-// ─────────────────────────────────────────────
 class AdminDashboard extends StatelessWidget {
   final DashboardController ctrl;
 
@@ -300,13 +294,14 @@ class AdminDashboard extends StatelessWidget {
   }
 }
 
-class _DeptDashboard extends StatelessWidget {
+class DeptDashboard extends StatelessWidget {
   final DashboardController ctrl;
   final String department;
-  const _DeptDashboard({required this.ctrl, required this.department});
+  const DeptDashboard({required this.ctrl, required this.department});
 
   @override
   Widget build(BuildContext context) {
+    final ctrl = Get.find<DashboardController>();
     final mq = MediaQuery.of(context);
     final isMobile = mq.size.width < 600;
     final actions = getActionsForMenu(department);
@@ -318,63 +313,7 @@ class _DeptDashboard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Top bar ──────────────────────────────
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 8 : 32,
-                vertical: isMobile ? 18 : 24,
-              ),
-              decoration: const BoxDecoration(
-                color: C.appBar1,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(28),
-                ),
-              ),
-              child: Row(
-                children: [
-                  // Avatar
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: C.bg),
-                    onPressed: () {
-                      Get.offAllNamed(AppRoutes.login);
-
-                      Get.back();
-                    },
-                  ),
-                  SizedBox(width: isMobile ? 10 : 18),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Obx(
-                        () => Text(
-                          ctrl.user.value,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: isMobile ? 20 : 25,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Obx(
-                        () => Text(
-                          ctrl.unit.value,
-                          style: TextStyle(
-                            color: C.bg,
-                            fontSize: isMobile ? 20 : 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            Header(ctrl: ctrl, isMobile: isMobile),
 
             // ── Dept title ───────────────────────────
             Center(
@@ -418,7 +357,7 @@ class _DeptDashboard extends StatelessWidget {
                   crossAxisCount: crossCount,
                   crossAxisSpacing: 14,
                   mainAxisSpacing: 14,
-                  childAspectRatio: 1.15,
+                  childAspectRatio: 1.1,
                 ),
                 itemCount: actions.length,
                 itemBuilder: (ctx, i) => _ActionCard(
@@ -486,72 +425,6 @@ class _DeptDashboard extends StatelessWidget {
   }
 }
 
-class _DeptCard extends StatelessWidget {
-  final _DeptItem item;
-  final DashboardController ctrl;
-  final bool isMobile;
-  const _DeptCard({
-    required this.item,
-    required this.ctrl,
-    required this.isMobile,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        Get.to(
-          () => _DeptDashboard(ctrl: ctrl, department: item.title),
-          transition: Transition.cupertino,
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(.06),
-              blurRadius: 14,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: isMobile ? 54 : 64,
-              height: isMobile ? 54 : 64,
-
-              child: Icon(
-                item.icon,
-                color: C.primary,
-                size: isMobile ? 30 : 34,
-              ),
-            ),
-            SizedBox(height: isMobile ? 12 : 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                item.title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: isMobile ? 13 : 15,
-                  color: const Color(0xFF1A1A2E),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────
 //  ACTION CARD (Dept grid)
@@ -689,204 +562,204 @@ class _ActionCard extends StatelessWidget {
   }
 }
 
-class _AppDrawer extends StatelessWidget {
-  final DashboardController ctrl;
-  final List<_DeptItem> items;
-  const _AppDrawer({required this.ctrl, required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-
-    return Drawer(
-      width: isMobile ? MediaQuery.of(context).size.width * .82 : 320,
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 24,
-                  ),
-                  color: C.primary,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Profile Row
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Colors.white24,
-                            child: IconButton(
-                              onPressed: () {
-                                Get.to(() => ProfileScreen());
-                              },
-                              icon: const Icon(
-                                Icons.person,
-                                color: C.secondaryLight,
-                                size: 30,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-
-                          Expanded(
-                            child: Obx(
-                              () => Text(
-                                ctrl.user.value,
-                                style: const TextStyle(
-                                  color: C.bg,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Unit Row
-                      Obx(
-                        () => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.white30),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.factory, color: C.bg, size: 18),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  ctrl.unit.value,
-                                  style: const TextStyle(
-                                    color: C.bg,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            // Dept list
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 2),
-                itemBuilder: (ctx, i) {
-                  final item = items[i];
-                  return ListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    leading: Container(
-                      width: 42,
-                      height: 42,
-                      // decoration: BoxDecoration(
-                      //   gradient: const LinearGradient(
-                      //       colors: [C.appBar4, C.appBar3]),
-                      //   borderRadius: BorderRadius.circular(12),
-                      // ),
-                      child: Icon(item.icon, color: C.primary, size: 20),
-                    ),
-                    title: Text(
-                      item.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: Colors.grey,
-                    ),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      Get.to(
-                        () =>
-                            _DeptDashboard(ctrl: ctrl, department: item.title),
-                        transition: Transition.cupertino,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-
-            // Footer
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Column(
-                children: [
-                  const Divider(),
-                  // ListTile(
-                  //   shape: RoundedRectangleBorder(
-                  //       borderRadius: BorderRadius.circular(14)),
-                  //   leading: const Icon(Icons.person_outline,
-                  //       color: C.),
-                  //   title: const Text('Profile',
-                  //       style: TextStyle(
-                  //           fontWeight: FontWeight.w600)),
-                  //   onTap: () {
-                  //     Navigator.pop(context);
-                  //     Get.to(() => ProfileScreen(
-                  //       user: ctrl.user.value,
-                  //       unit: ctrl.unit.value,
-                  //       department: ctrl.department.value,
-                  //       userType: ctrl.userType.value,
-                  //     ));
-                  //   },
-                  // ),
-                  ListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    onTap: ctrl.logout,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// class _AppDrawer extends StatelessWidget {
+//   final DashboardController ctrl;
+//   final List<_DeptItem> items;
+//   const _AppDrawer({required this.ctrl, required this.items});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final isMobile = MediaQuery.of(context).size.width < 600;
+//
+//     return Drawer(
+//       width: isMobile ? MediaQuery.of(context).size.width * .82 : 320,
+//       child: SafeArea(
+//         child: Column(
+//           children: [
+//             // Header
+//             Column(
+//               children: [
+//                 Container(
+//                   width: double.infinity,
+//                   padding: const EdgeInsets.symmetric(
+//                     horizontal: 20,
+//                     vertical: 24,
+//                   ),
+//                   color: C.primary,
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       // Profile Row
+//                       Row(
+//                         crossAxisAlignment: CrossAxisAlignment.center,
+//                         children: [
+//                           CircleAvatar(
+//                             radius: 30,
+//                             backgroundColor: Colors.white24,
+//                             child: IconButton(
+//                               onPressed: () {
+//                                 Get.to(() => ProfileScreen());
+//                               },
+//                               icon: const Icon(
+//                                 Icons.person,
+//                                 color: C.secondaryLight,
+//                                 size: 30,
+//                               ),
+//                             ),
+//                           ),
+//                           const SizedBox(width: 14),
+//
+//                           Expanded(
+//                             child: Obx(
+//                               () => Text(
+//                                 ctrl.user.value,
+//                                 style: const TextStyle(
+//                                   color: C.bg,
+//                                   fontSize: 18,
+//                                   fontWeight: FontWeight.bold,
+//                                 ),
+//                               ),
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//
+//                       const SizedBox(height: 16),
+//
+//                       // Unit Row
+//                       Obx(
+//                         () => Container(
+//                           padding: const EdgeInsets.symmetric(
+//                             horizontal: 12,
+//                             vertical: 8,
+//                           ),
+//                           decoration: BoxDecoration(
+//                             color: Colors.white.withOpacity(0.15),
+//                             borderRadius: BorderRadius.circular(20),
+//                             border: Border.all(color: Colors.white30),
+//                           ),
+//                           child: Row(
+//                             mainAxisSize: MainAxisSize.min,
+//                             children: [
+//                               const Icon(Icons.factory, color: C.bg, size: 18),
+//                               const SizedBox(width: 8),
+//                               Flexible(
+//                                 child: Text(
+//                                   ctrl.unit.value,
+//                                   style: const TextStyle(
+//                                     color: C.bg,
+//                                     fontSize: 14,
+//                                     fontWeight: FontWeight.w600,
+//                                   ),
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ),
+//
+//             // Dept list
+//             Expanded(
+//               child: ListView.separated(
+//                 padding: const EdgeInsets.symmetric(
+//                   horizontal: 12,
+//                   vertical: 12,
+//                 ),
+//                 itemCount: items.length,
+//                 separatorBuilder: (_, __) => const SizedBox(height: 2),
+//                 itemBuilder: (ctx, i) {
+//                   final item = items[i];
+//                   return ListTile(
+//                     shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(14),
+//                     ),
+//                     leading: Container(
+//                       width: 42,
+//                       height: 42,
+//                       // decoration: BoxDecoration(
+//                       //   gradient: const LinearGradient(
+//                       //       colors: [C.appBar4, C.appBar3]),
+//                       //   borderRadius: BorderRadius.circular(12),
+//                       // ),
+//                       child: Icon(item.icon, color: C.primary, size: 20),
+//                     ),
+//                     title: Text(
+//                       item.title,
+//                       style: const TextStyle(
+//                         fontWeight: FontWeight.w600,
+//                         fontSize: 14,
+//                       ),
+//                     ),
+//                     trailing: const Icon(
+//                       Icons.arrow_forward_ios_rounded,
+//                       size: 14,
+//                       color: Colors.grey,
+//                     ),
+//                     onTap: () {
+//                       Navigator.pop(ctx);
+//                       Get.to(
+//                         () =>
+//                             DeptDashboard(ctrl: ctrl, department: item.title),
+//                         transition: Transition.cupertino,
+//                       );
+//                     },
+//                   );
+//                 },
+//               ),
+//             ),
+//
+//             // Footer
+//             Padding(
+//               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+//               child: Column(
+//                 children: [
+//                   const Divider(),
+//                   // ListTile(
+//                   //   shape: RoundedRectangleBorder(
+//                   //       borderRadius: BorderRadius.circular(14)),
+//                   //   leading: const Icon(Icons.person_outline,
+//                   //       color: C.),
+//                   //   title: const Text('Profile',
+//                   //       style: TextStyle(
+//                   //           fontWeight: FontWeight.w600)),
+//                   //   onTap: () {
+//                   //     Navigator.pop(context);
+//                   //     Get.to(() => ProfileScreen(
+//                   //       user: ctrl.user.value,
+//                   //       unit: ctrl.unit.value,
+//                   //       department: ctrl.department.value,
+//                   //       userType: ctrl.userType.value,
+//                   //     ));
+//                   //   },
+//                   // ),
+//                   ListTile(
+//                     shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(14),
+//                     ),
+//                     leading: const Icon(Icons.logout, color: Colors.red),
+//                     title: const Text(
+//                       'Logout',
+//                       style: TextStyle(
+//                         color: Colors.red,
+//                         fontWeight: FontWeight.w600,
+//                       ),
+//                     ),
+//                     onTap: ctrl.logout,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // ─────────────────────────────────────────────
 //  NAVIGATION HELPER
@@ -935,7 +808,7 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
   switch (dept.toUpperCase()) {
     case 'MARKETING':
       if (action == MenuAction.Inquirey_Report)
-        Get.toNamed(AppRoutes.InquiryMarketingReport);
+        Get.toNamed(AppRoutes.InquiryMarketingList);
       if (action == MenuAction.Bom_Report) Get.toNamed(AppRoutes.bomReport);
 
       if (action == MenuAction.Bom_List_remain) {
@@ -1004,7 +877,7 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
       else if (action == MenuAction.rollWise)
         Get.toNamed(AppRoutes.rollWiseReport);
       else if (action == MenuAction.component_Wise)
-        Get.toNamed(AppRoutes.componentWiseReport);
+        Get.toNamed(AppRoutes.rolCuttingReport);
       else if (action == MenuAction.cutting_Wise)
         Get.toNamed(AppRoutes.cuttingWiseReport);
       else if (action == MenuAction.stock)

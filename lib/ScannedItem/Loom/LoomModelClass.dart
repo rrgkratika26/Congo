@@ -1,7 +1,7 @@
 class LoomOrder {
   final int id;
   final String articleNo;
-
+final int unique_No;
   final String bom;
   final String poNumber;
   final String orderNo;
@@ -37,7 +37,7 @@ class LoomOrder {
     required this.balanceKg,
     required this.balanceMtr,
     required this.status,
-    required this.customerName,
+    required this.customerName, required this.unique_No,
   });
 
   factory LoomOrder.fromJson(Map<String, dynamic> json) {
@@ -76,6 +76,7 @@ class LoomOrder {
 
       status: json['status'] ?? false,
       customerName: json['partyName']?.toString() ?? '',
+      unique_No: toInt(json['unique_No']),
     );
   }
 }

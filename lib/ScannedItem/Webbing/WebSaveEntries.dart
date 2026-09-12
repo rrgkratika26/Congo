@@ -183,7 +183,7 @@ PRINT 1
       );
       await Future.delayed(const Duration(milliseconds: 500));
 
-      Get.offAll(() => const NewAdminDashboard());
+      Get.to(() => const NewAdminDashboard());
 
     } catch (e) {
 

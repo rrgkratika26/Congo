@@ -1,794 +1,911 @@
 import 'package:flutter/material.dart';
 
+import 'package:IMS/services/DashboardApiServices.dart';
 import '../../Color/Colorclass.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
+
+import 'BagDesignScreen.dart';
+
+import 'ModelFIBCBag/BagComponent.dart';
+import 'ModelFIBCBag/BagModel.dart' as bagModel;
 
 class InquiryMarketingReportScreen extends StatefulWidget {
   final DateTime? startDate;
   final DateTime? endDate;
+  final String inquiryNo;
 
-  const InquiryMarketingReportScreen({Key? key, this.startDate, this.endDate})
-    : super(key: key);
+  const InquiryMarketingReportScreen({
+    Key? key,
+    this.startDate,
+    this.endDate,
+    required this.inquiryNo,
+  }) : super(key: key);
 
   @override
-  State<InquiryMarketingReportScreen> createState() => _InquiryMarketingReportScreenState();
+  State<InquiryMarketingReportScreen> createState() =>
+      _InquiryMarketingReportScreenState();
 }
 
-class _InquiryMarketingReportScreenState extends State<InquiryMarketingReportScreen> {
-  // ───────────────── DATE ─────────────────
-  final ScrollController _listController = ScrollController();
+class _InquiryMarketingReportScreenState
+    extends State<InquiryMarketingReportScreen> {
+  late DateTime _fromDate;
+  late DateTime _toDate;
 
-  bool isLoadingMore = false;
-  bool hasMoreData = true;
-  DateTime _fromDate = DateTime.now().subtract(const Duration(days: 30));
-
-  DateTime _toDate = DateTime.now();
-
-  final ScrollController _horizCtrl = ScrollController();
-
-  final TextEditingController _searchController = TextEditingController();
-
-  // ───────────────── STATIC DATA ─────────────────
-
-  String? selectedParty;
-
-  List<String> partyList = [];
-  bool isPartyLoading = false;
-  List<Map<String, dynamic>> reports = [];
-  List<Map<String, dynamic>> filteredReports = [];
+  Map<String, dynamic>? report;
 
   bool isLoading = false;
-  int pageNumber = 1;
-
-  String _formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}-"
-        "${date.month.toString().padLeft(2, '0')}-"
-        "${date.year}";
-  }
-
-  // ───────────────── COLUMN WIDTHS ─────────────────
-
-  static const double _colSrNo = 70;
-  static const double _colDate = 100;
-  static const double _colParty = 200;
-  static const double _colInquiry = 170;
-  static const double _colEmployee = 170;
-  static const double _colBagType = 170;
-  static const double _colArticle = 150;
-  static const double _colFg = 160;
-  static const double _colWo = 100;
-  static const double _colWoDate = 190;
-  static const double _colWoEmployee = 180;
-  static const double _colPo = 200;
-  static const double _colSrWo = 150;
-  static const double _colSrWoDate = 170;
-  static const double _colSrWoUser = 180;
-
-  static const double _colIssueQc = 180;
-  static const double _colIssuePerson = 180;
-
-  static const double _colBomDate = 180;
-  static const double _colBomProd = 180;
-
-  static const double _colIssueSample = 180;
-  static const double _colSamplePerson = 180;
-  static const double _colSampleDate = 180;
-
-  static const double _colComplaint = 180;
-  static const double _colStatusReason = 180;
-  static const double _colStatus = 150;
-
-  double get _totalWidth =>
-      _colSrNo +
-      _colDate +
-      _colParty +
-      _colInquiry +
-      _colEmployee +
-      _colBagType +
-      _colArticle +
-      _colFg +
-      _colWo +
-      _colWoDate +
-      _colWoEmployee +
-      _colPo +
-      _colSrWo +
-      _colSrWoDate +
-      _colSrWoUser +
-      _colIssueQc +
-      _colIssuePerson +
-      _colBomDate +
-      _colBomProd +
-      _colIssueSample +
-      _colSamplePerson +
-      _colSampleDate +
-      _colComplaint +
-      _colStatusReason +
-      _colStatus;
-
-  // ───────────────── INIT ─────────────────
+  bool isOpeningDesign = false;
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.startDate != null) {
-      _fromDate = widget.startDate!;
-    }
+    _fromDate =
+        widget.startDate ?? DateTime.now().subtract(const Duration(days: 30));
 
-    if (widget.endDate != null) {
-      _toDate = widget.endDate!;
-    }
+    _toDate = widget.endDate ?? DateTime.now();
 
-    _listController.addListener(_scrollListener);
-    loadParties(); // add this
     loadInquiryReport();
   }
 
-  void _scrollListener() {
-    if (_listController.position.pixels >=
-            _listController.position.maxScrollExtent - 200 &&
-        !isLoadingMore &&
-        hasMoreData) {
-      loadMoreData();
-    }
-  }
+  // ============================================================
+  // API DATE
+  // ============================================================
 
   String _apiDate(DateTime date) {
-    return "${date.year}-"
-        "${date.month.toString().padLeft(2, '0')}-"
-        "${date.day.toString().padLeft(2, '0')}";
+    return '${date.year}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 
-  Future<void> loadParties() async {
-    try {
-      setState(() {
-        isPartyLoading = true;
-      });
-
-      final result = await NaradanaApiService().fetchCustomerNames();
-
-      setState(() {
-        partyList = result;
-        isPartyLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isPartyLoading = false;
-      });
-
-      print(e);
-    }
-  }
-
-  Future<void> loadMoreData() async {
-    try {
-      setState(() {
-        isLoadingMore = true;
-      });
-
-      pageNumber++;
-
-      final result = await NaradanaApiService().fetchInquiryReport(
-        fromDate: _apiDate(_fromDate),
-        toDate: _apiDate(_toDate),
-        pageNumber: pageNumber,
-        pageSize: 50,
-      );
-
-      setState(() {
-        reports.addAll(result);
-
-        _filterData();
-
-        isLoadingMore = false;
-
-        if (result.isEmpty || result.length < 50) {
-          hasMoreData = false;
-        }
-      });
-    } catch (e) {
-      setState(() {
-        isLoadingMore = false;
-      });
-    }
-  }
-
-  void _filterData() {
-    final query = _searchController.text.toLowerCase().trim();
-
-    setState(() {
-      filteredReports = reports.where((item) {
-        final matchesSearch =
-            item["customeR_NAME"].toString().toLowerCase().contains(query) ||
-            item["articlE_NO"].toString().toLowerCase().contains(query) ||
-            item["inquirY_NO_main"].toString().toLowerCase().contains(query) ||
-            item["baG_TYPE"].toString().toLowerCase().contains(query);
-
-        final matchesParty =
-            selectedParty == null || item["customeR_NAME"] == selectedParty;
-
-        return matchesSearch && matchesParty;
-      }).toList();
-    });
-  }
+  // ============================================================
+  // LOAD REPORT
+  // ============================================================
 
   Future<void> loadInquiryReport() async {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
     try {
-      pageNumber = 1;
-      hasMoreData = true;
-
-      setState(() {
-        isLoading = true;
-      });
-
       final result = await NaradanaApiService().fetchInquiryReport(
         fromDate: _apiDate(_fromDate),
         toDate: _apiDate(_toDate),
-        pageNumber: pageNumber,
+        pageNumber: 1,
         pageSize: 50,
       );
 
+      final match = result.firstWhere((e) {
+        final apiInquiry = e["inquirY_NO_main"]?.toString().trim() ?? "";
+
+        return apiInquiry == widget.inquiryNo.trim();
+      }, orElse: () => <String, dynamic>{});
+
+      if (!mounted) return;
+
       setState(() {
-        reports = result;
-        filteredReports = result;
+        report = match.isEmpty ? null : match;
 
         isLoading = false;
-
-        if (result.length < 50) {
-          hasMoreData = false;
-        }
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
+        report = null;
         isLoading = false;
       });
+
+      _showSnackBar("Unable to load inquiry details", isError: true);
     }
   }
+// ============================================================
+// OPEN BAG DESIGN
+// ============================================================
 
-  void _onSearch(String value) {
-    _filterData();
-  }
+  Future<void> _openBagDesign() async {
+    final item = report;
 
-  @override
-  void dispose() {
-    _horizCtrl.dispose();
-    _listController.dispose();
-    _searchController.dispose();
-    super.dispose();
-  }
+    if (item == null) {
+      _showSnackBar(
+        "Inquiry data not found",
+        isError: true,
+      );
+      return;
+    }
 
-  // ───────────────── DATE PICKER ─────────────────
-
-  Future<void> _pickDateRange() async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      initialDateRange: DateTimeRange(start: _fromDate, end: _toDate),
+    final inquiryNo = _text(
+      item["inquirY_NO_main"],
     );
 
-    if (picked != null) {
+    if (inquiryNo == "-") {
+      _showSnackBar(
+        "Inquiry number not found",
+        isError: true,
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      isOpeningDesign = true;
+    });
+
+    try {
+      print('------------------------------------------');
+      print('Opening FIBC Bag Design');
+      print('Inquiry No: $inquiryNo');
+      print('Unit: UNIT-CONGO');
+      print('------------------------------------------');
+
+      final detail =
+      await DashboardService().getFibcBagSpecification(
+        inquiryNo: inquiryNo,
+        unit: 'UNIT-CONGO',
+      );
+
+      if (!mounted) return;
+
       setState(() {
-        _fromDate = picked.start;
-        _toDate = picked.end;
+        isOpeningDesign = false;
       });
 
-      loadInquiryReport();
+      if (detail == null) {
+        _showSnackBar(
+          "FIBC specification not found",
+          isError: true,
+        );
+        return;
+      }
+
+      print('------------------------------------------');
+      print('FIBC BAG DETAILS');
+      print('Length: ${detail.length}');
+      print('Width: ${detail.width}');
+      print('Height: ${detail.height}');
+      print('Loop Free Height: ${detail.loopFreeHeight}');
+      print('Loop LL: ${detail.longLegHeight}');
+      print('Loop SL: ${detail.shortLegHeight}');
+      print('F/S Diameter: ${detail.fillingSpoutDiameter}');
+      print('F/S Height: ${detail.fillingSpoutHeight}');
+      print('D/S Diameter: ${detail.dischargeSpoutDiameter}');
+      print('D/S Height: ${detail.dischargeSpoutHeight}');
+      print('Construction: ${detail.construction}');
+      print('Bag Type: ${detail.bagType}');
+      print('SWL: ${detail.safeWorkingLoad}');
+      print('Total: ${detail.total}');
+      print('SF: ${detail.safetyFactor}');
+      print('Components: ${detail.components.length}');
+      print('------------------------------------------');
+
+      final specification = _mapToDrawingSpec(
+        detail,
+        inquiryNo,
+      );
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Scaffold(
+            backgroundColor: C.bg,
+            appBar: AppBar(
+              backgroundColor: C.primary,
+              elevation: 0,
+              iconTheme: const IconThemeData(
+                color: Colors.white,
+              ),
+              title: const Text(
+                "Bag Design",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(14),
+                child: StaticFibcBagCard(
+                  specification: specification,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isOpeningDesign = false;
+      });
+
+      print('OPEN BAG DESIGN ERROR: $e');
+
+      _showSnackBar(
+        "Unable to load bag design",
+        isError: true,
+      );
     }
   }
 
-  // ───────────────── BUILD ─────────────────
+
+  FibcBagSpecification _mapToDrawingSpec(
+      DashboardBagSpecification d,
+      String inquiryId,
+      ) {
+    return FibcBagSpecification(
+      inquiryId: inquiryId,
+
+      // BAG SIZE
+      length: d.length,
+      width: d.width,
+      height: d.height,
+
+      // LOOP
+      loopFreeHeight: d.loopFreeHeight,
+      longLegHeight: d.longLegHeight,
+      shortLegHeight: d.shortLegHeight,
+
+      // FILLING SPOUT
+      fillingSpoutDiameter: d.fillingSpoutDiameter,
+      fillingSpoutHeight: d.fillingSpoutHeight,
+
+      // DISCHARGE SPOUT
+      dischargeSpoutDiameter: d.dischargeSpoutDiameter,
+      dischargeSpoutHeight: d.dischargeSpoutHeight,
+
+      // BAG INFORMATION
+      construction: d.construction,
+      bagType: d.bagType,
+
+      // SAFETY / WEIGHT
+      safeWorkingLoad: d.safeWorkingLoad,
+      total: d.total,
+      safetyFactor: d.safetyFactor,
+
+      // LOOP COLOR
+      loopColor: d.loopColor,
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: C.bg,
 
-      // ───────────── APP BAR ─────────────
       appBar: AppBar(
+        backgroundColor: C.primary,
         elevation: 0,
-        toolbarHeight: 78,
-        automaticallyImplyLeading: true,
 
-        flexibleSpace: Container(color: C.primary),
-
-        titleSpacing: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
 
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // ───────── TITLE ─────────
             const Text(
-              "Inquiry Report",
+              "Inquiry Details",
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 19,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                letterSpacing: .4,
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
 
-            // ───────── DATE RANGE ─────────
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                "${_formatDate(_fromDate)}  →  ${_formatDate(_toDate)}",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
+            Text(
+              widget.inquiryNo,
+              style: TextStyle(
+                color: Colors.white.withOpacity(.75),
+                fontSize: 11,
               ),
             ),
           ],
         ),
-
-        actions: [
-          // ───────── DATE FILTER BUTTON ─────────
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: _pickDateRange,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(.14),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(.15)),
-                ),
-                child: const Icon(
-                  Icons.date_range_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-            ),
-          ),
-        ],
-
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
 
-      body: Column(
+      body: _buildBody(),
+    );
+  }
+
+  // ============================================================
+  // BODY
+  // ============================================================
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final item = report;
+
+    if (item == null) {
+      return _buildEmpty();
+    }
+
+    return RefreshIndicator(
+      onRefresh: loadInquiryReport,
+
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+
+        padding: const EdgeInsets.all(14),
+
         children: [
-          _buildFilterBar(),
-          // _summaryBar(),
-          Expanded(child: _buildBody()),
+
+          _buildCustomerHeader(item),
+
+          const SizedBox(height: 14),
+
+          _buildTableSection(
+            title: "Inquiry Details",
+            icon: Icons.description_outlined,
+            rows: [
+              _row("Customer Name", item["customeR_NAME"]),
+
+              _row("Inquiry No.", item["inquirY_NO_main"]),
+
+              _row("Inquiry Date", _formatDate(_text(item["date"]))),
+
+              _row("Employee", item["employee"]),
+
+              _row("Grade", item["fG_NON_FG"]),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // ==================================================
+          // BAG DETAILS
+          // ==================================================
+          _buildTableSection(
+            title: "Bag Details",
+            icon: Icons.inventory_2_outlined,
+            rows: [
+              _row("Bag Type", item["baG_TYPE"]),
+
+              _row("Article No.", item["articlE_NO"]),
+
+              _row("Quantity", item["qty"]),
+
+              _row("Total", item["total"]),
+
+              _row(
+                "Total Ton",
+                _text(item["totaL_TON"]) == "-"
+                    ? "-"
+                    : "${_text(item["totaL_TON"])} T",
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // ==================================================
+          // WORK ORDER
+          // ==================================================
+          _buildTableSection(
+            title: "Work Order",
+            icon: Icons.assignment_outlined,
+            rows: [
+              _row("WO No.", item["wo"]),
+
+              _row("WO Date", _formatDate(_text(item["wO_DATE"]))),
+
+              _row("WO Employee", item["wO_EMPLOYEE"]),
+
+              _row("PO No.", item["po_num"]),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // ==================================================
+          // SAMPLE / QC
+          // ==================================================
+          _buildTableSection(
+            title: "Sample & QC",
+            icon: Icons.fact_check_outlined,
+            rows: [
+              _row("SR WO No.", item["sR_WO_NUM"]),
+
+              _row("SR WO Date", _formatDate(_text(item["sR_WO_DATE"]))),
+
+              _row("SR WO User", item["sR_WO_USER_NAME"]),
+
+              _row("Issued to QC", item["issuE_TO_QC"]),
+
+              _row("QC Person", item["issuE_PERSON"]),
+
+              _row("Issued to Sample", item["issuE_TO_SAMPLE"]),
+
+              _row("Sample Person", item["samplE_PERSON"]),
+
+              _row(
+                "Sample Date",
+                _formatDate(_text(item["samplE_PROCESSING_DATE"])),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // ==================================================
+          // BOM
+          // ==================================================
+          _buildTableSection(
+            title: "BOM",
+            icon: Icons.inventory_outlined,
+            rows: [
+              _row("BOM Date", _formatDate(_text(item["boM_DATE"]))),
+
+              _row("BOM to Production", item["boM_TO_PRODUCTION"]),
+            ],
+          ),
+
+          // ==================================================
+          // STATUS
+          // ==================================================
+          if (_hasStatus(item)) ...[
+            const SizedBox(height: 14),
+
+            _buildTableSection(
+              title: "Status & Remarks",
+              icon: Icons.info_outline,
+              rows: [
+                _row("Status", item["status"]),
+
+                _row("Status Reason", item["statuS_REASON"]),
+
+                _row("Complaint", item["complain"]),
+              ],
+            ),
+          ],
+
+          const SizedBox(height: 10),
+
+          _buildDesignButton(),
+
+          const SizedBox(height: 10),
         ],
       ),
     );
   }
-  // ───────────────── FILTER BAR ─────────────────
 
-  Widget _buildFilterBar() {
+  // ============================================================
+  // CUSTOMER HEADER
+  // ============================================================
+
+  Widget _buildCustomerHeader(Map<String, dynamic> item) {
+    final customer = _text(item["customeR_NAME"]);
+
+    final inquiryNo = _text(item["inquirY_NO_main"]);
+
+    final grade = _text(item["fG_NON_FG"]);
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(18),
+
       decoration: BoxDecoration(
         color: Colors.white,
+
+        borderRadius: BorderRadius.circular(16),
+
+        border: Border(left: BorderSide(color: C.primary, width: 4)),
+
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
+            color: Colors.black.withOpacity(.05),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // ───────── SEARCH BAR ─────────
-          TextField(
-            controller: _searchController,
-            onChanged: _onSearch,
-            decoration: InputDecoration(
-              hintText: "Search inquiry, article, party...",
-              prefixIcon: const Icon(
-                Icons.search_rounded,
-                color: Color(0xFF1A4A8A),
-              ),
-              filled: true,
-              fillColor: const Color(0xFFF4F7FC),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
 
-          const SizedBox(height: 12),
-
-          // ───────── PARTY DROPDOWN ─────────
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F7FC),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: selectedParty,
-                isExpanded: true,
-
-                hint: Text(
-                  isPartyLoading ? "Loading parties..." : "Select Party Name",
-                ),
-
-                items: [
-                  const DropdownMenuItem<String>(
-                    value: null,
-                    child: Text("All Parties"),
-                  ),
-
-                  ...partyList.map(
-                    (party) => DropdownMenuItem<String>(
-                      value: party,
-                      child: Text(party, overflow: TextOverflow.ellipsis),
-                    ),
-                  ),
-                ],
-
-                onChanged: (value) {
-                  setState(() {
-                    selectedParty = value;
-                  });
-
-                  _filterData();
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ───────────────── SUMMARY ─────────────────
-
-  Widget _summaryBar() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF0E2458), Color(0xFF1A4A8A)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
       child: Row(
         children: [
-          Expanded(
-            child: _summaryCard(
-              title: "Total Records",
-              value: filteredReports.length.toString(),
-              icon: Icons.inventory_2_rounded,
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: _summaryCard(
-              title: "Food Grade",
-              value: filteredReports
-                  .where((e) => e["fgNonFg"].toString().contains("FOOD"))
-                  .length
-                  .toString(),
-              icon: Icons.check_circle_rounded,
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: _summaryCard(
-              title: "Industrial",
-              value: filteredReports
-                  .where((e) => e["fgNonFg"].toString().contains("INDUSTRIAL"))
-                  .length
-                  .toString(),
-              icon: Icons.factory_rounded,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _summaryCard({
-    required String title,
-    required String value,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF).withOpacity(.12),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(.15)),
-      ),
-      child: Column(
-        children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            width: 48,
+            height: 48,
+
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(.12),
-              shape: BoxShape.circle,
+              color: C.primary.withOpacity(.10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.white, size: 22),
+
+            child: Icon(Icons.business_outlined, color: C.primary, size: 25),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(width: 13),
 
-          Text(
-            value,
-            style: const TextStyle(
-              color: Color(0xFFFFFFFF),
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                Text(
+                  customer,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF202124),
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  inquiryNo,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: C.primary,
+                  ),
+                ),
+              ],
             ),
           ),
 
-          const SizedBox(height: 6),
+          if (grade != "-")
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
 
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFFFFFFFF),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+
+              child: Text(
+                grade,
+                textAlign: TextAlign.center,
+
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange.shade800,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  // ───────────────── BODY ─────────────────
+  // ============================================================
+  // TABLE SECTION
+  // ============================================================
 
-  Widget _buildBody() {
-    if (filteredReports.isEmpty) {
-      return const Center(child: Text("No inquiry report found"));
+  Widget _buildTableSection({
+    required String title,
+    required IconData icon,
+    required List<_InfoTableRow> rows,
+  }) {
+    // Remove empty rows completely.
+    final visibleRows = rows.where((row) => row.value != "-").toList();
+
+    // Don't display an empty section.
+    if (visibleRows.isEmpty) {
+      return const SizedBox.shrink();
     }
 
-    return Scrollbar(
-      controller: _horizCtrl,
-      thumbVisibility: true,
-      trackVisibility: true,
-      child: SingleChildScrollView(
-        controller: _horizCtrl,
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: _totalWidth,
-          child: Column(
-            children: [
-              _buildTableHeader(),
-              Expanded(
-                child: ListView.builder(
-                  controller: _listController,
-                  itemCount: filteredReports.length + (isLoadingMore ? 1 : 0),
-
-                  itemBuilder: (_, index) {
-                    if (index == filteredReports.length) {
-                      return const Padding(
-                        padding: EdgeInsets.all(15),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-
-                    return _buildTableRow(filteredReports[index], index);
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ───────────────── HEADER ─────────────────
-
-  // ───────────────── HEADER ─────────────────
-
-  Widget _buildTableHeader() {
     return Container(
-      color: C.bg,
-      child: Row(
-        children: [
-          _headerCell("SR", _colSrNo),
-          _headerCell("DATE", _colDate),
-          _headerCell("PARTY NAME", _colParty),
-          _headerCell("INQUIRY", _colInquiry),
-          _headerCell("EMPLOYEE", _colEmployee),
-          _headerCell("BAG TYPE", _colBagType),
-          _headerCell("ARTICLE", _colArticle),
-          _headerCell("HYGIENE", _colFg),
-
-          _headerCell("WO", _colWo),
-          _headerCell("WO DATE", _colWoDate),
-          _headerCell("WO EMPLOYEE", _colWoEmployee),
-
-          _headerCell("PO NO", _colPo),
-
-          _headerCell("SR WO", _colSrWo),
-          _headerCell("SR WO DATE", _colSrWoDate),
-          _headerCell("SR WO USER", _colSrWoUser),
-
-          _headerCell("ISSUE QC", _colIssueQc),
-          _headerCell("ISSUE PERSON", _colIssuePerson),
-
-          _headerCell("BOM DATE", _colBomDate),
-          _headerCell("BOM PROD", _colBomProd),
-
-          _headerCell("ISSUE SAMPLE", _colIssueSample),
-          _headerCell("SAMPLE PERSON", _colSamplePerson),
-          _headerCell("SAMPLE DATE", _colSampleDate),
-
-          _headerCell("COMPLAINT", _colComplaint),
-          _headerCell("STATUS REASON", _colStatusReason),
-          _headerCell("STATUS", _colStatus),
-        ],
-      ),
-    );
-  }
-
-  Widget _headerCell(String title, double width) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        border: Border(right: BorderSide(color: C.border)),
-      ),
-      child: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: C.primary,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  // ───────────────── ROW ─────────────────
-
-  Widget _buildTableRow(Map<String, dynamic> item, int index) {
-    final bool isFood = item["fG_NON_FG"].toString().toUpperCase().contains(
-      "FOOD",
-    );
-
-    return Container(
-      color: index.isEven ? Colors.white : const Color(0xFFF7F9FC),
-
-      child: Row(
-        children: [
-          _dataCell("${index + 1}", _colSrNo),
-
-          _dataCell(item["date"] ?? "", _colDate),
-
-          _dataCell(item["customeR_NAME"] ?? "", _colParty, bold: true),
-
-          _dataCell(
-            item["inquirY_NO_main"] ?? "",
-            _colInquiry,
-            textColor: Colors.blue,
-            bold: true,
-          ),
-
-          _dataCell(item["employee"] ?? "", _colEmployee),
-
-          _dataCell(item["baG_TYPE"] ?? "", _colBagType),
-
-          _dataCell(item["articlE_NO"] ?? "", _colArticle),
-
-          // Hygiene badge
-          Container(
-            width: _colFg,
-            padding: const EdgeInsets.all(8),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: Border(
-                right: BorderSide(color: Colors.grey.shade200),
-                bottom: BorderSide(color: Colors.grey.shade200),
-              ),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: isFood ? Colors.green.shade100 : Colors.orange.shade100,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                item["fG_NON_FG"] ?? "",
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: isFood
-                      ? Colors.green.shade800
-                      : Colors.orange.shade800,
-                ),
-              ),
-            ),
-          ),
-
-          _dataCell(item["wo"] ?? "", _colWo),
-
-          _dataCell(item["wO_DATE"] ?? "", _colWoDate),
-
-          _dataCell(item["wO_EMPLOYEE"] ?? "", _colWoEmployee),
-
-          _dataCell(item["po_num"] ?? "", _colPo),
-
-          _dataCell(item["sR_WO_NUM"] ?? "", _colSrWo),
-
-          _dataCell(item["sR_WO_DATE"] ?? "", _colSrWoDate),
-
-          _dataCell(item["sR_WO_USER_NAME"] ?? "", _colSrWoUser),
-
-          _dataCell(item["issuE_TO_QC"] ?? "", _colIssueQc),
-
-          _dataCell(item["issuE_PERSON"] ?? "", _colIssuePerson),
-
-          _dataCell(item["boM_DATE"] ?? "", _colBomDate),
-
-          _dataCell(item["boM_TO_PRODUCTION"] ?? "", _colBomProd),
-
-          _dataCell(item["issuE_TO_SAMPLE"] ?? "", _colIssueSample),
-
-          _dataCell(item["samplE_PERSON"] ?? "", _colSamplePerson),
-
-          _dataCell(item["samplE_PROCESSING_DATE"] ?? "", _colSampleDate),
-
-          _dataCell(item["complain"] ?? "", _colComplaint),
-
-          _dataCell(item["statuS_REASON"] ?? "", _colStatusReason),
-
-          _dataCell(item["status"] ?? "", _colStatus),
-        ],
-      ),
-    );
-  }
-  // ───────────────── DATA CELL ─────────────────
-
-  Widget _dataCell(
-    String text,
-    double width, {
-    Color? textColor,
-    bool bold = false,
-  }) {
-    return Container(
-      width: width,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.circular(14),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.04),
+            blurRadius: 7,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+          // ----------------------------------------------
+          // SECTION TITLE
+          // ----------------------------------------------
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 13, 15, 11),
+
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+
+                  decoration: BoxDecoration(
+                    color: C.primary.withOpacity(.09),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+
+                  child: Icon(icon, size: 16, color: C.primary),
+                ),
+
+                const SizedBox(width: 9),
+
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF252525),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Divider(height: 1, color: Colors.grey.shade200),
+
+          // ----------------------------------------------
+          // VERTICAL TABLE
+          // ----------------------------------------------
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(14),
+              bottomRight: Radius.circular(14),
+            ),
+
+            child: Column(
+              children: List.generate(visibleRows.length, (index) {
+                final row = visibleRows[index];
+
+                return _buildTableRow(row, index);
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // TABLE ROW
+  // ============================================================
+
+  Widget _buildTableRow(_InfoTableRow row, int index) {
+    final isLast = index == 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: index.isEven ? Colors.white : const Color(0xFFFAFAFC),
+
         border: Border(
-          right: BorderSide(color: Colors.grey.shade200),
-          bottom: BorderSide(color: Colors.grey.shade200),
+          bottom: BorderSide(
+            color: Colors.grey.shade200,
+            width: isLast ? 0 : 1,
+          ),
         ),
       ),
-      child: Text(
-        text.isEmpty ? "-" : text,
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-          color: textColor ?? const Color(0xFF212121),
+
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+
+          children: [
+            // ------------------------------------------
+            // LABEL
+            // ------------------------------------------
+            Container(
+              width: 145,
+
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+
+              color: C.primary.withOpacity(.035),
+
+              alignment: Alignment.centerLeft,
+
+              child: Text(
+                row.label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+
+            // ------------------------------------------
+            // VERTICAL DIVIDER
+            // ------------------------------------------
+            Container(width: 1, color: Colors.grey.shade200),
+
+            // ------------------------------------------
+            // VALUE
+            // ------------------------------------------
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 11,
+                ),
+
+                child: Text(
+                  row.value,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF202124),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+
+  _InfoTableRow _row(String label, dynamic value) {
+    return _InfoTableRow(label: label, value: _text(value));
+  }
+
+  Widget _buildDesignButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 54,
+
+      child: ElevatedButton.icon(
+        onPressed: isOpeningDesign ? null : _openBagDesign,
+
+        style: ElevatedButton.styleFrom(
+          backgroundColor: C.primary,
+
+          disabledBackgroundColor: C.primary.withOpacity(.55),
+
+          elevation: 2,
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(13),
+          ),
+        ),
+
+        icon: isOpeningDesign
+            ? const SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Colors.white,
+          ),
+        )
+            : const Icon(Icons.view_in_ar_rounded, color: Colors.white),
+
+        label: Text(
+          isOpeningDesign ? "Loading Bag Design..." : "View Bag Design",
+
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _hasStatus(Map<String, dynamic> item) {
+    return _text(item["status"]) != "-" ||
+        _text(item["statuS_REASON"]) != "-" ||
+        _text(item["complain"]) != "-";
+  }
+
+  String _text(dynamic value) {
+    if (value == null) {
+      return "-";
+    }
+
+    final text = value.toString().trim();
+
+    if (text.isEmpty || text.toLowerCase() == "null") {
+      return "-";
+    }
+
+    return text;
+  }
+
+  String _formatDate(String value) {
+    if (value == "-" || value.isEmpty) {
+      return "-";
+    }
+
+    try {
+      final date = DateTime.parse(value);
+
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+
+      return "${date.day.toString().padLeft(2, '0')} "
+          "${months[date.month - 1]} "
+          "${date.year}";
+    } catch (_) {
+      return value;
+    }
+  }
+
+  Widget _buildEmpty() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+
+        children: [
+          Icon(Icons.search_off_rounded, size: 50, color: Colors.grey.shade400),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            "No inquiry data found",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 15),
+
+          OutlinedButton.icon(
+            onPressed: loadInquiryReport,
+
+            icon: const Icon(Icons.refresh),
+
+            label: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+
+        backgroundColor: isError ? Colors.red.shade700 : C.primary,
+
+        behavior: SnackBarBehavior.floating,
+
+        margin: const EdgeInsets.all(14),
+
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+}
+
+class _InfoTableRow {
+  final String label;
+  final String value;
+
+  const _InfoTableRow({required this.label, required this.value});
 }

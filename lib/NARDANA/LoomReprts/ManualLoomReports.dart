@@ -146,6 +146,15 @@ class _ManualPlanningReportsState extends State<ManualPlanningReports> {
           'Loom Report',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          color: C.bg,
+          onPressed: () {
+
+              Navigator.pop(context);
+
+          },
+        ),
         // actions: [
         //   IconButton(
         //     icon: const Icon(Icons.calendar_today, color: Colors.white),
@@ -289,10 +298,9 @@ class _ManualPlanningReportsState extends State<ManualPlanningReports> {
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
-          _box("Records", '$_totalRecords', C.bg),
-
-          _box("Req. Kg", totalRequiredKg.toStringAsFixed(2), C.bg),
-          _box("Req. Mtr", totalRequiredMtr.toStringAsFixed(2), C.bg),
+          _box("Records", '$_totalRecords', C.primary),
+          _box("Req. Kg", totalRequiredKg.toStringAsFixed(2), C.success),
+          _box("Req. Mtr", totalRequiredMtr.toStringAsFixed(2), C.warning),
         ],
       ),
     );
@@ -304,7 +312,8 @@ class _ManualPlanningReportsState extends State<ManualPlanningReports> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: C.primary,
+          color: color.withOpacity(0.12),
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

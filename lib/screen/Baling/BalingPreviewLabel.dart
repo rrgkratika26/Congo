@@ -5,6 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:thermal_printer_plus/thermal_printer.dart';
 
+import '../../Color/Colorclass.dart';
 import 'baleStockModel/BaleReportModel.dart';
 
 class BailingLabelPreview extends StatefulWidget {
@@ -33,11 +34,14 @@ class _BailingLabelPreviewState extends State<BailingLabelPreview> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final data = widget.data;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final boxWidth = screenWidth < 420 ? screenWidth - 40 : 380.0;
 
     return Container(
-      width: 380,
+      width: boxWidth,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black),
@@ -65,7 +69,7 @@ class _BailingLabelPreviewState extends State<BailingLabelPreview> {
               ),
               TextButton(
                 onPressed: _showPrinterPicker,
-                child: Text(_printerAddress != null ? "Change" : "Connect"),
+                child: Text(_printerAddress != null ? "Change" : "Connect",style: TextStyle(color: C.warning),),
               ),
             ],
           ),
@@ -112,22 +116,42 @@ class _BailingLabelPreviewState extends State<BailingLabelPreview> {
 
           const SizedBox(height: 20),
 
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _printing ? null : _confirmAndPrint,
-              icon: _printing
-                  ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
+          /// 🔹 Cancel + Print buttons side by side
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _printing ? null : () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
+                  label: const Text("Cancel"),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.grey.shade700,
+                    side: BorderSide(color: Colors.grey.shade400),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
                 ),
-              )
-                  : const Icon(Icons.print),
-              label: Text(_printing ? "Printing..." : "Print Label"),
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _printing ? null : _confirmAndPrint,
+                  icon: _printing
+                      ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                      : const Icon(Icons.print,color: C.warning,),
+                  label: Text(_printing ? "Printing..." : "Print",style: TextStyle(color: C.warning),),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

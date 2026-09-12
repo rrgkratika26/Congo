@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 
+import '../../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../../Color/Colorclass.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 import 'BarcCodeModel.dart';
@@ -72,7 +75,11 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
     try {
       final now = DateTime.now();
 
-      final formattedDate = DateTime(now.year, now.month, now.day).toIso8601String().split('T').first;
+      final formattedDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).toIso8601String().split('T').first;
 
       // ✅ CREATE ENTRIES LIST
       final entries = barcodeDataList.map((barcodeData) {
@@ -227,7 +234,7 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
 
       // ✅ Check if barcode already exists (prevent duplicates)
       final isDuplicate = barcodeDataList.any(
-            (item) => item.srno == result.srno,
+        (item) => item.srno == result.srno,
       );
 
       if (isDuplicate) {
@@ -254,11 +261,13 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
   void _snack(String msg, {Color? color}) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(msg),
-        backgroundColor: color,
-        duration: const Duration(seconds: 2),
-      ));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: color,
+          duration: const Duration(seconds: 2),
+        ),
+      );
   }
 
   void _showQRScanner() {
@@ -275,14 +284,20 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 child: Row(
                   children: [
                     const Icon(Icons.qr_code_scanner_rounded, color: C.primary),
                     const SizedBox(width: 8),
                     const Text(
                       "Scan Barcode",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Spacer(),
                     IconButton(
@@ -297,7 +312,9 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
               ),
               Expanded(
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(16),
+                  ),
                   child: QRView(
                     key: GlobalKey(debugLabel: 'QR'),
                     onQRViewCreated: (controller) {
@@ -390,14 +407,27 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
                         }),
                       ]),
                       const SizedBox(height: 12),
-                      _dropdown("PO Number", po, poList, (v) => setState(() => po = v)),
+                      _dropdown(
+                        "PO Number",
+                        po,
+                        poList,
+                        (v) => setState(() => po = v),
+                      ),
                     ]),
                     _card('Personnel', Colors.teal, [
                       _rowOrColumn(wide, [
-                        _dropdown("Supervisor", supervisor, supervisorList,
-                                (v) => setState(() => supervisor = v)),
-                        _dropdown("Operator", operatorName, operatorList,
-                                (v) => setState(() => operatorName = v)),
+                        _dropdown(
+                          "Supervisor",
+                          supervisor,
+                          supervisorList,
+                          (v) => setState(() => supervisor = v),
+                        ),
+                        _dropdown(
+                          "Operator",
+                          operatorName,
+                          operatorList,
+                          (v) => setState(() => operatorName = v),
+                        ),
                       ]),
                     ]),
                     _card('Scan Barcode', C.warning, [_barcodeInputRow()]),
@@ -419,8 +449,15 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: C.bg),
-        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back, size: 20),
+        color: C.bg,
+        onPressed: () {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          } else {
+            Get.to(() => const DeptBottomNavDashboard());
+          }
+        },
       ),
       title: const Text(
         "Dispatch Entry",
@@ -429,9 +466,6 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
     );
   }
 
-  // ---------------------
-  // Sections
-  // ---------------------
 
   Widget _articleRow() {
     return Row(
@@ -477,18 +511,22 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
   }
 
   Widget _barcodeListSection(bool wide) {
-    return _card('Scanned Barcodes (${barcodeDataList.length})', Colors.green.shade600, [
-      Align(
-        alignment: Alignment.centerRight,
-        child: TextButton.icon(
-          onPressed: () => setState(() => barcodeDataList.clear()),
-          icon: const Icon(Icons.delete_sweep, size: 18),
-          label: const Text("Clear All"),
-          style: TextButton.styleFrom(foregroundColor: Colors.red),
+    return _card(
+      'Scanned Barcodes (${barcodeDataList.length})',
+      Colors.green.shade600,
+      [
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: () => setState(() => barcodeDataList.clear()),
+            icon: const Icon(Icons.delete_sweep, size: 18),
+            label: const Text("Clear All"),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+          ),
         ),
-      ),
-      wide ? _barcodeGrid() : _barcodeList(),
-    ]);
+        wide ? _barcodeGrid() : _barcodeList(),
+      ],
+    );
   }
 
   Widget _barcodeList() {
@@ -497,7 +535,8 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: barcodeDataList.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (context, index) => _barcodeCard(barcodeDataList[index], index),
+      itemBuilder: (context, index) =>
+          _barcodeCard(barcodeDataList[index], index),
     );
   }
 
@@ -512,7 +551,8 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         mainAxisSpacing: 10,
         childAspectRatio: 1.6,
       ),
-      itemBuilder: (context, index) => _barcodeCard(barcodeDataList[index], index),
+      itemBuilder: (context, index) =>
+          _barcodeCard(barcodeDataList[index], index),
     );
   }
 
@@ -530,8 +570,13 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Barcode #${index + 1}",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              Text(
+                "Barcode #${index + 1}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
               InkWell(
                 onTap: () {
                   setState(() => barcodeDataList.removeAt(index));
@@ -560,13 +605,20 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         children: [
           Expanded(
             flex: 3,
-            child: Text(title,
-                style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600)),
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+            ),
           ),
           Expanded(
             flex: 4,
-            child: Text(value?.toString() ?? "-",
-                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500)),
+            child: Text(
+              value?.toString() ?? "-",
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ],
       ),
@@ -584,13 +636,22 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
               backgroundColor: C.primary,
               disabledBackgroundColor: Colors.grey.shade300,
               minimumSize: const Size(double.infinity, 50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: (barcodeDataList.isNotEmpty && !isSaving) ? _saveDispatch : null,
+            onPressed: (barcodeDataList.isNotEmpty && !isSaving)
+                ? _saveDispatch
+                : null,
             icon: isSaving
                 ? const SizedBox(
-                width: 18, height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Icon(Icons.save, color: Colors.white),
             label: Text(
               isSaving ? "Saving..." : "Save Dispatch",
@@ -615,13 +676,24 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
         borderRadius: BorderRadius.circular(14),
         border: Border(left: BorderSide(color: color, width: 4)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
           const SizedBox(height: 10),
           ...children,
         ],
@@ -671,27 +743,39 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
     );
   }
 
-  Widget _textField(TextEditingController ctrl, String label, {bool readOnly = false}) {
+  Widget _textField(
+    TextEditingController ctrl,
+    String label, {
+    bool readOnly = false,
+  }) {
     return TextField(
       controller: ctrl,
       readOnly: readOnly,
-      decoration: _decoration(label, filledColor: readOnly ? Colors.grey.shade100 : null),
+      decoration: _decoration(
+        label,
+        filledColor: readOnly ? Colors.grey.shade100 : null,
+      ),
     );
   }
 
   Widget _dropdown(
-      String label,
-      String? value,
-      List<String> items,
-      ValueChanged<String?> onChanged,
-      ) {
+    String label,
+    String? value,
+    List<String> items,
+    ValueChanged<String?> onChanged,
+  ) {
     return DropdownButtonFormField<String>(
       isExpanded: true,
       value: items.contains(value) ? value : null,
       decoration: _decoration(label),
       items: items
           .toSet()
-          .map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.ellipsis)))
+          .map(
+            (e) => DropdownMenuItem(
+              value: e,
+              child: Text(e, overflow: TextOverflow.ellipsis),
+            ),
+          )
           .toList(),
       onChanged: onChanged,
     );
@@ -704,11 +788,18 @@ class _BalingDispatchScreenState extends State<BalingDispatchScreen> {
       filled: true,
       fillColor: filledColor ?? Colors.grey.shade50,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
       enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
       focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: C.primary, width: 1.4)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: C.primary, width: 1.4),
+      ),
     );
   }
 }

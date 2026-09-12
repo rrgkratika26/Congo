@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Color/Colorclass.dart';
 import '../../services/NardanaApis/NardanaApi.dart';
+import 'BomReportGraph.dart';
 
 class BomReportScreen extends StatefulWidget {
   const BomReportScreen({super.key});
@@ -233,11 +234,22 @@ class _BomReportScreenState extends State<BomReportScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: IconButton(
+              onPressed: () => _showGraphSheet(context),
+              icon: const Icon(Icons.bar_chart_rounded, color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: IconButton(
               onPressed: _pickDateRange,
               icon: const Icon(Icons.date_range_rounded, color: Colors.white),
             ),
           ),
-
           const SizedBox(width: 10),
         ],
       ),
@@ -255,135 +267,119 @@ class _BomReportScreenState extends State<BomReportScreen> {
 
   // ───────────────── TOP FILTER ─────────────────
 
+  // ───────────────── TOP FILTER ─────────────────
+
   Widget _buildTopFilters() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       color: Colors.green.shade200,
-      child: Column(
+      child: Row(
         children: [
-          // ───────── SEARCH + DROPDOWN ─────────
-          Column(
-            children: [
-              // ───────── SEARCH FIELD ─────────
-              Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (_) => _filterData(),
-
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+          // ───────── SEARCH FIELD ─────────
+          Expanded(
+            flex: 3,
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(.10),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
-
-                  decoration: InputDecoration(
-                    hintText: "Search customer, article, WO...",
-
-                    hintStyle: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontSize: 13,
-                    ),
-
-                    prefixIcon: Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A4A8A).withOpacity(.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.search_rounded,
-                        color: Color(0xFF1A4A8A),
-                      ),
-                    ),
-
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
-
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 16,
-                    ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (_) => _filterData(),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: "Search customer, article, WO...",
+                  hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: const Color(0xFF1A4A8A),
+                    size: 20,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
                   ),
                 ),
               ),
+            ),
+          ),
 
-              const SizedBox(height: 14),
+          const SizedBox(width: 10),
 
-              // ───────── PARTY DROPDOWN ─────────
-              Container(
-                height: 56,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+          // ───────── PARTY DROPDOWN ─────────
+          Expanded(
+            flex: 2,
+            child: Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(.10),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedParty,
+                  isExpanded: true,
+                  isDense: true,
+                  hint: Text(
+                    isPartyLoading ? "Loading..." : "All Parties",
+                    style: const TextStyle(
+                      color: Color(0xFF0B1A3F),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
-
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: selectedParty,
-                    isExpanded: true,
-
-                    hint: Text(
-                      isPartyLoading ? "Loading Parties..." : "Select Party",
-                      style: const TextStyle(
-                        color: Color(0xFF0B1A3F),
-                        fontWeight: FontWeight.w600,
-                      ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text("All Parties", style: TextStyle(fontSize: 12)),
                     ),
-
-                    items: [
-                      const DropdownMenuItem<String>(
-                        value: null,
-                        child: Text("All Parties"),
-                      ),
-
-                      ...partyList.map(
-                        (party) => DropdownMenuItem<String>(
-                          value: party,
-                          child: Text(party, overflow: TextOverflow.ellipsis),
+                    ...partyList.map(
+                          (party) => DropdownMenuItem<String>(
+                        value: party,
+                        child: Text(
+                          party,
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ],
-
-                    onChanged: (value) {
-                      setState(() {
-                        selectedParty = value;
-                      });
-
-                      _filterData();
-                    },
-                  ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedParty = value;
+                    });
+                    _filterData();
+                  },
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
-
   // ───────────────── SUMMARY ─────────────────
 
   Widget _summaryBar() {
@@ -614,6 +610,18 @@ class _BomReportScreenState extends State<BomReportScreen> {
       ),
 
       child: Text(text, style: const TextStyle(fontSize: 12)),
+    );
+  }
+
+  void _showGraphSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => BomGraphSheet(reports: filteredReports),
     );
   }
 }

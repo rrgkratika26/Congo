@@ -627,11 +627,15 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
 
   List<LoomOrder> _orders = [];
   List<LoomOrder> _filteredOrders = [];
-  int _totalCount = 0;
-  bool _isLoading = false;
 
+  int _totalCount = 0;
   String _unit = "";
-  int pagesize= 50;
+  int pagesize = 50;
+
+  final StreamController<LoomOrderResponse> _ordersStreamController =
+      StreamController<LoomOrderResponse>.broadcast();
+
+  bool _isLoading = false;
 
   bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < 700;
@@ -640,13 +644,14 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
   void initState() {
     super.initState();
     _initializeData();
-    _loadOrders(viewType: 'all', unit: _unit,pagesize: pagesize);
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
     _searchController.dispose();
+    _ordersStreamController.close();
+
     super.dispose();
   }
 
@@ -655,34 +660,40 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
     required String unit,
     required int pagesize,
   }) async {
-    setState(() => _isLoading = true);
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       final response = await InStockService.fetchLoomOrders(
         viewType: viewType,
         unit: unit,
         pageNumber: 1,
-        pageSize: pagesize
+        pageSize: pagesize,
       );
-      final today = DateTime.now();
-      setState(() {
-        _orders = response.orders;
-        _filteredOrders = response.orders;
-        _totalCount = response.totalCount;
-      });
+
+      if (!_ordersStreamController.isClosed) {
+        _ordersStreamController.add(response);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      if (!_ordersStreamController.isClosed) {
+        _ordersStreamController.addError(e);
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _initializeData() async {
-    _unit = await AppSession.getUnit() ?? "INNOWEAVE";
+    _unit = await AppSession.getUnit() ?? "RRG";
 
-    _loadOrders(viewType: 'all', unit: _unit,pagesize: pagesize);
+    await _loadOrders(viewType: 'all', unit: _unit, pagesize: pagesize);
   }
 
   void _applyFilter(String filter) {
@@ -690,101 +701,138 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
       _selectedFilter = filter;
     });
 
-    switch (filter) {
-      case 'Process':
-        _loadOrders(viewType: 'process', unit: _unit,pagesize: pagesize);
-        break;
-
-      case 'Finish':
-        _loadOrders(viewType: 'finish', unit: _unit,pagesize: pagesize);
-        break;
-
-      default:
-        _loadOrders(viewType: 'all', unit: _unit,pagesize: pagesize);
-    }
+    _loadOrders(viewType: _getViewType(), unit: _unit, pagesize: pagesize);
   }
 
   void _filterOrders() {
-    if (_debounce?.isActive ?? false) {
-      _debounce!.cancel();
-    }
+    final q = _searchController.text.trim().toLowerCase();
 
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      final q = _searchController.text.toLowerCase();
+    if (!mounted) return;
 
-      setState(() {
-        _filteredOrders = _orders.where((e) {
-          return e.requiredFabricCode.toLowerCase().contains(q) ||
-              e.bom.contains(q)||
-              e.customerName.toLowerCase().contains(q) ||
-              e.orderNo.toLowerCase().contains(q) ||
-              e.fabricCode.toLowerCase().contains(q) ||
-              e.loomOrderNo.toLowerCase().contains(q);
-        }).toList();
-      });
+    setState(() {
+      if (q.isEmpty) {
+        _filteredOrders = List.from(_orders);
+        return;
+      }
+
+      _filteredOrders = _orders.where((e) {
+        return e.requiredFabricCode.toLowerCase().contains(q) ||
+            e.bom.toLowerCase().contains(q) ||
+            e.customerName.toLowerCase().contains(q) ||
+            e.orderNo.toLowerCase().contains(q) ||
+            e.fabricCode.toLowerCase().contains(q) ||
+            e.loomOrderNo.toLowerCase().contains(q);
+      }).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: C.pageBg,
-      body: Column(
-        children: [
-          _topHeader(),
+      backgroundColor: C.bg,
+      appBar: _buildAppBar(),
+      body: StreamBuilder<LoomOrderResponse>(
+        stream: _ordersStreamController.stream,
+        builder: (context, snapshot) {
+          // Loading
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(color: C.brand700),
+            );
+          }
 
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: C.brand700),
-                  )
-                : _filteredOrders.isEmpty
-                ? _emptyState()
-                : isMobile(context)
+          // Error
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 50,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    snapshot.error.toString(),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 15),
+                  ElevatedButton(
+                    onPressed: () {
+                      _loadOrders(
+                        viewType: _getViewType(),
+                        unit: _unit,
+                        pagesize: pagesize,
+                      );
+                    },
+                    child: const Text("Retry"),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Data received
+          if (snapshot.hasData) {
+            final response = snapshot.data!;
+            _orders = response.orders;
+
+            _filteredOrders = _orders.where((e) {
+              final q = _searchController.text.toLowerCase();
+              if (q.isEmpty) return true;
+              return e.requiredFabricCode.toLowerCase().contains(q) ||
+                  e.bom.toLowerCase().contains(q) ||
+                  e.customerName.toLowerCase().contains(q) ||
+                  e.orderNo.toLowerCase().contains(q) ||
+                  e.fabricCode.toLowerCase().contains(q) ||
+                  e.loomOrderNo.toLowerCase().contains(q);
+            }).toList();
+
+            _totalCount = response.totalCount;
+
+            if (_filteredOrders.isEmpty) {
+              return _emptyState();
+            }
+
+            return isMobile(context)
                 ? _buildMobileList()
-                : _buildDesktopTable(),
-          ),
-        ],
+                : _buildDesktopTable();
+          }
+
+          return const Center(child: Text("No Data Found"));
+        },
       ),
     );
   }
 
-  // ================= HEADER =================
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(140),
 
-  Widget _topHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      decoration: const BoxDecoration(
-        color: C.appBar1,
-        // gradient: LinearGradient(
-        //   colors: [C.appBar1, C.appBar4,],
-        //   begin: Alignment.topLeft,
-        //   end: Alignment.bottomRight,
-        // ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-      ),
-      child: SafeArea(
-        bottom: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 5, 14, 10),
+        decoration: const BoxDecoration(
+          color: C.appBar1,
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 25,
-                      ),
-                    ),
-
-                    const SizedBox(width: 22),
-
-                    // Your remaining widgets
-                  ],
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 25,
+                  ),
                 ),
+
+                const SizedBox(width: 12),
+
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -793,11 +841,10 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                         "Loom Entry",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: 2),
                       Text(
                         "Manage Loom Orders & Production",
                         style: TextStyle(color: Colors.white70, fontSize: 12),
@@ -810,35 +857,13 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
               ],
             ),
 
-            const SizedBox(height: 10),
-
-            _searchBar(),
-
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
 
             Row(
               children: [
-                Expanded(
-                  child: _filterCard(title: "Process", icon: Icons.sync),
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: _filterCard(
-                    title: "All",
-                    icon: Icons.grid_view_rounded,
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: _filterCard(
-                    title: "Finish",
-                    icon: Icons.check_circle_rounded,
-                  ),
-                ),
+                Expanded(child: _searchBar()),
+                const SizedBox(width: 8),
+                Expanded(child: _filterDropdown()),
               ],
             ),
           ],
@@ -847,104 +872,235 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
     );
   }
 
+  // Widget _filterDropdown() {
+  //   return Container(
+  //     height: 40,
+  //     padding: const EdgeInsets.symmetric(horizontal: 10),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(10),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(.06),
+  //           blurRadius: 6,
+  //           offset: const Offset(0, 2),
+  //         ),
+  //       ],
+  //     ),
+  //     child: DropdownButtonHideUnderline(
+  //       child: DropdownButton<String>(
+  //         value: _selectedFilter,
+  //         isExpanded: true,
+  //         isDense: true,
+  //         icon: const Icon(Icons.expand_more_rounded, size: 18, color: C.brand700),
+  //         style: const TextStyle(
+  //           fontSize: 13,
+  //           fontWeight: FontWeight.w600,
+  //           color: C.textHigh,
+  //         ),
+  //         items: const [
+  //           DropdownMenuItem(
+  //             value: 'Process',
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Icon(Icons.sync, size: 16, color: C.textMid),
+  //                 SizedBox(width: 6),
+  //                 Text('Process'),
+  //               ],
+  //             ),
+  //           ),
+  //           DropdownMenuItem(
+  //             value: 'All',
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Icon(Icons.grid_view_rounded, size: 16, color: C.textMid),
+  //                 SizedBox(width: 6),
+  //                 Text('All'),
+  //               ],
+  //             ),
+  //           ),
+  //           DropdownMenuItem(
+  //             value: 'Finish',
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Icon(Icons.check_circle_rounded, size: 16, color: C.textMid),
+  //                 SizedBox(width: 6),
+  //                 Text('Finish'),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //         onChanged: (value) {
+  //           if (value != null) _applyFilter(value);
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _recordBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.14),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(.15)),
-      ),
-      child: Column(
-        children: [
-          Text("$_totalCount",
-            style: const TextStyle(
-              color: C.bg,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+    return Column(
+      children: [
+        Text(
+          "$_totalCount",
+          style: const TextStyle(
+            color: C.bg,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
           ),
-          const Text(
-            "Records",
-            style: TextStyle(color: C.success, fontSize: 11),
-          ),
-        ],
-      ),
+        ),
+        const Text(
+          "Records",
+          style: TextStyle(color: C.textMid, fontSize: 11),
+        ),
+      ],
     );
   }
 
   Widget _searchBar() {
     return Container(
-      height: 52,
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (_) => _filterOrders(),
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-        decoration: InputDecoration(
-          hintText: "Search Bom No / Order / Customer / Fabric",
-          hintStyle: TextStyle(color: Colors.grey.shade500),
-          prefixIcon: const Icon(Icons.search_rounded, color: C.brand700),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  onPressed: () {
-                    _searchController.clear();
-                    _filterOrders();
-                  },
-                  icon: const Icon(Icons.close_rounded),
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.search_rounded,
+            color: C.brand700,
+            size: 18,
+          ),
+
+          const SizedBox(width: 6),
+
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+
+              // 👇 Har character type hote hi search
+              onChanged: (value) {
+                _filterOrders();
+                setState(() {});
+              },
+
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+
+              decoration: InputDecoration(
+                isDense: true,
+                isCollapsed: true,
+                hintText: "Search order / customer...",
+                hintStyle: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 12,
+                ),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+
+          if (_searchController.text.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                _searchController.clear();
+
+                setState(() {
+                  _filteredOrders = List.from(_orders);
+                });
+              },
+              child: const Icon(
+                Icons.close_rounded,
+                size: 16,
+                color: C.textMid,
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _filterCard({required String title, required IconData icon}) {
-    final isSelected = _selectedFilter == title;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () => _applyFilter(title),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? C.border : C.bg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? C.actionOrange : C.borderLight,
-            width: 1,
+  Widget _filterDropdown() {
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: isSelected ? C.success : C.textMid),
-
-            const SizedBox(width: 8),
-
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? C.success : C.textHigh,
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedFilter,
+          isExpanded: true,
+          isDense: true,
+          icon: const Icon(
+            Icons.expand_more_rounded,
+            size: 18,
+            color: C.brand700,
+          ),
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: C.textHigh,
+          ),
+          items: const [
+            DropdownMenuItem(
+              value: 'Process',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.sync, size: 16, color: C.textMid),
+                  SizedBox(width: 6),
+                  Text('Process'),
+                ],
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'All',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.grid_view_rounded, size: 16, color: C.headerBlue),
+                  SizedBox(width: 6),
+                  Text('All'),
+                ],
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'Finish',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle_rounded, size: 16, color: C.textMid),
+                  SizedBox(width: 6),
+                  Text('Finish'),
+                ],
               ),
             ),
           ],
+          onChanged: (value) {
+            if (value != null) _applyFilter(value);
+          },
         ),
       ),
     );
@@ -1083,7 +1239,6 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                       _tableRow(
                         "Prod Mtr",
                         order.productionMtr.toStringAsFixed(0),
-
                       ),
                       _tableRow(
                         "Bal KG",
@@ -1096,7 +1251,6 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
                         order.balanceMtr.toStringAsFixed(0),
                         valueColor: order.balanceMtr < 0 ? C.danger : C.success,
                       ),
-
                     ],
                   ),
                 ),
@@ -1467,5 +1621,18 @@ class _LoomForwardScreenState extends State<LoomForwardScreen> {
         ],
       ),
     );
+  }
+
+  String _getViewType() {
+    switch (_selectedFilter) {
+      case 'Process':
+        return 'process';
+
+      case 'Finish':
+        return 'finish';
+
+      default:
+        return 'all';
+    }
   }
 }

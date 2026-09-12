@@ -6,7 +6,6 @@ import '../../../Color/Colorclass.dart';
 import '../../../util/widget/CountRecords/CountRecords.dart';
 import '../modelClass/tapeStockModel.dart';
 
-
 class TapeStockScreen extends StatefulWidget {
   const TapeStockScreen({super.key});
 
@@ -41,21 +40,28 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
     }).toList();
   }
 
-  List<String> get _parties =>
-      _allReports.map((r) => r.party).toSet().toList();
+  List<String> get _parties => _allReports.map((r) => r.party).toSet().toList();
   List<String> get _supervisors =>
       _allReports.map((r) => r.supervisor).toSet().toList();
   List<String> get _statuses =>
       _allReports.map((r) => r.tapePlant).toSet().toList();
 
-  double get _totalQty =>
-      _filtered.fold(0, (a, b) => a + b.totalQty);
+  double get _totalQty => _filtered.fold(0, (a, b) => a + b.totalQty);
 
-  double get _issueQty =>
-      _filtered.fold(0, (a, b) => a + b.issueQty);
+  double get _issueQty => _filtered.fold(0, (a, b) => a + b.issueQty);
 
-  double get _balanceQty =>
-      _filtered.fold(0, (a, b) => a + b.balance);
+  double get _balanceQty => _filtered.fold(0, (a, b) => a + b.balance);
+  String _formatApiDate(String date) {
+    if (date.trim().isEmpty) return '';
+
+    try {
+      final parsedDate = DateFormat('M/d/yyyy h:mm:ss a').parse(date);
+      return DateFormat('dd-MM-yyyy').format(parsedDate);
+    } catch (e) {
+      debugPrint('Date parsing error: $date');
+      return date;
+    }
+  }
 
   @override
   void initState() {
@@ -92,10 +98,7 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
     try {
-      final data = await InStockService.fetchTapeStock(
-        page: 1,
-        pageSize: 50,
-      );
+      final data = await InStockService.fetchTapeStock(page: 1, pageSize: 50);
 
       setState(() {
         _allReports = data;
@@ -168,13 +171,13 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
           _searchBar(),
           _isLoading
               ? const Expanded(
-            child: Center(child: CircularProgressIndicator()),
-          )
+                  child: Center(child: CircularProgressIndicator()),
+                )
               : _filtered.isEmpty
               ? Expanded(child: _emptyState())
               : Expanded(
-            child: Column(children: [Expanded(child: _table(_filtered))]),
-          ),
+                  child: Column(children: [Expanded(child: _table(_filtered))]),
+                ),
         ],
       ),
     );
@@ -187,21 +190,9 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
-          _box(
-            "Total Qty",
-            _totalQty.toStringAsFixed(2),
-            Colors.blue,
-          ),
-          _box(
-            "Issue Qty",
-            _issueQty.toStringAsFixed(2),
-            Colors.orange,
-          ),
-          _box(
-            "Balance",
-            _balanceQty.toStringAsFixed(2),
-            Colors.green,
-          ),
+          _box("Total Qty", _totalQty.toStringAsFixed(2), Colors.blue),
+          _box("Issue Qty", _issueQty.toStringAsFixed(2), Colors.orange),
+          _box("Balance", _balanceQty.toStringAsFixed(2), Colors.green),
         ],
       ),
     );
@@ -259,10 +250,8 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
             child: DataTable(
               columnSpacing: 12,
               horizontalMargin: 12,
-              headingRowColor:
-              WidgetStateProperty.all(const Color(0xffEAF2FF)),
+              headingRowColor: WidgetStateProperty.all(const Color(0xffEAF2FF)),
               columns: const [
-
                 DataColumn(label: Text("Date")),
                 DataColumn(label: Text("Party")),
                 DataColumn(label: Text("PO")),
@@ -279,32 +268,31 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
               ],
 
               rows: _filtered.map((r) {
-
-                return DataRow(cells: [
-
-                  DataCell(_cell(r.date)),
-                  DataCell(_cell(r.party)),
-                  DataCell(_cell(r.po)),
-                  DataCell(_cell(r.articleNo)),
-                  DataCell(_cell(r.code, width: 180)),
-                  DataCell(_cell(r.recipeType)),
-                  DataCell(_cell(r.totalQty.toString())),
-                  DataCell(_cell(r.issueQty.toString())),
-                  DataCell(
-                    _cell(
-                      r.balance.toString(),
-                      color: Colors.green,
-                      isBold: true,
+                return DataRow(
+                  cells: [
+                    DataCell(_cell(_formatApiDate(r.date))),
+                    DataCell(_cell(r.party)),
+                    DataCell(_cell(r.po)),
+                    DataCell(_cell(r.articleNo)),
+                    DataCell(_cell(r.code, width: 180)),
+                    DataCell(_cell(r.recipeType)),
+                    DataCell(_cell(r.totalQty.toString())),
+                    DataCell(_cell(r.issueQty.toString())),
+                    DataCell(
+                      _cell(
+                        r.balance.toString(),
+                        color: Colors.green,
+                        isBold: true,
+                      ),
                     ),
-                  ),
-                  DataCell(_cell(r.diner.toString())),
-                  DataCell(_cell("${r.widthMM} mm")),
-                  DataCell(_cell(r.tapePlant)),
-                  DataCell(_cell(r.supervisor)),
-                ]);
-
+                    DataCell(_cell(r.diner.toString())),
+                    DataCell(_cell("${r.widthMM} mm")),
+                    DataCell(_cell(r.tapePlant)),
+                    DataCell(_cell(r.supervisor)),
+                  ],
+                );
               }).toList(),
-            )
+            ),
           ),
         ),
       ),
@@ -327,12 +315,12 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
   );
 
   Widget _cell(
-      String text, {
-        double? width,
-        bool isBold = false,
-        bool mono = false,
-        Color? color,
-      }) {
+    String text, {
+    double? width,
+    bool isBold = false,
+    bool mono = false,
+    Color? color,
+  }) {
     return SizedBox(
       width: width,
       child: Text(
@@ -397,22 +385,21 @@ class _TapeStockScreenState extends State<TapeStockScreen> {
         },
         style: const TextStyle(fontSize: 14),
         decoration: InputDecoration(
-          hintText:
-          "Search Party / PO / Article / Code / Supervisor",
+          hintText: "Search Party / PO / Article / Code / Supervisor",
           hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
 
           prefixIcon: const Icon(Icons.search, size: 20, color: C.actionOrange),
 
           suffixIcon: _query.isNotEmpty
               ? IconButton(
-            icon: const Icon(Icons.close, size: 18),
-            onPressed: () {
-              _searchCtrl.clear();
-              setState(() {
-                _query = '';
-              });
-            },
-          )
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () {
+                    _searchCtrl.clear();
+                    setState(() {
+                      _query = '';
+                    });
+                  },
+                )
               : null,
 
           filled: true,

@@ -712,6 +712,7 @@
 //   }
 // }
 
+import 'package:IMS/AdminDashBoard/AsiaDashBoard/Marketingtab.dart' hide DeptDashboard;
 import 'package:IMS/AdminDashBoard/DepartmentDashboard.dart';
 import 'package:IMS/services/getSupervisors/getSupervisors.dart';
 import 'package:barcode_widget/barcode_widget.dart';
@@ -724,6 +725,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:thermal_printer_plus/thermal_printer.dart';
 
+import '../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../Color/Colorclass.dart';
 import '../../NARDANA/LoomReprts/LoomReports.dart';
 import 'LoomListSavedModel.dart';
@@ -879,7 +881,7 @@ class _SavedListScreenState extends State<SavedListScreen> {
           children: [
             IconButton(
               icon: const Icon(Icons.arrow_back, color: C.primaryLight),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () =>Navigator.pop(context),
             ),
 
           ],
@@ -1516,8 +1518,8 @@ Get.back(result: true);
                     style: TextStyle(color: C.textHigh),
                   ),
                   onPressed: () async {
-                    // Navigator.pop(context);
-                    Get.offAll(() => const LoomReportScreen());
+                    Navigator.pop(context);
+                    // Get.to(() => const LoomReportScreen());
 
                     await _printBarcodeApi(item);
                   },
@@ -1537,8 +1539,10 @@ Get.back(result: true);
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () async {
-                    // Get.back(result: true);
-                    Get.offAll(() => const LoomReportScreen());
+                    // 1. Bottom sheet close
+                    Navigator.pop(context);
+
+                    // 2. Issue API call
                     await _issueWithoutPrint(item);
                   },
                 ),
@@ -1567,9 +1571,10 @@ Get.back(result: true);
       );
       await Future.delayed(const Duration(milliseconds: 500));
 
-      /// Navigate to Dashboard
-      // Get.offAll(() => const NewAdminDashboard());
-      Get.back(result: true);
+      if (mounted && Navigator.canPop(context)) {
+        // Navigator.pop(context, true);
+        Get.to(() => const DeptBottomNavDashboard());
+      }
     } catch (e) {
       Get.snackbar(
         "Error",

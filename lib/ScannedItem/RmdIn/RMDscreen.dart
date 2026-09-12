@@ -1,8 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../Color/Colorclass.dart';
 import '../../screen/inStock/inStockScreen.dart';
 import 'RMDStockIn.dart';
@@ -48,7 +51,17 @@ class _RmdScreenState extends State<RmdScreen> {
       appBar: AppBar(
         backgroundColor: C.appBar1,
         elevation: 2,
-        iconTheme: IconThemeData(color: C.primaryLight),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          color: C.bg,
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Get.to(() => const DeptBottomNavDashboard());
+            }
+          },
+        ),
 
         // flexibleSpace: Container(
         //   decoration: BoxDecoration(
@@ -62,20 +75,7 @@ class _RmdScreenState extends State<RmdScreen> {
         shadowColor: Colors.black.withOpacity(0.1),
 
         // important
-        leading: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: C.primaryLight),
-              onPressed: () => Navigator.pop(context),
-            ),
-            // Image.asset(
-            //   'assets/images/logo-1.png',
-            //   height: 28,
-            //   fit: BoxFit.contain,
-            // ),
-          ],
-        ),
-
+        centerTitle: true,
         title: Row(
           children: [
             Text(
@@ -190,7 +190,7 @@ class _RmdScreenState extends State<RmdScreen> {
             height: 5,
             width: isTablet ? 100 : 80,
             decoration: BoxDecoration(
-              color: isActive ? C.actionOrange : Colors.transparent,
+              color: isActive ? C.bg : Colors.transparent,
               borderRadius: BorderRadius.circular(2),
             ),
           ),

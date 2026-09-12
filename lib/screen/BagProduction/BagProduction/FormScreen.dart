@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 
+import '../../../AdminDashBoard/AsiaDashBoard/DepartmentdashboardBottom.dart';
 import '../../../Color/Colorclass.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 import 'BagItemModelClass.dart';
@@ -369,7 +372,18 @@ class _FormScreenState extends State<FormScreen> {
         backgroundColor: C.primary,
         foregroundColor: C.bg,
         elevation: 0,
-        iconTheme: IconThemeData(color: C.bg),
+        leading:  IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          color: C.bg,
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Get.to(() => const DeptBottomNavDashboard());
+
+            }
+          },
+        ),
       ),
       body: Form(
         key: _formKey,

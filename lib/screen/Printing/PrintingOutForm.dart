@@ -476,7 +476,7 @@ class _PrintRollEntryFormState extends State<PrintRollEntryForm> {
 
       if (success) {
         setState(() => _isSaved = true);
-        Get.offAll(() => PrintOutsavedList(title: "Printing Rolls"));
+        Get.to(() => PrintOutsavedList(title: "Printing Rolls"));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Row(

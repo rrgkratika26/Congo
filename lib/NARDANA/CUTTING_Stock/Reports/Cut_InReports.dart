@@ -375,16 +375,16 @@ class _CuttingInReportState extends State<CuttingInReport> {
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
-          _box("Records", "$_totalRecords", C.bg),
+          _box("Records", "$_totalRecords", C.primary),
           _box(
             "Roll Wt(Kg)",
             _totalRollWt.toStringAsFixed(2),
-            C.bg,
+            C.success,
           ),
           _box(
             "Roll Mtr",
             _totalRollMtr.toString(),
-            C.bg,
+            C.warning,
           ),
         ],
       ),
@@ -397,7 +397,8 @@ class _CuttingInReportState extends State<CuttingInReport> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: C.primary,
+          color: color.withOpacity(0.12),
+          border: Border.all(color: color),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
