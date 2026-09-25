@@ -500,4 +500,31 @@ class RmdService {
       rethrow;
     }
   }
+  // RmdService mein add karo (fetchCuttingStockReport ke saath hi):
+  Future<int> fetchCuttingStockTotalCount() async {
+    final uri = Uri.parse(
+      '${InStockService.baseUrl}/Cutting/cutting-stock-report'
+          '?pageNumber=1'
+          '&pageSize=100000',
+    );
+
+    try {
+      final response =
+      await http.get(uri, headers: await InStockService.authHeaders());
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load total count. Status Code: ${response.statusCode}');
+      }
+
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is! List) {
+        throw Exception('Invalid response format from cutting stock API.');
+      }
+
+      return decoded.length;
+    } catch (e, stackTrace) {
+      debugPrint('Total count error: $e\n$stackTrace');
+      rethrow;
+    }
+  }
 }

@@ -46,6 +46,7 @@ import '../Login/LoginScreen.dart';
 import '../NARDANA/BaleNardana/BaleStockGroup.dart';
 import '../NARDANA/CUTTING_Stock/Reports/ComponetReportScreen.dart';
 import '../NARDANA/CUTTING_Stock/Reports/Cut_InReports.dart';
+import '../NARDANA/CUTTING_Stock/Reports/CuttingOutReport.dart';
 import '../NARDANA/CUTTING_Stock/Reports/Cutting_InReportScreen.dart';
 import '../NARDANA/CUTTING_Stock/Reports/ReportSliderScreen.dart';
 import '../NARDANA/CUTTING_Stock/Reports/RollCuttingReport/RollCuttingreport.dart';
@@ -307,9 +308,12 @@ import '../ScannedItem/Cutting/OutStock/OutSavedList.dart';
 import '../screen/Printing/PrintingIn.dart';
 import '../screen/Printing/PrintingInReportScreen.dart';
 import '../screen/Printing/PrintingOutReport.dart';
+import '../screen/Printing/PrintingRecieve/PrintingIssueList.dart';
+import '../screen/Printing/PrintingRecieve/PrintingRecieveList.dart';
+import '../screen/Printing/PrintingRecieve/Printingissuereport.dart';
+import '../screen/Printing/PrintingRecieve/issueReportScreen.dart';
+import '../screen/Printing/PrintingRecieve/printingRecieveReport.dart';
 import '../screen/Slitting/SlittingInStock.dart';
-
-// Import all your screens here
 
 class AppRoutes {
   AppRoutes._();
@@ -346,6 +350,10 @@ class AppRoutes {
   static const String reccutpcscutting = '/recutpcscutting';
   static const String cuttingnardana = '/cutting';
   static const String nardanaInReport = '/nardanaInReport';
+  static const String printingrecieveList = '/printingrecieveList';
+  static const String printingRecieveReport = '/printingRecieveReport';
+static const String printingIssueReport ='/printingIssueReport';
+  static const String printingIssueList = '/printingIssueList';
   static const String cuttingIssuenardana = '/cuttingIssuenardana';
   static const String cuttingIssue = '/cuttingIssue';
   static const String reCutIssue = '/reCutIssue';
@@ -386,6 +394,7 @@ class AppRoutes {
   static const String webStockSlider = '/webStockSlider';
   static const String lamReportScreen = '/lamReportScreen';
   static const String cutGroupStock = '/cutGroupStock';
+  static const String cutOutreport = '/cutOutreport';
   static const String stockLedger = '/stockLedger';
   static const String InquiryMarketingList = '/InquireyPannel';
   static const String bomReport = '/bomReport';
@@ -467,10 +476,27 @@ class AppRoutes {
     GetPage(name: nardanaInReport, page: () => const CuttingInReport()),
 
     GetPage(
-      name: cuttingIssuenardana,
-      page: () => const RollWiseCuttingStockReport(),
+      name: printingRecieveReport,
+      page: () => const PrintingRecieveReportScreen(),
     ),
 
+    GetPage(
+      name: printingrecieveList,
+      page: () => const PrintingReceiveListScreen(),
+    ),
+    GetPage(
+      name: printingIssueList,
+      page: () => const PrintingIssueListScreen(),
+    ),
+    GetPage(
+      name: printingIssueReport,
+      page: () => const PrintingIssueReportScreen(),
+    ),
+
+    // GetPage(
+    //   name: cuttingIssuenardana,
+    //   page: () => const RollWiseCuttingStockReport(),
+    // ),
     GetPage(name: cuttingIssue, page: () => const CutPieceIssuedScreen()),
 
     GetPage(name: reCutIssue, page: () => const RecutPcsIssueScreen()),
@@ -491,7 +517,7 @@ class AppRoutes {
     GetPage(name: rolCuttingReport, page: () => RollCuttingReport()),
     GetPage(name: componentWiseReport, page: () => ComponentReportScreen()),
     GetPage(name: cuttingWiseReport, page: () => Cutting_InReportSCreen()),
-
+    GetPage(name: cutOutreport, page: () => const CuttingOutReport()),
     GetPage(name: bagEntry, page: () => BagEntryScreen()),
 
     GetPage(name: bagReport, page: () => BagReportScreen()),
@@ -551,7 +577,7 @@ class AppRoutes {
 
     GetPage(
       name: cutGroupStock,
-      page: () => const RollWiseCuttingStockReport(),
+      page: () => const CuttingStockreport(),
     ),
 
     GetPage(name: stockLedger, page: () => const StockLedgerScreen()),

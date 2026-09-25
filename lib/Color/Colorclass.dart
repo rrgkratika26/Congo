@@ -329,7 +329,7 @@ class C {
       case 'BALING':
       case 'JBL BALING':
         return Color(0xFF0891B2);
-
+      case 'PRINTING':
       case 'WEBBING':
       case 'JBL WEBBING':
         return Color(0xFF7C3AED);

@@ -39,14 +39,14 @@ class NaradanaApiService {
   // static const String _baseUrl = 'http://190.92.175.47:80/api/api';
   // static const String _baseUrl ='http://190.92.175.47/Qualipack/api';
   // static const String _baseUrl = 'http://190.92.175.47/CONGO_API/api';
-  static const String _baseUrl = 'http://192.168.29.123:7165/api';
+  // static const String _baseUrl = 'http://192.168.29.123:7165/api';
   // static const String _baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String _baseUrl = 'http://190.92.175.47/ShriShakti/api';
   //static const String _baseUrl = 'http://192.168.29.39:44349/api/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Visa/api';
-  // static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  static const String _baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String _baseUrl ='http://190.92.175.47:80/API/api';
   // static const String _baseUrl = 'http://190.92.175.47:80/Nardana';

@@ -127,21 +127,40 @@ void navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.cuttingWiseReport);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.cutGroupStock);
-      else if (action == MenuAction.Approval)
-        Get.toNamed(AppRoutes.cuttingnardana);
-      else if (action == MenuAction.Pcs_Issue)
-        Get.toNamed(AppRoutes.cuttingIssuenardana);
+      // else if (action == MenuAction.Approval)
+      //   Get.toNamed(AppRoutes.cuttingnardana);
+      // else if (action == MenuAction.Pcs_Issue)
+      //   Get.toNamed(AppRoutes.cuttingIssuenardana);
       break;
+    // case 'PRINTING':
+    //   if (action == MenuAction.IN)
+    //     Get.toNamed(AppRoutes.printingIn);
+    //   else if (action == MenuAction.OUT)
+    //     Get.toNamed(AppRoutes.printingOut);
+    //   else if (action == MenuAction.In_Report)
+    //     Get.toNamed(AppRoutes.printingInReport);
+    //   else if (action == MenuAction.Out_Report)
+    //     Get.toNamed(AppRoutes.printingOutReport);
+    //   break;
     case 'PRINTING':
-      if (action == MenuAction.IN)
-        Get.toNamed(AppRoutes.printingIn);
-      else if (action == MenuAction.OUT)
-        Get.toNamed(AppRoutes.printingOut);
-      else if (action == MenuAction.In_Report)
-        Get.toNamed(AppRoutes.printingInReport);
-      else if (action == MenuAction.Out_Report)
-        Get.toNamed(AppRoutes.printingOutReport);
+      if (action == MenuAction.Recieve)
+        Get.toNamed(AppRoutes.printingrecieveList);
+
+      else if (action == MenuAction.Issue)
+        Get.toNamed(AppRoutes.printingIssueList);
+      else if (action == MenuAction.Recieve_report)
+        Get.toNamed(AppRoutes.printingRecieveReport);
+      else if (action == MenuAction.Issue_report)
+        Get.toNamed(AppRoutes.printingIssueReport);
       break;
+      // else if (action == MenuAction.Issue)
+      //   Get.toNamed(AppRoutes.Issue);
+      // else if (action == MenuAction.Recieve_report)
+      //   Get.toNamed(AppRoutes.Recieve_report);
+      // else if (action == MenuAction.issue_Report)
+      //   Get.toNamed(AppRoutes.issue_Report);
+      break;
+
   // case 'SLITTING':
   //   if (action == MenuAction.IN) Get.toNamed(AppRoutes.slittingIn);
   // else if (action == MenuAction.OUT)

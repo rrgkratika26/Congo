@@ -981,6 +981,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.12"
+  timeline_tile_plus:
+    dependency: "direct main"
+    description:
+      name: timeline_tile_plus
+      sha256: e7e4988b8ac343f0670a8e9f593805b5be4e372510ce6f10b63d5c11444a6377
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   typed_data:
     dependency: transitive
     description:

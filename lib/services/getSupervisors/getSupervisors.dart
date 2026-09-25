@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../JBL/JBL_Loom/LoomListSavedModel.dart';
 import '../../Login/LoginModel.dart';
 import '../../NARDANA/CUTTING_Stock/Reports/ComponentReportmodel.dart';
+import '../../NARDANA/CUTTING_Stock/Reports/CuttingOutReportModel.dart';
 import '../../NARDANA/CUTTING_Stock/Reports/CuttingReport_Model.dart';
 import '../../NARDANA/CUTTING_Stock/Reports/InReportModel.dart';
 import '../../NARDANA/CUTTING_Stock/Reports/RollWiseReportModel.dart';
@@ -34,7 +35,7 @@ import '../../util/sharedpreference/shared_preference.dart';
 import '../auth_exception.dart';
 
 class InStockService {
-  static const String baseUrl = 'http://192.168.29.123:7165/api';
+  // static const String baseUrl = 'http://192.168.29.123:7165/api';
   // static const String baseUrl = 'http://190.92.175.47/VISA_S/api';
   // static const String baseUrl = 'http://190.92.175.47/Qualipack/api';
   // http://190.92.175.47/CONGO_API/
@@ -44,7 +45,7 @@ class InStockService {
   // static const String baseUrl = 'http://190.92.175.47:80/JblAPI/api';
   // static const String baseUrl = 'http://190.92.175.47:80/JBL_DEMO/api';
   // static const String baseUrl = 'http://190.92.175.47:80/Visa/api';
-  // static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
+  static const String baseUrl = 'http://190.92.175.47:80/Nardana/api';
   // static const String baseUrl = 'http://190.92.175.47:80/ASIA_API/api';
   // static const String baseUrl ='http://190.92.175.47:80/API/api';
   // static const String baseUrl = 'http://fibcsoftware.in:4430/Visa/api';
@@ -2632,6 +2633,77 @@ class InStockService {
       debugPrint("UPDATE LOCATION ERROR: $e");
 
       return {"success": false, "message": e.toString()};
+    }
+  }
+
+
+  Future<List<CuttingOutReportModel>> getCuttingOutReport({
+    int pageNumber = 1,
+    int pageSize = 50,
+  }) async {
+    try {
+      final url = Uri.parse(
+        '$baseUrl/Cutting/cutting-out-report'
+            '?pageNumber=$pageNumber'
+            '&pageSize=$pageSize',
+      );
+
+      print('');
+      print('==============================================');
+      print('CUTTING OUT REPORT API');
+      print('==============================================');
+      print('URL     : $url');
+      print('METHOD  : GET');
+      print('PAGE    : $pageNumber');
+      print('SIZE    : $pageSize');
+      print('==============================================');
+
+      final response = await http.get(
+        url,
+        headers: await InStockService.authHeaders()
+      );
+
+      print('STATUS  : ${response.statusCode}');
+      print('BODY    : ${response.body}');
+      print('==============================================');
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Cutting Out Report API failed: '
+              '${response.statusCode} ${response.body}',
+        );
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception('Invalid API response format');
+      }
+
+      if (decoded['success'] != true) {
+        throw Exception(
+          decoded['message']?.toString() ??
+              'Failed to fetch Cutting Out Report',
+        );
+      }
+
+      final data = decoded['data'];
+
+      if (data is! List) {
+        return [];
+      }
+
+      return data
+          .map(
+            (item) =>
+            CuttingOutReportModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+      )
+          .toList();
+    } catch (e) {
+      print('CUTTING OUT REPORT ERROR: $e');
+      rethrow;
     }
   }
 }

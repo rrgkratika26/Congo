@@ -3045,7 +3045,7 @@ class _CuttingOutStockFormNardanaState
       if (message.contains("Success") || message.contains("Successfully")) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => RollWiseCuttingStockReport()),
+          MaterialPageRoute(builder: (context) => CuttingStockreport()),
         );
         _showSnack(message, Colors.green);
       } else {

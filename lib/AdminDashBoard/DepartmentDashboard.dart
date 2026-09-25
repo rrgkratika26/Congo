@@ -122,8 +122,8 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.cutting_Wise,
 
         MenuAction.stock,
-        MenuAction.Approval,
-        MenuAction.Pcs_Issue,
+        // MenuAction.Approval,
+        // MenuAction.Pcs_Issue,
       ];
     case 'JBL CUTTING':
       return [MenuAction.IN];
@@ -882,8 +882,8 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.cuttingWiseReport);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.cutGroupStock);
-      else if (action == MenuAction.Approval)
-        Get.toNamed(AppRoutes.cuttingnardana);
+      // else if (action == MenuAction.Approval)
+      //   Get.toNamed(AppRoutes.cuttingnardana);
       else if (action == MenuAction.Pcs_Issue)
         Get.toNamed(AppRoutes.cuttingIssuenardana);
       break;

@@ -5,47 +5,81 @@ import '../../../../Color/Colorclass.dart';
 import '../../../ScannedItem/Cutting/NardanaCutting/RecutPOPupNardana.dart';
 import 'RollCuttingReport/ModelComponentWise/RollwisecuttingStockmodel.dart';
 
-class RollWiseCuttingStockReport extends StatefulWidget {
-  const RollWiseCuttingStockReport({super.key});
+class CuttingStockreport extends StatefulWidget {
+  const CuttingStockreport({super.key});
 
   @override
-  State<RollWiseCuttingStockReport> createState() =>
-      _RollWiseCuttingStockReportState();
+  State<CuttingStockreport> createState() => _CuttingStockreportState();
 }
 
-class _RollWiseCuttingStockReportState
-    extends State<RollWiseCuttingStockReport> {
+class _CuttingStockreportState extends State<CuttingStockreport> {
   final RmdService _service = RmdService();
-  final issueToCtrl = TextEditingController();
+
   final TextEditingController _searchController = TextEditingController();
 
   final ScrollController _horizontalController = ScrollController();
 
-  List<RollWiseCuttingStockModel> _records = [];
+
+  // ============================================================
+  // ALL API DATA
+  // ============================================================
+
+  List<RollWiseCuttingStockModel> _allRecords = [];
+
+  // Search filtered data
   List<RollWiseCuttingStockModel> _filteredRecords = [];
+
+  // Current page data
+  List<RollWiseCuttingStockModel> _pageRecords = [];
 
   bool _isLoading = true;
   bool _isRefreshing = false;
 
   String? _errorMessage;
 
+  // ============================================================
+  // LOCAL PAGINATION
+  // ============================================================
+
   int _pageNumber = 1;
+
   int _pageSize = 15;
 
-  bool _hasNextPage = false;
+  int get _totalRecords => _filteredRecords.length;
+
+  int get _totalPages {
+    if (_totalRecords == 0) {
+      return 1;
+    }
+
+    return (_totalRecords / _pageSize).ceil();
+  }
+
+  bool get _hasPreviousPage {
+    return _pageNumber > 1;
+  }
+
+  bool get _hasNextPage {
+    return _pageNumber < _totalPages;
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
 
   @override
   void initState() {
     super.initState();
 
-    _searchController.addListener(_applySearch);
+    _searchController.addListener(_onSearchChanged);
 
-    _loadData();
+    _loadAllData();
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_applySearch);
+    _searchController.removeListener(_onSearchChanged);
+
     _searchController.dispose();
 
     _horizontalController.dispose();
@@ -53,10 +87,15 @@ class _RollWiseCuttingStockReportState
     super.dispose();
   }
 
-  Future<void> _loadData({bool refresh = false}) async {
+  // ============================================================
+  // LOAD ALL API DATA
+  // ============================================================
+
+  Future<void> _loadAllData({bool refresh = false}) async {
     if (refresh) {
       setState(() {
         _isRefreshing = true;
+        _errorMessage = null;
       });
     } else {
       setState(() {
@@ -67,32 +106,67 @@ class _RollWiseCuttingStockReportState
 
     try {
       debugPrint('');
-      debugPrint('ROLL WISE CUTTING STOCK');
-      debugPrint('Loading page $_pageNumber with size $_pageSize');
+      debugPrint('==========================================');
+      debugPrint('CUTTING STOCK REPORT');
+      debugPrint('LOADING ALL API DATA');
+      debugPrint('==========================================');
 
-      final result = await _service.fetchCuttingStockReport(
-        pageNumber: _pageNumber,
-        pageSize: _pageSize,
-      );
+      final List<RollWiseCuttingStockModel> allData = [];
 
-      if (!mounted) return;
+      int apiPage = 1;
+
+      // We use a reasonably large API page size so that
+      // fewer API requests are required.
+      const int apiPageSize = 200;
+
+      while (true) {
+        debugPrint('Fetching API page $apiPage, size $apiPageSize');
+
+        final result = await _service.fetchCuttingStockReport(
+          pageNumber: apiPage,
+          pageSize: apiPageSize,
+        );
+
+        allData.addAll(result);
+
+        debugPrint('API page $apiPage returned ${result.length} records');
+
+        // If fewer records than page size came back,
+        // this is the last API page.
+        if (result.length < apiPageSize) {
+          break;
+        }
+
+        apiPage++;
+      }
+
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
-        _records = result;
-
-        _hasNextPage = result.length >= _pageSize;
+        _allRecords = allData;
 
         _isLoading = false;
         _isRefreshing = false;
         _errorMessage = null;
+
+        _pageNumber = 1;
       });
 
-      _applySearch();
+      _applySearchAndPagination();
 
-      debugPrint('Page $_pageNumber loaded: ${result.length} records');
-      debugPrint('Has Next Page: $_hasNextPage');
+      debugPrint('');
+      debugPrint('TOTAL API RECORDS: ${_allRecords.length}');
+      debugPrint('TOTAL FILTERED: ${_filteredRecords.length}');
+      debugPrint('TOTAL LOCAL PAGES: $_totalPages');
+      debugPrint('==========================================');
     } catch (e) {
-      if (!mounted) return;
+      debugPrint('CUTTING STOCK ERROR: $e');
+
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _isLoading = false;
@@ -102,85 +176,171 @@ class _RollWiseCuttingStockReportState
     }
   }
 
+  // ============================================================
+  // REFRESH
+  // ============================================================
+
   Future<void> _refresh() async {
-    await _loadData(refresh: true);
+    await _loadAllData(refresh: true);
   }
 
-  void _applySearch() {
+  // ============================================================
+  // SEARCH
+  // ============================================================
+
+  void _onSearchChanged() {
+    _pageNumber = 1;
+
+    _applySearchAndPagination();
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _applySearchAndPagination() {
     final query = _searchController.text.trim().toLowerCase();
 
-    if (query.isEmpty) {
-      if (mounted) {
-        setState(() {
-          _filteredRecords = List.from(_records);
-        });
-      }
+    // ==========================================================
+    // SEARCH WHOLE DATA
+    // ==========================================================
 
+    if (query.isEmpty) {
+      _filteredRecords = List.from(_allRecords);
+    } else {
+      _filteredRecords = _allRecords.where((item) {
+        final partyName = item.partyName.trim().toLowerCase();
+
+        final bomNo = item.bomNo.trim().toLowerCase();
+
+        return partyName.contains(query) || bomNo.contains(query);
+      }).toList();
+    }
+
+    // ==========================================================
+    // SAFETY: CURRENT PAGE MUST EXIST
+    // ==========================================================
+
+    if (_pageNumber > _totalPages) {
+      _pageNumber = _totalPages;
+    }
+
+    if (_pageNumber < 1) {
+      _pageNumber = 1;
+    }
+
+    // ==========================================================
+    // LOCAL PAGINATION
+    // ==========================================================
+
+    final startIndex = (_pageNumber - 1) * _pageSize;
+
+    if (startIndex >= _filteredRecords.length) {
+      _pageRecords = [];
       return;
     }
 
-    final result = _records.where((item) {
-      return item.searchText.contains(query);
-    }).toList();
+    final endIndex = (startIndex + _pageSize).clamp(0, _filteredRecords.length);
 
-    if (mounted) {
-      setState(() {
-        _filteredRecords = result;
-      });
-    }
+    _pageRecords = _filteredRecords.sublist(startIndex, endIndex);
   }
 
   void _clearSearch() {
     _searchController.clear();
   }
 
-  Future<void> _goToPreviousPage() async {
-    if (_pageNumber <= 1 || _isLoading) {
+  // ============================================================
+  // PAGE NAVIGATION
+  // ============================================================
+
+  void _goToPreviousPage() {
+    if (!_hasPreviousPage) {
       return;
     }
 
     setState(() {
       _pageNumber--;
+      _applySearchAndPagination();
     });
 
-    await _loadData();
+    _scrollTableToTop();
   }
 
-  Future<void> _goToNextPage() async {
-    if (!_hasNextPage || _isLoading) {
+  void _goToNextPage() {
+    if (!_hasNextPage) {
       return;
     }
 
     setState(() {
       _pageNumber++;
+      _applySearchAndPagination();
     });
 
-    await _loadData();
+    _scrollTableToTop();
   }
 
-  Future<void> _changePageSize(int? value) async {
+  void _goToPage(int page) {
+    if (page < 1 || page > _totalPages) {
+      return;
+    }
+
+    if (page == _pageNumber) {
+      return;
+    }
+
+    setState(() {
+      _pageNumber = page;
+      _applySearchAndPagination();
+    });
+
+    _scrollTableToTop();
+  }
+
+  void _scrollTableToTop() {
+    // Small delay allows the table to rebuild first.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final controller = PrimaryScrollController.of(context);
+
+      if (controller.hasClients) {
+        controller.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  // ============================================================
+  // PAGE SIZE
+  // ============================================================
+
+  void _changePageSize(int? value) {
     if (value == null || value == _pageSize) {
       return;
     }
 
     setState(() {
       _pageSize = value;
-      _pageNumber = 1;
-    });
 
-    await _loadData();
+      // Start from page 1 whenever page size changes.
+      _pageNumber = 1;
+
+      _applySearchAndPagination();
+    });
   }
 
+  // ============================================================
+  // RECUT POPUP
+  // ============================================================
+
   void _openRecutPopup(RollWiseCuttingStockModel item) {
-    final parts = item.cutSize.split(RegExp(r'[xX*]'));
-    final width = parts.isNotEmpty ? double.tryParse(parts[0].trim()) : null;
-    final cutLength = parts.length > 1
-        ? double.tryParse(parts[1].trim())
-        : null;
-
-    AddRecutPcsPopupNardana.show(
+    CuttingIssueData.show(
       context,
-
       partyName: item.partyName,
       width: item.cutWidth,
       cutLength: item.cutLength,
@@ -190,6 +350,10 @@ class _RollWiseCuttingStockReportState
       onSaved: _refresh,
     );
   }
+
+  // ============================================================
+  // SUMMARY
+  // ============================================================
 
   int get totalPcs {
     return _filteredRecords.fold(0, (sum, item) => sum + item.pcs);
@@ -231,6 +395,10 @@ class _RollWiseCuttingStockReportState
     return (totalBalanceWt / totalNetWt) * 100;
   }
 
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -240,13 +408,17 @@ class _RollWiseCuttingStockReportState
     );
   }
 
+  // ============================================================
+  // APP BAR
+  // ============================================================
+
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       elevation: 0,
       backgroundColor: C.appBar1,
       foregroundColor: Colors.white,
       titleSpacing: 18,
-      title: Text(
+      title: const Text(
         'Cutting Stock Report',
         overflow: TextOverflow.ellipsis,
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
@@ -262,12 +434,16 @@ class _RollWiseCuttingStockReportState
     );
   }
 
+  // ============================================================
+  // BODY
+  // ============================================================
+
   Widget _buildBody(BuildContext context) {
-    if (_isLoading && _records.isEmpty) {
+    if (_isLoading && _allRecords.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_errorMessage != null && _records.isEmpty) {
+    if (_errorMessage != null && _allRecords.isEmpty) {
       return _buildErrorState();
     }
 
@@ -281,10 +457,19 @@ class _RollWiseCuttingStockReportState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildSearchSection(context, isMobile),
+
+              const SizedBox(height: 8),
+
+              _buildSummaryCards(context, isMobile),
+
+              const SizedBox(height: 8),
+
               _buildTableCard(context),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 8),
 
+              // PAGINATION IS AT BOTTOM
               _buildPagination(context),
 
               const SizedBox(height: 10),
@@ -295,114 +480,88 @@ class _RollWiseCuttingStockReportState
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isMobile) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 15 : 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: C.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.035),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+  // ============================================================
+  // SEARCH SECTION
+  // ============================================================
+
+  Widget _buildSearchSection(BuildContext context, bool isMobile) {
+    return TextField(
+      controller: _searchController,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: 'Search Party Name or BOM No...',
+        prefixIcon: const Icon(Icons.search_rounded, size: 20),
+        suffixIcon: _searchController.text.isNotEmpty
+            ? IconButton(
+                tooltip: 'Clear',
+                onPressed: _clearSearch,
+                icon: const Icon(Icons.close_rounded, size: 19),
+              )
+            : null,
+        filled: true,
+        fillColor: C.bg,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 13,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: C.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: C.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: C.primary, width: 1.3),
+        ),
       ),
-      child: isMobile
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _titleContent(),
-                const SizedBox(height: 14),
-                _pageInfo(),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(child: _titleContent()),
-                _pageInfo(),
-              ],
-            ),
     );
   }
 
-  Widget _titleContent() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: C.primary.withOpacity(0.09),
-            borderRadius: BorderRadius.circular(11),
-          ),
-          child: Icon(
-            Icons.content_cut_rounded,
-            color: C.primaryDark,
-            size: 22,
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Cutting Stock Report',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: C.textHigh,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'Monitor cut stock, usage and remaining balance.',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // ============================================================
+  // PAGE SIZE DROPDOWN
+  // ============================================================
 
-  Widget _pageInfo() {
+  Widget _pageSizeDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: C.primary.withOpacity(0.07),
+        color: C.bg,
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: C.border),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.layers_outlined, size: 17, color: C.primaryDark),
-          const SizedBox(width: 7),
-          Text(
-            'Page $_pageNumber',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: C.primaryDark,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: _pageSize,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+          items: const [
+            DropdownMenuItem(
+              value: 15,
+              child: Text('15 / page', style: TextStyle(fontSize: 11)),
             ),
-          ),
-          const SizedBox(width: 9),
-          Container(width: 1, height: 16, color: C.border),
-          const SizedBox(width: 9),
-          Text(
-            'Total: ${_filteredRecords.length} records',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Colors.grey,
+            DropdownMenuItem(
+              value: 25,
+              child: Text('25 / page', style: TextStyle(fontSize: 11)),
             ),
-          ),
-        ],
+            DropdownMenuItem(
+              value: 50,
+              child: Text('50 / page', style: TextStyle(fontSize: 11)),
+            ),
+            DropdownMenuItem(
+              value: 100,
+              child: Text('100 / page', style: TextStyle(fontSize: 11)),
+            ),
+            DropdownMenuItem(
+              value: 200,
+              child: Text('200 / page', style: TextStyle(fontSize: 11)),
+            ),
+          ],
+          onChanged: _changePageSize,
+        ),
       ),
     );
   }
@@ -413,76 +572,41 @@ class _RollWiseCuttingStockReportState
 
   Widget _buildSummaryCards(BuildContext context, bool isMobile) {
     final cards = [
+      // _SummaryData(
+      //   title: 'Net PCS',
+      //   value: _formatInt(totalPcs),
+      //
+      //   icon: Icons.inventory_2_outlined,
+      //   iconColor: C.primary,
+      // ),
+
       _SummaryData(
-        title: 'Net PCS',
-        value: _formatInt(totalPcs),
-        subtitle: 'Current page',
-        icon: Icons.inventory_2_outlined,
-        iconColor: C.primary,
-      ),
-      _SummaryData(
-        title: 'Used PCS',
-        value: _formatInt(usedPcs),
-        subtitle: '${usedPercentage.toStringAsFixed(1)}% used',
-        icon: Icons.output_rounded,
-        iconColor: Colors.orange.shade700,
-      ),
-      _SummaryData(
-        title: 'Balance PCS',
+        title: 'Total PCS',
         value: _formatInt(balancePcs),
-        subtitle: '${balancePercentage.toStringAsFixed(1)}% balance',
+
         icon: Icons.inventory_outlined,
         iconColor: Colors.green.shade700,
       ),
+
       _SummaryData(
-        title: 'Net Weight',
-        value: '${totalNetWt.toStringAsFixed(2)} kg',
-        subtitle: 'Current page',
-        icon: Icons.scale_outlined,
-        iconColor: Colors.blue.shade700,
-      ),
-      _SummaryData(
-        title: 'Used Weight',
-        value: '${totalUsedWt.toStringAsFixed(2)} kg',
-        subtitle: '${usedPercentage.toStringAsFixed(1)}%',
-        icon: Icons.trending_up_rounded,
-        iconColor: Colors.deepOrange.shade700,
-      ),
-      _SummaryData(
-        title: 'Balance Weight',
+        title: 'Total Weight',
         value: '${totalBalanceWt.toStringAsFixed(2)} kg',
-        subtitle: '${balancePercentage.toStringAsFixed(1)}%',
+
         icon: Icons.account_balance_wallet_outlined,
         iconColor: Colors.green.shade700,
       ),
     ];
 
     if (isMobile) {
-      return Column(
+      return Row(
         children: [
-          Row(
-            children: [
-              Expanded(child: _summaryCard(cards[0])),
-              const SizedBox(width: 10),
-              Expanded(child: _summaryCard(cards[1])),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(child: _summaryCard(cards[2])),
-              const SizedBox(width: 10),
-              Expanded(child: _summaryCard(cards[3])),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(child: _summaryCard(cards[4])),
-              const SizedBox(width: 10),
-              Expanded(child: _summaryCard(cards[5])),
-            ],
-          ),
+          // _summaryCard(cards[0]),
+          // const SizedBox(width: 5),
+          _summaryCard(cards[0]),
+          const SizedBox(width: 5),
+          _summaryCard(cards[1]),
+
+
         ],
       );
     }
@@ -515,56 +639,34 @@ class _RollWiseCuttingStockReportState
         borderRadius: BorderRadius.circular(13),
         border: Border.all(color: C.border),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: data.iconColor.withOpacity(0.10),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(data.icon, size: 20, color: data.iconColor),
+          Row(
+
+            children: [
+              Icon(data.icon, size: 15, color: data.iconColor),
+              const SizedBox(width: 10),
+              Text(
+                data.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  data.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  data.value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: C.textHigh,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  data.subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 9.5,
-                    color: data.iconColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+
+          Text(
+            data.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              color: C.textHigh,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -572,163 +674,42 @@ class _RollWiseCuttingStockReportState
     );
   }
 
-  Widget _buildSearchSection(BuildContext context, bool isMobile) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(13),
-        border: Border.all(color: C.border),
-      ),
-      child: isMobile
-          ? Column(
-              children: [
-                _searchField(),
-                const SizedBox(height: 10),
-                _pageSizeDropdown(),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(child: _searchField()),
-                const SizedBox(width: 12),
-                _pageSizeDropdown(),
-              ],
-            ),
-    );
-  }
-
-  Widget _searchField() {
-    return TextField(
-      controller: _searchController,
-      textInputAction: TextInputAction.search,
-      decoration: InputDecoration(
-        hintText: 'Search party, BOM, component, size, PCS or weight...',
-        prefixIcon: const Icon(Icons.search_rounded, size: 20),
-        suffixIcon: _searchController.text.isNotEmpty
-            ? IconButton(
-                tooltip: 'Clear',
-                onPressed: _clearSearch,
-                icon: const Icon(Icons.close_rounded, size: 19),
-              )
-            : null,
-        filled: true,
-        fillColor: C.bg,
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 13,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: C.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: C.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: C.primary, width: 1.3),
-        ),
-      ),
-      onChanged: (_) {
-        setState(() {});
-        _applySearch();
-      },
-    );
-  }
-
-  Widget _pageSizeDropdown() {
-    return Container(
-      height: 46,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: C.bg,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: C.border),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _pageSize,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 19),
-          items: const [
-            DropdownMenuItem(value: 15, child: Text('15 / page')),
-            DropdownMenuItem(value: 25, child: Text('25 / page')),
-            DropdownMenuItem(value: 50, child: Text('50 / page')),
-            DropdownMenuItem(value: 100, child: Text('100 / page')),
-            DropdownMenuItem(value: 200, child: Text('200 / page')),
-          ],
-          onChanged: _changePageSize,
-        ),
-      ),
-    );
-  }
+  // ============================================================
+  // TABLE
+  // ============================================================
 
   Widget _buildTableCard(BuildContext context) {
-    if (_filteredRecords.isEmpty) {
+    if (_pageRecords.isEmpty) {
       return _buildEmptyState();
     }
 
-    return Column(
-      children: [
-        _buildTableHeader(),
-
-        if (_isLoading) const LinearProgressIndicator(minHeight: 2),
-
-        Scrollbar(
-          controller: _horizontalController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            controller: _horizontalController,
-            scrollDirection: Axis.horizontal,
-            child: _buildDataTable(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTableHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: BoxDecoration(
-        color: C.warning.withOpacity(0.05),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(14),
-          topRight: Radius.circular(14),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: C.border),
       ),
-      child: Row(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
         children: [
-          const Icon(
-            Icons.table_chart_outlined,
-            size: 19,
-            color: C.primaryDark,
-          ),
-          const SizedBox(width: 5),
-          const Text(
-            'Cutting Stock Details',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: C.textHigh,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            '${_filteredRecords.length} shown',
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.grey,
-              fontWeight: FontWeight.w600,
+
+          if (_isLoading) const LinearProgressIndicator(minHeight: 2),
+
+          Scrollbar(
+            controller: _horizontalController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _horizontalController,
+              scrollDirection: Axis.horizontal,
+              child: _buildDataTable(),
             ),
           ),
         ],
       ),
     );
   }
+
+
 
   Widget _head(String text) {
     return Text(
@@ -813,7 +794,7 @@ class _RollWiseCuttingStockReportState
           DataColumn(label: _head('Party')),
           DataColumn(label: _head('BOM No')),
           DataColumn(label: _head('Component')),
-          DataColumn(label: _head('Cut Width'), numeric: true), // ← naya
+          DataColumn(label: _head('Cut Width'), numeric: true),
           DataColumn(label: _head('Cut Length'), numeric: true),
           DataColumn(label: _head('Net Wt'), numeric: true),
           DataColumn(label: _head('PCS'), numeric: true),
@@ -823,13 +804,15 @@ class _RollWiseCuttingStockReportState
           DataColumn(label: _head('Bal Pcs'), numeric: true),
           DataColumn(label: _head('Bal Wt'), numeric: true),
         ],
-        rows: List.generate(_filteredRecords.length, (index) {
-          final item = _filteredRecords[index];
+        rows: List.generate(_pageRecords.length, (index) {
+          final item = _pageRecords[index];
+
+          // Serial number across
+          // filtered pages.
           final globalIndex = ((_pageNumber - 1) * _pageSize) + index + 1;
 
           return DataRow(
-            onSelectChanged: (_) => _openRecutPopup(item), // ← ye line add karo
-
+            onSelectChanged: (_) => _openRecutPopup(item),
             color: WidgetStateProperty.all(
               index.isEven ? Colors.white : const Color(0xFFF8FAFF),
             ),
@@ -844,14 +827,17 @@ class _RollWiseCuttingStockReportState
               ),
 
               DataCell(_pill(item.bomNo, C.primaryDark)),
+
               DataCell(_pill(item.component, _componentColor(item.component))),
-              DataCell(_cell(item.cutWidth.toStringAsFixed(2))), // ← Cut Width
-              DataCell(
-                _cell(item.cutLength.toStringAsFixed(2)),
-              ), // ← Cut Length
+
+              DataCell(_cell(item.cutWidth.toStringAsFixed(2))),
+
+              DataCell(_cell(item.cutLength.toStringAsFixed(2))),
 
               DataCell(_cell(item.netWt.toStringAsFixed(2), isBold: true)),
+
               DataCell(_cell(_formatInt(item.pcs), isBold: true)),
+
               DataCell(_cell(item.weightPerPcs.toStringAsFixed(3))),
 
               DataCell(
@@ -862,6 +848,7 @@ class _RollWiseCuttingStockReportState
                       : Colors.grey.shade600,
                 ),
               ),
+
               DataCell(
                 _cell(
                   item.usedWt.toStringAsFixed(2),
@@ -880,6 +867,7 @@ class _RollWiseCuttingStockReportState
                       : Colors.grey.shade600,
                 ),
               ),
+
               DataCell(
                 _cell(
                   item.balanceWt.toStringAsFixed(2),
@@ -897,11 +885,13 @@ class _RollWiseCuttingStockReportState
   }
 
   // ============================================================
-  // PAGINATION UI
+  // PAGINATION
   // ============================================================
 
   Widget _buildPagination(BuildContext context) {
-    final bool isFirstPage = _pageNumber <= 1;
+    if (_totalRecords == 0) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       width: double.infinity,
@@ -913,27 +903,29 @@ class _RollWiseCuttingStockReportState
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final bool isMobile = constraints.maxWidth < 600;
+          final bool isMobile = constraints.maxWidth < 650;
 
           if (isMobile) {
             return Column(
               children: [
                 Text(
-                  'Page $_pageNumber',
+                  'Page $_pageNumber of $_totalPages',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: C.textHigh,
                   ),
                 ),
-                const SizedBox(height: 10),
+
+
+
                 Row(
                   children: [
                     Expanded(
                       child: _paginationButton(
                         icon: Icons.chevron_left_rounded,
                         text: 'Previous',
-                        enabled: !isFirstPage && !_isLoading,
+                        enabled: _hasPreviousPage,
                         onTap: _goToPreviousPage,
                       ),
                     ),
@@ -942,7 +934,7 @@ class _RollWiseCuttingStockReportState
                       child: _paginationButton(
                         icon: Icons.chevron_right_rounded,
                         text: 'Next',
-                        enabled: _hasNextPage && !_isLoading,
+                        enabled: _hasNextPage,
                         iconAfterText: true,
                         onTap: _goToNextPage,
                       ),
@@ -956,25 +948,33 @@ class _RollWiseCuttingStockReportState
           return Row(
             children: [
               Text(
-                'Page $_pageNumber',
+                'Page $_pageNumber of $_totalPages',
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: C.textHigh,
                 ),
               ),
-              const Spacer(),
+
+              const SizedBox(width: 20),
+
               _paginationButton(
                 icon: Icons.chevron_left_rounded,
                 text: 'Previous',
-                enabled: !isFirstPage && !_isLoading,
+                enabled: _hasPreviousPage,
                 onTap: _goToPreviousPage,
               ),
-              const SizedBox(width: 8),
+
+              const SizedBox(width: 10),
+
+              Expanded(child: _buildPageNumbers()),
+
+              const SizedBox(width: 10),
+
               _paginationButton(
                 icon: Icons.chevron_right_rounded,
                 text: 'Next',
-                enabled: _hasNextPage && !_isLoading,
+                enabled: _hasNextPage,
                 iconAfterText: true,
                 onTap: _goToNextPage,
               ),
@@ -984,6 +984,102 @@ class _RollWiseCuttingStockReportState
       ),
     );
   }
+
+  // ============================================================
+  // PAGE NUMBER BUTTONS
+  // ============================================================
+
+  Widget _buildPageNumbers({bool isMobile = false}) {
+    final pages = _getVisiblePages();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: pages.map((page) {
+          if (page == -1) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5),
+              child: Text(
+                '...',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey,
+                ),
+              ),
+            );
+          }
+
+          final bool selected = page == _pageNumber;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => _goToPage(page),
+              child: Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: selected ? C.primary : C.primary.withOpacity(0.07),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$page',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: selected ? Colors.white : C.primaryDark,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  List<int> _getVisiblePages() {
+    final total = _totalPages;
+
+    if (total <= 7) {
+      return List.generate(total, (index) => index + 1);
+    }
+
+    final List<int> pages = [];
+
+    pages.add(1);
+
+    if (_pageNumber > 4) {
+      pages.add(-1);
+    }
+
+    final int start = (_pageNumber - 1).clamp(2, total - 1);
+
+    final int end = (_pageNumber + 1).clamp(2, total - 1);
+
+    for (int i = start; i <= end; i++) {
+      if (!pages.contains(i)) {
+        pages.add(i);
+      }
+    }
+
+    if (_pageNumber < total - 3) {
+      pages.add(-1);
+    }
+
+    if (!pages.contains(total)) {
+      pages.add(total);
+    }
+
+    return pages;
+  }
+
+  // ============================================================
+  // PAGINATION BUTTON
+  // ============================================================
 
   Widget _paginationButton({
     required IconData icon,
@@ -996,12 +1092,16 @@ class _RollWiseCuttingStockReportState
       mainAxisSize: MainAxisSize.min,
       children: [
         if (!iconAfterText) Icon(icon, size: 18),
+
         if (!iconAfterText) const SizedBox(width: 4),
+
         Text(
           text,
           style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
+
         if (iconAfterText) const SizedBox(width: 4),
+
         if (iconAfterText) Icon(icon, size: 18),
       ],
     );
@@ -1037,6 +1137,8 @@ class _RollWiseCuttingStockReportState
   // ============================================================
 
   Widget _buildEmptyState() {
+    final hasSearch = _searchController.text.trim().isNotEmpty;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 55),
@@ -1060,20 +1162,24 @@ class _RollWiseCuttingStockReportState
               color: C.primaryDark,
             ),
           ),
+
           const SizedBox(height: 14),
-          const Text(
-            'No cutting stock found',
-            style: TextStyle(
+
+          Text(
+            hasSearch ? 'No matching records' : 'No cutting stock found',
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
               color: C.textHigh,
             ),
           ),
+
           const SizedBox(height: 5),
+
           Text(
-            _searchController.text.trim().isNotEmpty
-                ? 'No records match your search.'
-                : 'There are no records on this page.',
+            hasSearch
+                ? 'No records match your Party Name or BOM No search.'
+                : 'There are no cutting stock records.',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
@@ -1082,12 +1188,17 @@ class _RollWiseCuttingStockReportState
     );
   }
 
+  // ============================================================
+  // ERROR
+  // ============================================================
+
   Widget _buildErrorState() {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(25),
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+
         Container(
           padding: const EdgeInsets.all(25),
           decoration: BoxDecoration(
@@ -1110,7 +1221,9 @@ class _RollWiseCuttingStockReportState
                   size: 30,
                 ),
               ),
+
               const SizedBox(height: 14),
+
               const Text(
                 'Unable to load cutting stock',
                 style: TextStyle(
@@ -1119,15 +1232,19 @@ class _RollWiseCuttingStockReportState
                   color: C.textHigh,
                 ),
               ),
+
               const SizedBox(height: 7),
+
               Text(
                 _errorMessage ?? 'Something went wrong.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 11, color: Colors.grey),
               ),
+
               const SizedBox(height: 18),
+
               ElevatedButton.icon(
-                onPressed: _loadData,
+                onPressed: _loadAllData,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Try Again'),
                 style: ElevatedButton.styleFrom(
@@ -1150,6 +1267,10 @@ class _RollWiseCuttingStockReportState
     );
   }
 
+  // ============================================================
+  // FORMAT
+  // ============================================================
+
   String _formatInt(int value) {
     return value.toString().replaceAllMapped(
       RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
@@ -1158,17 +1279,21 @@ class _RollWiseCuttingStockReportState
   }
 }
 
+// ================================================================
+// SUMMARY MODEL
+// ================================================================
+
 class _SummaryData {
   final String title;
   final String value;
-  final String subtitle;
+
   final IconData icon;
   final Color iconColor;
 
   const _SummaryData({
     required this.title,
     required this.value,
-    required this.subtitle,
+
     required this.icon,
     required this.iconColor,
   });

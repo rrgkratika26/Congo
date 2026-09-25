@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../Color/Colorclass.dart';
 import '../../../services/getSupervisors/getSupervisors.dart';
 
-class AddRecutPcsPopupNardana {
+class CuttingIssueData {
   static Future<void> show(
       BuildContext context, {
         String? partyName,
@@ -227,7 +227,7 @@ class _AddRecutPcsScreenState extends State<_AddRecutPcsScreen> {
         backgroundColor: C.primary,
         foregroundColor: Colors.white,
         title: const Text(
-          "Add Recut PCS Issue",
+          "Cutting Issue Data",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         centerTitle: false,

@@ -127,11 +127,16 @@ enum MenuAction {
   manual_Planning,
   saved_List,
   cutting_Wise,
+  stock_Issue,
   roll_Cutting_Report,
   rollWise,
   component_Wise,
   bomList,
   Webbing,
+  Recieve,
+  Issue,
+  Recieve_report,
+  Issue_report,
   RMD,Tapeline,Lamination,FIBC,Cutting,Quality,Cutting_Report,Printing,Report,Receipt_Department,Daily_Wastage, Daily_Wastage_Report
 }
 

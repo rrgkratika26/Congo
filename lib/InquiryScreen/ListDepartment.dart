@@ -31,11 +31,26 @@ List<DepartmentReport> departments = [
     color: Colors.blueGrey.shade200,
     showMetrics: false,
   ),
+
   DepartmentReport(
     title: "Planning",
     type: "PLANNING",
     icon: Icons.calendar_month,
     color: Colors.purple.shade200,
+    showMetrics: false,
+  ),
+  DepartmentReport(
+    title: "Tapeline",
+    type: "TAPELINE",
+    icon: Icons.assignment,
+    color: Colors.blueGrey.shade200,
+    showMetrics: false,
+  ),
+  DepartmentReport(
+    title: "Webbing",
+    type: "WEBBING",
+    icon: Icons.assignment,
+    color: Colors.blueGrey.shade200,
     showMetrics: false,
   ),
   DepartmentReport(

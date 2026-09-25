@@ -68,7 +68,7 @@ class _ReceiveCutPcsNardanaState extends State<ReceiveCutPcsNardana> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => RollWiseCuttingStockReport(),
+              builder: (context) => CuttingStockreport(),
             ),
           );
           ScaffoldMessenger.of(context).showSnackBar(

@@ -34,6 +34,7 @@ class _Palette {
   static const textSecondary = Color(0xFF6B7280);
   static const border = Color(0xFFEDF0F6);
   static const marketing = Color(0xFFFF7A59);
+  static const printing = Color(0xFFFF7A59);
   static const planning = Color(0xFF6C5CE7);
   static const loom = Color(0xFF3D8EF7);
   static const rmd = Color(0xFF00B4A6);
@@ -65,6 +66,8 @@ class _Palette {
         return bag;
       case 'BALING':
         return baling;
+      case 'PRINTING':
+        return printing;
       case 'WEBBING':
         return webbing;
       case 'TAPELINE':
@@ -129,12 +132,14 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.IN,
         MenuAction.OUT,
         MenuAction.In_Report,
-        MenuAction.rollWise,
-        MenuAction.roll_Cutting_Report,
-        // MenuAction.cutting_Wise,
         MenuAction.stock,
-        MenuAction.Approval,
-        MenuAction.Pcs_Issue,
+        // MenuAction.Pcs_Issue,
+        MenuAction.roll_Cutting_Report,
+
+        MenuAction.Out_Report,
+
+        MenuAction.rollWise,
+        // MenuAction.Approval,
       ];
     case 'JBL CUTTING':
       return [MenuAction.IN];
@@ -149,6 +154,13 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.dispatch,
         MenuAction.dispatch_report,
         MenuAction.stock,
+      ];
+    case 'PRINTING':
+      return [
+        MenuAction.Recieve,
+        MenuAction.Recieve_report,
+        MenuAction.Issue,
+        MenuAction.Issue_report,
       ];
     case 'JBL BALING':
       return [MenuAction.entry];
@@ -186,7 +198,8 @@ List<MenuAction> getActionsForMenu(String dept) {
         MenuAction.Report,
         MenuAction.Receipt_Department,
 
-        MenuAction.Daily_Wastage_Report,      ];
+        MenuAction.Daily_Wastage_Report,
+      ];
     case 'MARKETING':
       return [
         MenuAction.Inquirey_Report,
@@ -282,14 +295,16 @@ class AdminDashboard extends StatelessWidget {
     _DeptItem(title: 'CUTTING', icon: Icons.cut, color: _Palette.cutting),
     _DeptItem(title: 'BAG', icon: Icons.shopping_bag, color: _Palette.bag),
     _DeptItem(title: 'BALING', icon: Icons.waves, color: _Palette.baling),
+
+    _DeptItem(title: 'PRINTING', icon: Icons.print, color: _Palette.printing),
     _DeptItem(title: 'WEBBING', icon: Icons.web, color: _Palette.webbing),
     _DeptItem(
       title: 'TAPELINE',
       icon: Icons.dashboard_rounded,
       color: _Palette.tapeline,
     ),
-    // _DeptItem(title: 'WASTAGE', icon: Icons.transfer_within_a_station, color: _Palette.webbing),
 
+    // _DeptItem(title: 'WASTAGE', icon: Icons.transfer_within_a_station, color: _Palette.webbing),
   ];
 
   @override
@@ -337,7 +352,6 @@ class DeptDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final mq = MediaQuery.of(context);
     final isMobile = mq.size.width < 600;
     final actions = getActionsForMenu(department);
@@ -348,14 +362,10 @@ class DeptDashboard extends StatelessWidget {
       backgroundColor: _Palette.bg,
 
       body: SafeArea(
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Header(
-              ctrl: ctrl,
-              isMobile: isMobile,
-            ),
+            Header(ctrl: ctrl, isMobile: isMobile),
             Row(
               children: [
                 Container(
@@ -808,8 +818,7 @@ class _AppDrawer extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(ctx);
                       Get.to(
-                        () =>
-                            DeptDashboard(ctrl: ctrl, department: item.title),
+                        () => DeptDashboard(ctrl: ctrl, department: item.title),
                         transition: Transition.cupertino,
                       );
                     },
@@ -965,20 +974,32 @@ void _navigate(BuildContext ctx, String dept, MenuAction action) {
         Get.toNamed(AppRoutes.cuttingWiseReport);
       else if (action == MenuAction.stock)
         Get.toNamed(AppRoutes.cutGroupStock);
-      else if (action == MenuAction.Approval)
-        Get.toNamed(AppRoutes.cuttingnardana);
-      else if (action == MenuAction.Pcs_Issue)
-        Get.toNamed(AppRoutes.cuttingIssuenardana);
-      break;
-    case 'PRINTING':
-      if (action == MenuAction.IN)
-        Get.toNamed(AppRoutes.printingIn);
-      else if (action == MenuAction.OUT)
-        Get.toNamed(AppRoutes.printingOut);
-      else if (action == MenuAction.In_Report)
-        Get.toNamed(AppRoutes.printingInReport);
       else if (action == MenuAction.Out_Report)
-        Get.toNamed(AppRoutes.printingOutReport);
+        Get.toNamed(AppRoutes.cutOutreport);
+      // else if (action == MenuAction.Approval)
+      //   Get.toNamed(AppRoutes.cuttingnardana);
+      // else if (action == MenuAction.Pcs_Issue)
+      //   Get.toNamed(AppRoutes.cuttingIssuenardana);
+      break;
+    // case 'PRINTING':
+    //   if (action == MenuAction.IN)
+    //     Get.toNamed(AppRoutes.printingIn);
+    //   else if (action == MenuAction.OUT)
+    //     Get.toNamed(AppRoutes.printingOut);
+    //   else if (action == MenuAction.In_Report)
+    //     Get.toNamed(AppRoutes.printingInReport);
+    //   else if (action == MenuAction.Out_Report)
+    //     Get.toNamed(AppRoutes.printingOutReport);
+    //   break;
+    case 'PRINTING':
+      if (action == MenuAction.Recieve)
+        Get.toNamed(AppRoutes.printingrecieveList);
+      else if (action == MenuAction.Issue)
+        Get.toNamed(AppRoutes.printingIssueList);
+      else if (action == MenuAction.Recieve_report)
+        Get.toNamed(AppRoutes.printingRecieveReport);
+      else if (action == MenuAction.Issue_report)
+        Get.toNamed(AppRoutes.printingIssueReport);
       break;
     case 'BAG':
       if (action == MenuAction.entry)
